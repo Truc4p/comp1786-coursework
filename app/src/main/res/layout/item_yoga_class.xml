@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/input_background"
+    android:layout_margin="4dp"
+    android:elevation="2dp"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Class Type -->
+    <TextView
+        android:id="@+id/tv_class_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Flow Yoga"
+        android:textColor="@color/dark_purple"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- Day and Time -->
+    <TextView
+        android:id="@+id/tv_day_and_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Monday at 10:00 AM"
+        android:textColor="@color/medium_purple"
+        android:textSize="14sp" />
+
+    <!-- Capacity and Price -->
+    <TextView
+        android:id="@+id/tv_capacity_and_price"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="20 people • £15.00"
+        android:textColor="@color/dark_gray"
+        android:textSize="14sp" />
+
+    <!-- Instructor (optional) -->
+    <TextView
+        android:id="@+id/tv_instructor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Instructor: John Doe"
+        android:textColor="@color/accent_teal"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:visibility="gone" />
+
+</LinearLayout> 

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/light_purple"
+    tools:context=".MainActivity">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Universal Yoga"
+            android:textColor="@color/dark_purple"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Admin Panel"
+            android:textColor="@color/dark_purple"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tv_class_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Total Classes: 0"
+            android:textColor="@color/medium_purple"
+            android:textSize="16sp"
+            android:textStyle="italic" />
+
+    </LinearLayout>
+
+    <!-- Main Menu Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_add_class"
+            style="@style/MenuButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="Add New Yoga Class"
+            android:drawableStart="@android:drawable/ic_input_add"
+            android:drawablePadding="8dp" />
+
+        <Button
+            android:id="@+id/btn_view_classes"
+            style="@style/MenuButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="View &amp; Manage Classes"
+            android:drawableStart="@android:drawable/ic_menu_view"
+            android:drawablePadding="8dp" />
+
+        <Button
+            android:id="@+id/btn_reset_database"
+            style="@style/MenuButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="Reset Database"
+            android:drawableStart="@android:drawable/ic_menu_delete"
+            android:drawablePadding="8dp"
+            android:backgroundTint="@color/warning_red" />
+
+    </LinearLayout>
+
+    <!-- Footer -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="Manage your yoga class schedules"
+        android:textColor="@color/medium_purple"
+        android:textSize="14sp"
+        android:textStyle="italic" />
+
+</LinearLayout>

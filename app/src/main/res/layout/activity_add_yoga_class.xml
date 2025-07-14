@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_purple"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"
+            android:text="Add New Yoga Class"
+            android:textColor="@color/dark_purple"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Day of Week -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Day of Week *" />
+
+        <Spinner
+            android:id="@+id/spinner_day_of_week"
+            style="@style/SpinnerStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Time -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time *" />
+
+        <EditText
+            android:id="@+id/et_time"
+            style="@style/InputFieldStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="e.g. 10:00 AM"
+            android:inputType="text" />
+
+        <!-- Capacity -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Capacity *" />
+
+        <EditText
+            android:id="@+id/et_capacity"
+            style="@style/InputFieldStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Maximum number of participants"
+            android:inputType="number" />
+
+        <!-- Duration -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Duration (minutes) *" />
+
+        <EditText
+            android:id="@+id/et_duration"
+            style="@style/InputFieldStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="e.g. 60"
+            android:inputType="number" />
+
+        <!-- Price -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price (£) *" />
+
+        <EditText
+            android:id="@+id/et_price"
+            style="@style/InputFieldStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="e.g. 15.00"
+            android:inputType="numberDecimal" />
+
+        <!-- Class Type -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Type of Class *" />
+
+        <Spinner
+            android:id="@+id/spinner_class_type"
+            style="@style/SpinnerStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Instructor -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Instructor" />
+
+        <EditText
+            android:id="@+id/et_instructor"
+            style="@style/InputFieldStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name of instructor (optional)"
+            android:inputType="textPersonName" />
+
+        <!-- Difficulty -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Difficulty Level" />
+
+        <Spinner
+            android:id="@+id/spinner_difficulty"
+            style="@style/SpinnerStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Description -->
+        <TextView
+            style="@style/LabelStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Description" />
+
+        <EditText
+            android:id="@+id/et_description"
+            style="@style/InputFieldStyle"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:gravity="top|start"
+            android:hint="Additional details about the class (optional)"
+            android:inputType="textMultiLine"
+            android:maxLines="5" />
+
+        <!-- Required Fields Note -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="* Required fields"
+            android:textColor="@color/warning_red"
+            android:textSize="12sp"
+            android:textStyle="italic" />
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_cancel"
+                style="@style/MenuButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/dark_gray"
+                android:text="Cancel" />
+
+            <Button
+                android:id="@+id/btn_confirm"
+                style="@style/MenuButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/success_green"
+                android:text="Continue" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView> 

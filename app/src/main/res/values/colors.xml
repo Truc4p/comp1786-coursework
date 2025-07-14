@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Yoga-themed colors -->
+    <color name="light_purple">#F3E5F5</color>
+    <color name="light_purple_2">#E1BEE7</color>
+    <color name="medium_purple">#9C27B0</color>
+    <color name="dark_purple">#4A148C</color>
+    <color name="accent_teal">#26A69A</color>
+    <color name="warning_red">#F44336</color>
+    <color name="success_green">#4CAF50</color>
+    <color name="light_gray">#F5F5F5</color>
+    <color name="dark_gray">#424242</color>
+</resources>

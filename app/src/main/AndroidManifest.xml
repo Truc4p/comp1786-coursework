@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Yogaadminapp"
+        tools:targetApi="31">
+        
+        <!-- Main Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Add Yoga Class Activity -->
+        <activity
+            android:name=".AddYogaClassActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        
+        <!-- Confirmation Activity -->
+        <activity
+            android:name=".ConfirmationActivity"
+            android:exported="false"
+            android:parentActivityName=".AddYogaClassActivity" />
+        
+        <!-- View Yoga Classes Activity -->
+        <activity
+            android:name=".ViewYogaClassesActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        
+        <!-- Edit Yoga Class Activity -->
+        <activity
+            android:name=".EditYogaClassActivity"
+            android:exported="false"
+            android:parentActivityName=".ViewYogaClassesActivity" />
+        
+    </application>
+
+</manifest>
