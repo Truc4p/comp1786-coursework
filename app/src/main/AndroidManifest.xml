@@ -47,6 +47,12 @@
             android:exported="false"
             android:parentActivityName=".ViewYogaClassesActivity" />
         
+        <!-- Manage Class Instances Activity -->
+        <activity
+            android:name=".ManageClassInstancesActivity"
+            android:exported="false"
+            android:parentActivityName=".ViewYogaClassesActivity" />
+        
     </application>
 
 </manifest>

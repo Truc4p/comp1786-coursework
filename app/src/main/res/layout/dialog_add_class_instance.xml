@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Date Field -->
+    <TextView
+        style="@style/LabelStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date (dd/MM/yyyy) *" />
+
+    <EditText
+        android:id="@+id/et_date"
+        style="@style/InputFieldStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="e.g., 17/10/2023"
+        android:inputType="date" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Note: Date must match the day of week for this class"
+        android:textColor="@color/dark_gray"
+        android:textSize="12sp"
+        android:textStyle="italic" />
+
+    <!-- Teacher Field -->
+    <TextView
+        style="@style/LabelStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Teacher *" />
+
+    <EditText
+        android:id="@+id/et_teacher"
+        style="@style/InputFieldStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter teacher name"
+        android:inputType="textPersonName" />
+
+    <!-- Additional Comments Field -->
+    <TextView
+        style="@style/LabelStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Additional Comments (Optional)" />
+
+    <EditText
+        android:id="@+id/et_comments"
+        style="@style/InputFieldStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:hint="Enter any additional comments"
+        android:inputType="textMultiLine"
+        android:lines="3" />
+
+</LinearLayout>

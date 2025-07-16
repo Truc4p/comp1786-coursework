@@ -77,7 +77,7 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(yogaClass.getClassType() + " - " + yogaClass.getDayOfWeek());
         
-        String[] options = {"View Details", "Edit Class", "Delete Class"};
+        String[] options = {"View Details", "Edit Class", "Manage Class Instances", "Delete Class"};
         
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
@@ -89,7 +89,10 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
                     case 1: // Edit Class
                         editYogaClass(yogaClass);
                         break;
-                    case 2: // Delete Class
+                    case 2: // Manage Class Instances
+                        manageClassInstances(yogaClass);
+                        break;
+                    case 3: // Delete Class
                         confirmDeleteClass(yogaClass);
                         break;
                 }
@@ -172,4 +175,23 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
         super.onResume();
         loadYogaClasses(); // Refresh the list when returning from edit
     }
-} 
+    
+    private void manageClassInstances(YogaClass yogaClass) {
+        // Log the yoga class details before creating the intent
+        System.out.println("Managing class instances for: " + yogaClass.getClassType() + ", ID: " + yogaClass.getId());
+        
+        Intent intent = new Intent(this, ManageClassInstancesActivity.class);
+        intent.putExtra("classId", yogaClass.getId());
+        intent.putExtra("className", yogaClass.getClassType());
+        intent.putExtra("dayOfWeek", yogaClass.getDayOfWeek());
+        intent.putExtra("time", yogaClass.getTime());
+        
+        // Log the intent extras for debugging
+        System.out.println("Intent extras - classId: " + yogaClass.getId() + 
+                          ", className: " + yogaClass.getClassType() + 
+                          ", dayOfWeek: " + yogaClass.getDayOfWeek() + 
+                          ", time: " + yogaClass.getTime());
+        
+        startActivity(intent);
+    }
+}

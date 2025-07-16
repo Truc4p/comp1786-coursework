@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/input_background"
+    android:layout_margin="4dp"
+    android:elevation="2dp"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Date -->
+    <TextView
+        android:id="@+id/tv_instance_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="17/10/2023"
+        android:textColor="@color/dark_purple"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- Teacher -->
+    <TextView
+        android:id="@+id/tv_instance_teacher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Teacher: John Doe"
+        android:textColor="@color/medium_purple"
+        android:textSize="14sp" />
+
+    <!-- Additional Comments (optional) -->
+    <TextView
+        android:id="@+id/tv_instance_comments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Additional comments about this class instance"
+        android:textColor="@color/dark_gray"
+        android:textSize="14sp"
+        android:textStyle="italic"
+        android:visibility="gone" />
+
+</LinearLayout>
