@@ -176,7 +176,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/dark_gray"
                 android:text="Cancel" />
 
             <Button
@@ -186,7 +185,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/success_green"
                 android:text="Continue" />
 
         </LinearLayout>

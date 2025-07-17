@@ -82,8 +82,7 @@
             android:layout_marginBottom="16dp"
             android:text="Reset Database"
             android:drawableStart="@android:drawable/ic_menu_delete"
-            android:drawablePadding="8dp"
-            android:backgroundTint="@color/warning_red" />
+            android:drawablePadding="8dp" />
 
     </LinearLayout>
 

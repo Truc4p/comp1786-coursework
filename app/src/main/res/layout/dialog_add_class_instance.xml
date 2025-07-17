@@ -10,22 +10,25 @@
         style="@style/LabelStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Date (dd/MM/yyyy) *" />
+        android:text="Date *" />
 
-    <EditText
-        android:id="@+id/et_date"
-        style="@style/InputFieldStyle"
+    <Button
+        android:id="@+id/btn_select_date"
+        style="@style/MenuButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="e.g., 17/10/2023"
-        android:inputType="date" />
+        android:layout_marginBottom="8dp"
+        android:text="Select Date"
+        android:gravity="start|center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Note: Date must match the day of week for this class"
-        android:textColor="@color/dark_gray"
+        android:text="Tap to select a date from the calendar. Only dates matching this class's day of week will be available."
+        android:textColor="@color/medium_purple"
         android:textSize="12sp"
         android:textStyle="italic" />
 

@@ -79,7 +79,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:backgroundTint="@color/medium_purple"
         android:text="← Back to Main Menu" />
 
 </LinearLayout> 

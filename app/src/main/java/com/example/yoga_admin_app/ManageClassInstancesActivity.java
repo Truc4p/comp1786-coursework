@@ -1,12 +1,14 @@
 package com.example.yoga_admin_app;
 
 import androidx.appcompat.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -127,34 +129,39 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_class_instance, null);
         builder.setView(view);
 
-        final EditText etDate = view.findViewById(R.id.et_date);
+        final Button btnSelectDate = view.findViewById(R.id.btn_select_date);
         final EditText etTeacher = view.findViewById(R.id.et_teacher);
         final EditText etComments = view.findViewById(R.id.et_comments);
+
+        // Variable to store selected date
+        final String[] selectedDate = {""};
+
+        // Set up date picker button
+        btnSelectDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerForDayOfWeek(yogaClass.getDayOfWeek(), new DatePickerCallback() {
+                    @Override
+                    public void onDateSelected(String date) {
+                        selectedDate[0] = date;
+                        btnSelectDate.setText(date);
+                        btnSelectDate.setTextColor(getResources().getColor(android.R.color.black));
+                    }
+                });
+            }
+        });
 
         // Set positive and negative buttons
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // Validate input
-                String date = etDate.getText().toString().trim();
+                String date = selectedDate[0];
                 String teacher = etTeacher.getText().toString().trim();
                 String comments = etComments.getText().toString().trim();
 
                 if (date.isEmpty() || teacher.isEmpty()) {
                     Toast.makeText(ManageClassInstancesActivity.this, "Date and teacher are required", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // Validate date format (dd/MM/yyyy)
-                if (!isValidDateFormat(date)) {
-                    Toast.makeText(ManageClassInstancesActivity.this, "Invalid date format. Use dd/MM/yyyy", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // Check if date matches day of week
-                if (!isDateMatchingDayOfWeek(date, yogaClass.getDayOfWeek())) {
-                    Toast.makeText(ManageClassInstancesActivity.this, 
-                            "Date must be a " + yogaClass.getDayOfWeek(), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -209,39 +216,45 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_class_instance, null);
         builder.setView(view);
 
-        final EditText etDate = view.findViewById(R.id.et_date);
+        final Button btnSelectDate = view.findViewById(R.id.btn_select_date);
         final EditText etTeacher = view.findViewById(R.id.et_teacher);
         final EditText etComments = view.findViewById(R.id.et_comments);
 
+        // Variable to store selected date, initialize with existing date
+        final String[] selectedDate = {instance.getDate()};
+
         // Pre-fill with existing data
-        etDate.setText(instance.getDate());
+        btnSelectDate.setText(instance.getDate());
+        btnSelectDate.setTextColor(getResources().getColor(android.R.color.black));
         etTeacher.setText(instance.getTeacher());
         etComments.setText(instance.getAdditionalComments());
+
+        // Set up date picker button
+        btnSelectDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerForDayOfWeek(yogaClass.getDayOfWeek(), new DatePickerCallback() {
+                    @Override
+                    public void onDateSelected(String date) {
+                        selectedDate[0] = date;
+                        btnSelectDate.setText(date);
+                        btnSelectDate.setTextColor(getResources().getColor(android.R.color.black));
+                    }
+                });
+            }
+        });
 
         // Set positive and negative buttons
         builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // Validate input
-                String date = etDate.getText().toString().trim();
+                String date = selectedDate[0];
                 String teacher = etTeacher.getText().toString().trim();
                 String comments = etComments.getText().toString().trim();
 
                 if (date.isEmpty() || teacher.isEmpty()) {
                     Toast.makeText(ManageClassInstancesActivity.this, "Date and teacher are required", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // Validate date format (dd/MM/yyyy)
-                if (!isValidDateFormat(date)) {
-                    Toast.makeText(ManageClassInstancesActivity.this, "Invalid date format. Use dd/MM/yyyy", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // Check if date matches day of week
-                if (!isDateMatchingDayOfWeek(date, yogaClass.getDayOfWeek())) {
-                    Toast.makeText(ManageClassInstancesActivity.this, 
-                            "Date must be a " + yogaClass.getDayOfWeek(), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -329,6 +342,65 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
             System.out.println("ParseException in isDateMatchingDayOfWeek: " + e.getMessage());
             e.printStackTrace();
             return false;
+        }
+    }
+
+    // Interface for date picker callback
+    private interface DatePickerCallback {
+        void onDateSelected(String date);
+    }
+
+    // Method to show date picker that only allows selection of dates matching the specified day of week
+    private void showDatePickerForDayOfWeek(String requiredDayOfWeek, DatePickerCallback callback) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int selectedYear, int selectedMonth, int selectedDay) {
+                        // Create a calendar instance for the selected date
+                        Calendar selectedDate = Calendar.getInstance();
+                        selectedDate.set(selectedYear, selectedMonth, selectedDay);
+
+                        // Check if the selected date matches the required day of week
+                        int dayOfWeek = selectedDate.get(Calendar.DAY_OF_WEEK);
+                        String dayName = getDayName(dayOfWeek);
+
+                        if (dayName.equalsIgnoreCase(requiredDayOfWeek)) {
+                            // Format the date as dd/MM/yyyy
+                            String formattedDate = String.format(Locale.getDefault(), "%02d/%02d/%d", 
+                                    selectedDay, selectedMonth + 1, selectedYear);
+                            callback.onDateSelected(formattedDate);
+                        } else {
+                            Toast.makeText(ManageClassInstancesActivity.this, 
+                                    "Please select a " + requiredDayOfWeek + ". You selected a " + dayName + ".", 
+                                    Toast.LENGTH_LONG).show();
+                            // Show the date picker again
+                            showDatePickerForDayOfWeek(requiredDayOfWeek, callback);
+                        }
+                    }
+                }, year, month, day);
+
+        // Set minimum date to today to prevent selecting past dates
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
+
+        datePickerDialog.show();
+    }
+
+    // Helper method to get day name from Calendar day of week constant
+    private String getDayName(int dayOfWeek) {
+        switch (dayOfWeek) {
+            case Calendar.SUNDAY: return "Sunday";
+            case Calendar.MONDAY: return "Monday";
+            case Calendar.TUESDAY: return "Tuesday";
+            case Calendar.WEDNESDAY: return "Wednesday";
+            case Calendar.THURSDAY: return "Thursday";
+            case Calendar.FRIDAY: return "Friday";
+            case Calendar.SATURDAY: return "Saturday";
+            default: return "";
         }
     }
 }
