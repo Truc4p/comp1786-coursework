@@ -130,7 +130,7 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
         builder.setView(view);
 
         final Button btnSelectDate = view.findViewById(R.id.btn_select_date);
-        final EditText etTeacher = view.findViewById(R.id.et_teacher);
+        final EditText etInstructor = view.findViewById(R.id.et_instructor);
         final EditText etComments = view.findViewById(R.id.et_comments);
 
         // Variable to store selected date
@@ -157,11 +157,11 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 // Validate input
                 String date = selectedDate[0];
-                String teacher = etTeacher.getText().toString().trim();
+                String instructor = etInstructor.getText().toString().trim();
                 String comments = etComments.getText().toString().trim();
 
-                if (date.isEmpty() || teacher.isEmpty()) {
-                    Toast.makeText(ManageClassInstancesActivity.this, "Date and teacher are required", Toast.LENGTH_SHORT).show();
+                if (date.isEmpty() || instructor.isEmpty()) {
+                    Toast.makeText(ManageClassInstancesActivity.this, "Date and instructor are required", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -169,7 +169,7 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
                 ClassInstance instance = new ClassInstance();
                 instance.setYogaClassId(yogaClassId);
                 instance.setDate(date);
-                instance.setTeacher(teacher);
+                instance.setInstructor(instructor);
                 instance.setAdditionalComments(comments);
 
                 long id = databaseHelper.addClassInstance(instance);
@@ -217,7 +217,7 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
         builder.setView(view);
 
         final Button btnSelectDate = view.findViewById(R.id.btn_select_date);
-        final EditText etTeacher = view.findViewById(R.id.et_teacher);
+        final EditText etInstructor = view.findViewById(R.id.et_instructor);
         final EditText etComments = view.findViewById(R.id.et_comments);
 
         // Variable to store selected date, initialize with existing date
@@ -226,7 +226,7 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
         // Pre-fill with existing data
         btnSelectDate.setText(instance.getDate());
         btnSelectDate.setTextColor(getResources().getColor(android.R.color.black));
-        etTeacher.setText(instance.getTeacher());
+        etInstructor.setText(instance.getInstructor());
         etComments.setText(instance.getAdditionalComments());
 
         // Set up date picker button
@@ -250,17 +250,17 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 // Validate input
                 String date = selectedDate[0];
-                String teacher = etTeacher.getText().toString().trim();
+                String instructor = etInstructor.getText().toString().trim();
                 String comments = etComments.getText().toString().trim();
 
-                if (date.isEmpty() || teacher.isEmpty()) {
-                    Toast.makeText(ManageClassInstancesActivity.this, "Date and teacher are required", Toast.LENGTH_SHORT).show();
+                if (date.isEmpty() || instructor.isEmpty()) {
+                    Toast.makeText(ManageClassInstancesActivity.this, "Date and instructor are required", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 // Update the class instance
                 instance.setDate(date);
-                instance.setTeacher(teacher);
+                instance.setInstructor(instructor);
                 instance.setAdditionalComments(comments);
 
                 int result = databaseHelper.updateClassInstance(instance);

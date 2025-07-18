@@ -33,6 +33,32 @@
 
     </LinearLayout>
 
+    <!-- Quick Search Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_quick_search"
+            style="@style/InputFieldStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Search by instructor name..."
+            android:inputType="textPersonName" />
+
+        <Button
+            android:id="@+id/btn_advanced_search"
+            style="@style/ButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Advanced" />
+
+    </LinearLayout>
+
     <!-- Classes List -->
     <ListView
         android:id="@+id/listview_yoga_classes"
@@ -75,7 +101,7 @@
     <!-- Back Button -->
     <Button
         android:id="@+id/btn_back"
-        style="@style/MenuButtonStyle"
+        style="@style/ButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

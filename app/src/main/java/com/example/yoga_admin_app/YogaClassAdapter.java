@@ -46,7 +46,6 @@ public class YogaClassAdapter extends BaseAdapter {
             holder.tvClassType = convertView.findViewById(R.id.tv_class_type);
             holder.tvDayAndTime = convertView.findViewById(R.id.tv_day_and_time);
             holder.tvCapacityAndPrice = convertView.findViewById(R.id.tv_capacity_and_price);
-            holder.tvInstructor = convertView.findViewById(R.id.tv_instructor);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -59,14 +58,6 @@ public class YogaClassAdapter extends BaseAdapter {
         holder.tvCapacityAndPrice.setText(yogaClass.getCapacity() + " people • £" + 
                 String.format("%.2f", yogaClass.getPrice()));
 
-        String instructor = yogaClass.getInstructor();
-        if (instructor != null && !instructor.trim().isEmpty()) {
-            holder.tvInstructor.setText("Instructor: " + instructor);
-            holder.tvInstructor.setVisibility(View.VISIBLE);
-        } else {
-            holder.tvInstructor.setVisibility(View.GONE);
-        }
-
         return convertView;
     }
 
@@ -74,6 +65,5 @@ public class YogaClassAdapter extends BaseAdapter {
         TextView tvClassType;
         TextView tvDayAndTime;
         TextView tvCapacityAndPrice;
-        TextView tvInstructor;
     }
 } 

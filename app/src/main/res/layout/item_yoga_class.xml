@@ -37,16 +37,4 @@
         android:textColor="@color/dark_gray"
         android:textSize="14sp" />
 
-    <!-- Instructor (optional) -->
-    <TextView
-        android:id="@+id/tv_instructor"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Instructor: John Doe"
-        android:textColor="@color/accent_teal"
-        android:textSize="12sp"
-        android:textStyle="italic"
-        android:visibility="gone" />
-
 </LinearLayout> 

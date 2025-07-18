@@ -175,30 +175,6 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Instructor -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    style="@style/LabelStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Instructor:" />
-
-                <TextView
-                    android:id="@+id/tv_instructor"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="John Doe"
-                    android:textColor="@color/dark_gray"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
             <!-- Difficulty -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -260,7 +236,7 @@
 
             <Button
                 android:id="@+id/btn_back"
-                style="@style/MenuButtonStyle"
+                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -269,7 +245,7 @@
 
             <Button
                 android:id="@+id/btn_save"
-                style="@style/MenuButtonStyle"
+                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"

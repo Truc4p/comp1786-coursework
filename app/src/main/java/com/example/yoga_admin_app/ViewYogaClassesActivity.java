@@ -3,9 +3,12 @@ package com.example.yoga_admin_app;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -14,16 +17,22 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ViewYogaClassesActivity extends AppCompatActivity {
 
     private ListView listViewYogaClasses;
     private LinearLayout tvNoClasses;
     private Button btnBack;
+    private Button btnAdvancedSearch;
+    private EditText etQuickSearch;
     private DatabaseHelper databaseHelper;
     private YogaClassAdapter adapter;
     private List<YogaClass> yogaClassList;
+    private List<YogaClass> filteredYogaClassList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,32 +50,42 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
 
         // Setup button listeners
         setupButtonListeners();
+        
+        // Setup search functionality
+        setupSearchFunctionality();
     }
 
     private void initializeViews() {
         listViewYogaClasses = findViewById(R.id.listview_yoga_classes);
         tvNoClasses = findViewById(R.id.tv_no_classes);
         btnBack = findViewById(R.id.btn_back);
+        btnAdvancedSearch = findViewById(R.id.btn_advanced_search);
+        etQuickSearch = findViewById(R.id.et_quick_search);
+        
+        // Initialize filtered list
+        filteredYogaClassList = new ArrayList<>();
     }
 
     private void loadYogaClasses() {
         yogaClassList = databaseHelper.getAllYogaClasses();
+        filteredYogaClassList.clear();
+        filteredYogaClassList.addAll(yogaClassList);
 
-        if (yogaClassList.isEmpty()) {
+        if (filteredYogaClassList.isEmpty()) {
             listViewYogaClasses.setVisibility(View.GONE);
             tvNoClasses.setVisibility(View.VISIBLE);
         } else {
             listViewYogaClasses.setVisibility(View.VISIBLE);
             tvNoClasses.setVisibility(View.GONE);
 
-            adapter = new YogaClassAdapter(this, yogaClassList);
+            adapter = new YogaClassAdapter(this, filteredYogaClassList);
             listViewYogaClasses.setAdapter(adapter);
 
             // Set up item click listener for editing
             listViewYogaClasses.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    YogaClass selectedClass = yogaClassList.get(position);
+                    YogaClass selectedClass = filteredYogaClassList.get(position);
                     showClassOptionsDialog(selectedClass);
                 }
             });
@@ -114,9 +133,7 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
         details.append("Capacity: ").append(yogaClass.getCapacity()).append(" people\n\n");
         details.append("Duration: ").append(yogaClass.getDuration()).append(" minutes\n\n");
         details.append("Price: £").append(String.format("%.2f", yogaClass.getPrice())).append("\n\n");
-        details.append("Instructor: ").append(
-            yogaClass.getInstructor() != null && !yogaClass.getInstructor().trim().isEmpty() 
-                ? yogaClass.getInstructor() : "Not specified").append("\n\n");
+        
         details.append("Difficulty: ").append(yogaClass.getDifficulty()).append("\n\n");
         details.append("Description: ").append(
             yogaClass.getDescription() != null && !yogaClass.getDescription().trim().isEmpty() 
@@ -137,7 +154,6 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
         intent.putExtra("price", yogaClass.getPrice());
         intent.putExtra("classType", yogaClass.getClassType());
         intent.putExtra("description", yogaClass.getDescription());
-        intent.putExtra("instructor", yogaClass.getInstructor());
         intent.putExtra("difficulty", yogaClass.getDifficulty());
         startActivity(intent);
     }
@@ -168,12 +184,62 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
                 finish();
             }
         });
+        
+        btnAdvancedSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ViewYogaClassesActivity.this, SearchYogaClassesActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+    
+    private void setupSearchFunctionality() {
+        etQuickSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterClassesByInstructor(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Not needed
+            }
+        });
+    }
+    
+    private void filterClassesByInstructor(String instructorName) {
+        if (instructorName.trim().isEmpty()) {
+            // Show all classes
+            filteredYogaClassList.clear();
+            filteredYogaClassList.addAll(yogaClassList);
+        } else {
+            // Filter by instructor name
+            filteredYogaClassList = databaseHelper.searchYogaClassesByInstructor(instructorName);
+        }
+        
+        // Update the adapter
+        if (filteredYogaClassList.isEmpty()) {
+            listViewYogaClasses.setVisibility(View.GONE);
+            tvNoClasses.setVisibility(View.VISIBLE);
+        } else {
+            listViewYogaClasses.setVisibility(View.VISIBLE);
+            tvNoClasses.setVisibility(View.GONE);
+            adapter = new YogaClassAdapter(this, filteredYogaClassList);
+            listViewYogaClasses.setAdapter(adapter);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         loadYogaClasses(); // Refresh the list when returning from edit
+        etQuickSearch.setText(""); // Clear search when returning
     }
     
     private void manageClassInstances(YogaClass yogaClass) {

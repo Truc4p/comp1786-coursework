@@ -44,7 +44,7 @@ public class ClassInstanceAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.item_class_instance, parent, false);
             holder = new ViewHolder();
             holder.tvDate = convertView.findViewById(R.id.tv_instance_date);
-            holder.tvTeacher = convertView.findViewById(R.id.tv_instance_teacher);
+            holder.tvInstructor = convertView.findViewById(R.id.tv_instance_instructor);
             holder.tvComments = convertView.findViewById(R.id.tv_instance_comments);
             convertView.setTag(holder);
         } else {
@@ -54,7 +54,7 @@ public class ClassInstanceAdapter extends BaseAdapter {
         ClassInstance instance = instanceList.get(position);
 
         holder.tvDate.setText(instance.getDate());
-        holder.tvTeacher.setText("Teacher: " + instance.getTeacher());
+        holder.tvInstructor.setText("Instructor: " + instance.getInstructor());
         
         // Handle optional comments field
         if (instance.getAdditionalComments() != null && !instance.getAdditionalComments().isEmpty()) {
@@ -69,7 +69,7 @@ public class ClassInstanceAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         TextView tvDate;
-        TextView tvTeacher;
+        TextView tvInstructor;
         TextView tvComments;
     }
 

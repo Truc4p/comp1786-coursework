@@ -1,5 +1,6 @@
 package com.example.yoga_admin_app;
 
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -7,9 +8,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Calendar;
+import java.util.Locale;
 
 public class EditYogaClassActivity extends AppCompatActivity {
 
@@ -20,7 +25,6 @@ public class EditYogaClassActivity extends AppCompatActivity {
     private EditText etPrice;
     private Spinner spinnerClassType;
     private EditText etDescription;
-    private EditText etInstructor;
     private Spinner spinnerDifficulty;
     private Button btnUpdate;
     private Button btnCancel;
@@ -50,6 +54,9 @@ public class EditYogaClassActivity extends AppCompatActivity {
         // Setup spinners
         setupSpinners();
         
+        // Setup time picker
+        setupTimePicker();
+        
         // Load existing data
         loadExistingData();
         
@@ -65,7 +72,6 @@ public class EditYogaClassActivity extends AppCompatActivity {
         etPrice = findViewById(R.id.et_price);
         spinnerClassType = findViewById(R.id.spinner_class_type);
         etDescription = findViewById(R.id.et_description);
-        etInstructor = findViewById(R.id.et_instructor);
         spinnerDifficulty = findViewById(R.id.spinner_difficulty);
         btnUpdate = findViewById(R.id.btn_update);
         btnCancel = findViewById(R.id.btn_cancel);
@@ -88,6 +94,82 @@ public class EditYogaClassActivity extends AppCompatActivity {
         spinnerDifficulty.setAdapter(difficultyAdapter);
     }
 
+    private void setupTimePicker() {
+        // Make time field non-editable but clickable
+        etTime.setFocusable(false);
+        etTime.setClickable(true);
+        
+        etTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePickerDialog();
+            }
+        });
+    }
+
+    private void showTimePickerDialog() {
+        // Get current time from the field or use current time
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+
+        // Try to parse existing time if available
+        String currentTime = etTime.getText().toString().trim();
+        if (!currentTime.isEmpty()) {
+            try {
+                // Parse time like "10:00 AM"
+                String[] parts = currentTime.split(" ");
+                if (parts.length == 2) {
+                    String[] timeParts = parts[0].split(":");
+                    if (timeParts.length == 2) {
+                        int parsedHour = Integer.parseInt(timeParts[0]);
+                        int parsedMinute = Integer.parseInt(timeParts[1]);
+                        
+                        if (parts[1].equalsIgnoreCase("PM") && parsedHour != 12) {
+                            parsedHour += 12;
+                        } else if (parts[1].equalsIgnoreCase("AM") && parsedHour == 12) {
+                            parsedHour = 0;
+                        }
+                        
+                        hour = parsedHour;
+                        minute = parsedMinute;
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // Use current time if parsing fails
+            }
+        }
+
+        // Create time picker dialog
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this,
+                new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        // Format time in 12-hour format with AM/PM
+                        String timeString = formatTime(hourOfDay, minute);
+                        etTime.setText(timeString);
+                    }
+                }, hour, minute, false); // false for 12-hour format
+
+        timePickerDialog.show();
+    }
+
+    private String formatTime(int hour, int minute) {
+        String amPm = "AM";
+        int displayHour = hour;
+        
+        if (hour == 0) {
+            displayHour = 12;
+        } else if (hour > 12) {
+            displayHour = hour - 12;
+            amPm = "PM";
+        } else if (hour == 12) {
+            amPm = "PM";
+        }
+        
+        return String.format(Locale.getDefault(), "%d:%02d %s", displayHour, minute, amPm);
+    }
+
     private void loadExistingData() {
         Intent intent = getIntent();
         
@@ -102,7 +184,6 @@ public class EditYogaClassActivity extends AppCompatActivity {
         etDuration.setText(String.valueOf(intent.getIntExtra("duration", 0)));
         etPrice.setText(String.valueOf(intent.getDoubleExtra("price", 0.0)));
         etDescription.setText(intent.getStringExtra("description"));
-        etInstructor.setText(intent.getStringExtra("instructor"));
     }
 
     private void setSpinnerSelection(Spinner spinner, String value) {
@@ -245,7 +326,7 @@ public class EditYogaClassActivity extends AppCompatActivity {
         yogaClass.setPrice(Double.parseDouble(etPrice.getText().toString().trim()));
         yogaClass.setClassType(spinnerClassType.getSelectedItem().toString());
         yogaClass.setDescription(etDescription.getText().toString().trim());
-        yogaClass.setInstructor(etInstructor.getText().toString().trim());
+        yogaClass.setInstructor(""); // Set empty string for instructor field
         yogaClass.setDifficulty(spinnerDifficulty.getSelectedItem().toString());
 
         // Update in database

@@ -46,8 +46,11 @@
             style="@style/InputFieldStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="e.g. 10:00 AM"
-            android:inputType="text" />
+            android:hint="Tap to select time"
+            android:inputType="none"
+            android:focusable="false"
+            android:clickable="true"
+            android:drawableEnd="@android:drawable/ic_menu_recent_history" />
 
         <!-- Capacity -->
         <TextView
@@ -107,27 +110,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Instructor -->
-        <TextView
-            style="@style/LabelStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Instructor" />
-
-        <EditText
-            android:id="@+id/et_instructor"
-            style="@style/InputFieldStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Name of instructor (optional)"
-            android:inputType="textPersonName" />
-
         <!-- Difficulty -->
         <TextView
             style="@style/LabelStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Difficulty Level" />
+            android:text="Difficulty Level *" />
 
         <Spinner
             android:id="@+id/spinner_difficulty"
@@ -171,7 +159,7 @@
 
             <Button
                 android:id="@+id/btn_cancel"
-                style="@style/MenuButtonStyle"
+                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -180,7 +168,7 @@
 
             <Button
                 android:id="@+id/btn_confirm"
-                style="@style/MenuButtonStyle"
+                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"

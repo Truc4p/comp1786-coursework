@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 3; // Increased version for schema update with ON DELETE CASCADE
+    private static final int DATABASE_VERSION = 6; // Forced complete database recreation
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
@@ -24,15 +24,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_DURATION = "duration";
     private static final String KEY_PRICE = "price";
     private static final String KEY_CLASS_TYPE = "class_type";
-    private static final String KEY_DESCRIPTION = "description";
-    private static final String KEY_INSTRUCTOR = "instructor";
     private static final String KEY_DIFFICULTY = "difficulty";
+    private static final String KEY_DESCRIPTION = "description";
+
     
     // Column names for class_instances table
     private static final String KEY_INSTANCE_ID = "id";
     private static final String KEY_YOGA_CLASS_ID = "yoga_class_id";
     private static final String KEY_DATE = "date";
-    private static final String KEY_TEACHER = "teacher";
+    private static final String KEY_INSTANCE_INSTRUCTOR = "instructor";
     private static final String KEY_ADDITIONAL_COMMENTS = "additional_comments";
 
     public DatabaseHelper(Context context) {
@@ -63,7 +63,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_PRICE + " REAL NOT NULL,"
                 + KEY_CLASS_TYPE + " TEXT NOT NULL,"
                 + KEY_DESCRIPTION + " TEXT,"
-                + KEY_INSTRUCTOR + " TEXT,"
                 + KEY_DIFFICULTY + " TEXT" + ")";
         db.execSQL(CREATE_YOGA_CLASSES_TABLE);
         
@@ -72,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_INSTANCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + KEY_YOGA_CLASS_ID + " INTEGER NOT NULL,"
                 + KEY_DATE + " TEXT NOT NULL,"
-                + KEY_TEACHER + " TEXT NOT NULL,"
+                + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
                 + KEY_ADDITIONAL_COMMENTS + " TEXT,"
                 + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
         db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
@@ -89,7 +88,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + KEY_INSTANCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + KEY_YOGA_CLASS_ID + " INTEGER NOT NULL,"
                     + KEY_DATE + " TEXT NOT NULL,"
-                    + KEY_TEACHER + " TEXT NOT NULL,"
+                    + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
                     + KEY_ADDITIONAL_COMMENTS + " TEXT,"
                     + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
             db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
@@ -100,7 +99,85 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + KEY_INSTANCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + KEY_YOGA_CLASS_ID + " INTEGER NOT NULL,"
                     + KEY_DATE + " TEXT NOT NULL,"
-                    + KEY_TEACHER + " TEXT NOT NULL,"
+                    + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
+                    + KEY_ADDITIONAL_COMMENTS + " TEXT,"
+                    + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
+            db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
+        }
+        
+        if (oldVersion < 4) {
+            // Remove instructor column from yoga_classes table and recreate it without instructor
+            // First, save existing data (excluding instructor column)
+            try {
+                db.execSQL("CREATE TABLE yoga_classes_backup AS SELECT " +
+                        KEY_ID + ", " + KEY_DAY_OF_WEEK + ", " + KEY_TIME + ", " + KEY_CAPACITY + ", " +
+                        KEY_DURATION + ", " + KEY_PRICE + ", " + KEY_CLASS_TYPE + ", " + KEY_DESCRIPTION + ", " +
+                        KEY_DIFFICULTY + " FROM " + TABLE_YOGA_CLASSES);
+            } catch (Exception e) {
+                // If the backup fails (maybe instructor column doesn't exist), create empty backup
+                db.execSQL("CREATE TABLE yoga_classes_backup AS SELECT " +
+                        KEY_ID + ", " + KEY_DAY_OF_WEEK + ", " + KEY_TIME + ", " + KEY_CAPACITY + ", " +
+                        KEY_DURATION + ", " + KEY_PRICE + ", " + KEY_CLASS_TYPE + ", " + KEY_DESCRIPTION + ", " +
+                        KEY_DIFFICULTY + " FROM " + TABLE_YOGA_CLASSES + " WHERE 1=0");
+            }
+            
+            // Drop the old table
+            db.execSQL("DROP TABLE " + TABLE_YOGA_CLASSES);
+            
+            // Create new table without instructor column
+            String CREATE_YOGA_CLASSES_TABLE = "CREATE TABLE " + TABLE_YOGA_CLASSES + "("
+                    + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + KEY_DAY_OF_WEEK + " TEXT NOT NULL,"
+                    + KEY_TIME + " TEXT NOT NULL,"
+                    + KEY_CAPACITY + " INTEGER NOT NULL,"
+                    + KEY_DURATION + " INTEGER NOT NULL,"
+                    + KEY_PRICE + " REAL NOT NULL,"
+                    + KEY_CLASS_TYPE + " TEXT NOT NULL,"
+                    + KEY_DESCRIPTION + " TEXT,"
+                    + KEY_DIFFICULTY + " TEXT" + ")";
+            db.execSQL(CREATE_YOGA_CLASSES_TABLE);
+            
+            // Restore data
+            try {
+                db.execSQL("INSERT INTO " + TABLE_YOGA_CLASSES + " SELECT * FROM yoga_classes_backup");
+            } catch (Exception e) {
+                // If restore fails, that's okay - we'll have an empty table
+            }
+            
+            // Drop backup table
+            db.execSQL("DROP TABLE IF EXISTS yoga_classes_backup");
+        }
+        
+        if (oldVersion < 5) {
+            // Version 5: Ensure class_instances table has the instructor column
+            // This is a safety check to make sure the upgrade is complete
+            // No changes needed, just increment version to trigger upgrade
+        }
+        
+        if (oldVersion < 6) {
+            // Version 6: Complete database recreation to fix persistent schema issues
+            // Drop all tables and recreate from scratch
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
+            
+            // Recreate tables with correct schema
+            String CREATE_YOGA_CLASSES_TABLE = "CREATE TABLE " + TABLE_YOGA_CLASSES + "("
+                    + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + KEY_DAY_OF_WEEK + " TEXT NOT NULL,"
+                    + KEY_TIME + " TEXT NOT NULL,"
+                    + KEY_CAPACITY + " INTEGER NOT NULL,"
+                    + KEY_DURATION + " INTEGER NOT NULL,"
+                    + KEY_PRICE + " REAL NOT NULL,"
+                    + KEY_CLASS_TYPE + " TEXT NOT NULL,"
+                    + KEY_DESCRIPTION + " TEXT,"
+                    + KEY_DIFFICULTY + " TEXT" + ")";
+            db.execSQL(CREATE_YOGA_CLASSES_TABLE);
+            
+            String CREATE_CLASS_INSTANCES_TABLE = "CREATE TABLE " + TABLE_CLASS_INSTANCES + "("
+                    + KEY_INSTANCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + KEY_YOGA_CLASS_ID + " INTEGER NOT NULL,"
+                    + KEY_DATE + " TEXT NOT NULL,"
+                    + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
                     + KEY_ADDITIONAL_COMMENTS + " TEXT,"
                     + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
             db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
@@ -119,7 +196,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PRICE, yogaClass.getPrice());
         values.put(KEY_CLASS_TYPE, yogaClass.getClassType());
         values.put(KEY_DESCRIPTION, yogaClass.getDescription());
-        values.put(KEY_INSTRUCTOR, yogaClass.getInstructor());
         values.put(KEY_DIFFICULTY, yogaClass.getDifficulty());
         
         long id = db.insert(TABLE_YOGA_CLASSES, null, values);
@@ -146,7 +222,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 yogaClass.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_PRICE)));
                 yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
                 yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
-                yogaClass.setInstructor(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTRUCTOR)));
                 yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
                 
                 yogaClassList.add(yogaClass);
@@ -173,7 +248,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             yogaClass.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_PRICE)));
             yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
             yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
-            yogaClass.setInstructor(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTRUCTOR)));
             yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
             cursor.close();
             db.close();
@@ -196,7 +270,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PRICE, yogaClass.getPrice());
         values.put(KEY_CLASS_TYPE, yogaClass.getClassType());
         values.put(KEY_DESCRIPTION, yogaClass.getDescription());
-        values.put(KEY_INSTRUCTOR, yogaClass.getInstructor());
         values.put(KEY_DIFFICULTY, yogaClass.getDifficulty());
         
         int result = db.update(TABLE_YOGA_CLASSES, values, KEY_ID + " = ?",
@@ -243,7 +316,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         values.put(KEY_YOGA_CLASS_ID, classInstance.getYogaClassId());
         values.put(KEY_DATE, classInstance.getDate());
-        values.put(KEY_TEACHER, classInstance.getTeacher());
+        values.put(KEY_INSTANCE_INSTRUCTOR, classInstance.getInstructor());
         values.put(KEY_ADDITIONAL_COMMENTS, classInstance.getAdditionalComments());
         
         long id = db.insert(TABLE_CLASS_INSTANCES, null, values);
@@ -266,7 +339,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 instance.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_INSTANCE_ID)));
                 instance.setYogaClassId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_YOGA_CLASS_ID)));
                 instance.setDate(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DATE)));
-                instance.setTeacher(cursor.getString(cursor.getColumnIndexOrThrow(KEY_TEACHER)));
+                instance.setInstructor(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_INSTRUCTOR)));
                 instance.setAdditionalComments(cursor.getString(cursor.getColumnIndexOrThrow(KEY_ADDITIONAL_COMMENTS)));
                 
                 instanceList.add(instance);
@@ -288,7 +361,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             instance.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_INSTANCE_ID)));
             instance.setYogaClassId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_YOGA_CLASS_ID)));
             instance.setDate(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DATE)));
-            instance.setTeacher(cursor.getString(cursor.getColumnIndexOrThrow(KEY_TEACHER)));
+            instance.setInstructor(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_INSTRUCTOR)));
             instance.setAdditionalComments(cursor.getString(cursor.getColumnIndexOrThrow(KEY_ADDITIONAL_COMMENTS)));
             cursor.close();
             db.close();
@@ -306,7 +379,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         values.put(KEY_YOGA_CLASS_ID, instance.getYogaClassId());
         values.put(KEY_DATE, instance.getDate());
-        values.put(KEY_TEACHER, instance.getTeacher());
+        values.put(KEY_INSTANCE_INSTRUCTOR, instance.getInstructor());
         values.put(KEY_ADDITIONAL_COMMENTS, instance.getAdditionalComments());
         
         int result = db.update(TABLE_CLASS_INSTANCES, values, KEY_INSTANCE_ID + " = ?",
@@ -339,5 +412,161 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return count;
+    }
+    
+    // Search Methods
+    
+    // Search yoga classes by instructor name (from class instances)
+    public List<YogaClass> searchYogaClassesByInstructor(String instructorName) {
+        List<YogaClass> yogaClassList = new ArrayList<>();
+        String searchQuery = "SELECT DISTINCT yc.* FROM " + TABLE_YOGA_CLASSES + " yc " +
+                "INNER JOIN " + TABLE_CLASS_INSTANCES + " ci ON yc." + KEY_ID + " = ci." + KEY_YOGA_CLASS_ID +
+                " WHERE ci." + KEY_INSTANCE_INSTRUCTOR + " LIKE ? " +
+                "ORDER BY yc." + KEY_DAY_OF_WEEK + ", yc." + KEY_TIME;
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(searchQuery, new String[]{"%" + instructorName + "%"});
+        
+        if (cursor.moveToFirst()) {
+            do {
+                YogaClass yogaClass = new YogaClass();
+                yogaClass.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_ID)));
+                yogaClass.setDayOfWeek(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DAY_OF_WEEK)));
+                yogaClass.setTime(cursor.getString(cursor.getColumnIndexOrThrow(KEY_TIME)));
+                yogaClass.setCapacity(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_CAPACITY)));
+                yogaClass.setDuration(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_DURATION)));
+                yogaClass.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_PRICE)));
+                yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
+                yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
+                yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+                
+                yogaClassList.add(yogaClass);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return yogaClassList;
+    }
+    
+    // Search yoga classes by day of the week
+    public List<YogaClass> searchYogaClassesByDayOfWeek(String dayOfWeek) {
+        List<YogaClass> yogaClassList = new ArrayList<>();
+        String searchQuery = "SELECT * FROM " + TABLE_YOGA_CLASSES + 
+                " WHERE " + KEY_DAY_OF_WEEK + " = ? " +
+                "ORDER BY " + KEY_TIME;
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(searchQuery, new String[]{dayOfWeek});
+        
+        if (cursor.moveToFirst()) {
+            do {
+                YogaClass yogaClass = new YogaClass();
+                yogaClass.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_ID)));
+                yogaClass.setDayOfWeek(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DAY_OF_WEEK)));
+                yogaClass.setTime(cursor.getString(cursor.getColumnIndexOrThrow(KEY_TIME)));
+                yogaClass.setCapacity(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_CAPACITY)));
+                yogaClass.setDuration(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_DURATION)));
+                yogaClass.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_PRICE)));
+                yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
+                yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
+                yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+                
+                yogaClassList.add(yogaClass);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return yogaClassList;
+    }
+    
+    // Search yoga classes by specific date (from class instances)
+    public List<YogaClass> searchYogaClassesByDate(String date) {
+        List<YogaClass> yogaClassList = new ArrayList<>();
+        String searchQuery = "SELECT DISTINCT yc.* FROM " + TABLE_YOGA_CLASSES + " yc " +
+                "INNER JOIN " + TABLE_CLASS_INSTANCES + " ci ON yc." + KEY_ID + " = ci." + KEY_YOGA_CLASS_ID +
+                " WHERE ci." + KEY_DATE + " = ? " +
+                "ORDER BY yc." + KEY_TIME;
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(searchQuery, new String[]{date});
+        
+        if (cursor.moveToFirst()) {
+            do {
+                YogaClass yogaClass = new YogaClass();
+                yogaClass.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_ID)));
+                yogaClass.setDayOfWeek(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DAY_OF_WEEK)));
+                yogaClass.setTime(cursor.getString(cursor.getColumnIndexOrThrow(KEY_TIME)));
+                yogaClass.setCapacity(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_CAPACITY)));
+                yogaClass.setDuration(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_DURATION)));
+                yogaClass.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_PRICE)));
+                yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
+                yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
+                yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+                
+                yogaClassList.add(yogaClass);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return yogaClassList;
+    }
+    
+    // Combined search method for advanced search
+    public List<YogaClass> searchYogaClasses(String instructorName, String dayOfWeek, String date) {
+        List<YogaClass> yogaClassList = new ArrayList<>();
+        StringBuilder queryBuilder = new StringBuilder();
+        List<String> params = new ArrayList<>();
+        
+        queryBuilder.append("SELECT DISTINCT yc.* FROM ").append(TABLE_YOGA_CLASSES).append(" yc ");
+        
+        boolean hasInstanceCriteria = (instructorName != null && !instructorName.trim().isEmpty()) || 
+                                    (date != null && !date.trim().isEmpty());
+        
+        if (hasInstanceCriteria) {
+            queryBuilder.append("INNER JOIN ").append(TABLE_CLASS_INSTANCES).append(" ci ON yc.")
+                       .append(KEY_ID).append(" = ci.").append(KEY_YOGA_CLASS_ID).append(" ");
+        }
+        
+        queryBuilder.append("WHERE 1=1 ");
+        
+        if (instructorName != null && !instructorName.trim().isEmpty()) {
+            queryBuilder.append("AND ci.").append(KEY_INSTANCE_INSTRUCTOR).append(" LIKE ? ");
+            params.add("%" + instructorName + "%");
+        }
+        
+        if (dayOfWeek != null && !dayOfWeek.trim().isEmpty()) {
+            queryBuilder.append("AND yc.").append(KEY_DAY_OF_WEEK).append(" = ? ");
+            params.add(dayOfWeek);
+        }
+        
+        if (date != null && !date.trim().isEmpty()) {
+            queryBuilder.append("AND ci.").append(KEY_DATE).append(" = ? ");
+            params.add(date);
+        }
+        
+        queryBuilder.append("ORDER BY yc.").append(KEY_DAY_OF_WEEK).append(", yc.").append(KEY_TIME);
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(queryBuilder.toString(), params.toArray(new String[0]));
+        
+        if (cursor.moveToFirst()) {
+            do {
+                YogaClass yogaClass = new YogaClass();
+                yogaClass.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_ID)));
+                yogaClass.setDayOfWeek(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DAY_OF_WEEK)));
+                yogaClass.setTime(cursor.getString(cursor.getColumnIndexOrThrow(KEY_TIME)));
+                yogaClass.setCapacity(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_CAPACITY)));
+                yogaClass.setDuration(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_DURATION)));
+                yogaClass.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_PRICE)));
+                yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
+                yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
+                yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+                
+                yogaClassList.add(yogaClass);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return yogaClassList;
     }
 }

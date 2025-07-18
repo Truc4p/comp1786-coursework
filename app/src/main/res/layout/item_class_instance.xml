@@ -17,13 +17,13 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <!-- Teacher -->
+    <!-- Instructor -->
     <TextView
-        android:id="@+id/tv_instance_teacher"
+        android:id="@+id/tv_instance_instructor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Teacher: John Doe"
+        android:text="Instructor: John Doe"
         android:textColor="@color/medium_purple"
         android:textSize="14sp" />
 
@@ -35,7 +35,7 @@
         android:layout_marginTop="4dp"
         android:text="Additional comments about this class instance"
         android:textColor="@color/dark_gray"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textStyle="italic"
         android:visibility="gone" />
 

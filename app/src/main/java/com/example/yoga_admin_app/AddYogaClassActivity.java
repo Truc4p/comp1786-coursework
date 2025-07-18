@@ -1,5 +1,6 @@
 package com.example.yoga_admin_app;
 
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -7,9 +8,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Calendar;
+import java.util.Locale;
 
 public class AddYogaClassActivity extends AppCompatActivity {
 
@@ -20,7 +25,6 @@ public class AddYogaClassActivity extends AppCompatActivity {
     private EditText etPrice;
     private Spinner spinnerClassType;
     private EditText etDescription;
-    private EditText etInstructor;
     private Spinner spinnerDifficulty;
     private Button btnConfirm;
     private Button btnCancel;
@@ -41,6 +45,9 @@ public class AddYogaClassActivity extends AppCompatActivity {
         // Setup spinners
         setupSpinners();
         
+        // Setup time picker
+        setupTimePicker();
+        
         // Setup button listeners
         setupButtonListeners();
     }
@@ -53,7 +60,6 @@ public class AddYogaClassActivity extends AppCompatActivity {
         etPrice = findViewById(R.id.et_price);
         spinnerClassType = findViewById(R.id.spinner_class_type);
         etDescription = findViewById(R.id.et_description);
-        etInstructor = findViewById(R.id.et_instructor);
         spinnerDifficulty = findViewById(R.id.spinner_difficulty);
         btnConfirm = findViewById(R.id.btn_confirm);
         btnCancel = findViewById(R.id.btn_cancel);
@@ -74,6 +80,55 @@ public class AddYogaClassActivity extends AppCompatActivity {
         String[] difficulties = {"Select difficulty level", "Beginner", "Intermediate", "Advanced"};
         CustomSpinnerAdapter difficultyAdapter = new CustomSpinnerAdapter(this, difficulties);
         spinnerDifficulty.setAdapter(difficultyAdapter);
+    }
+
+    private void setupTimePicker() {
+        // Make time field non-editable but clickable
+        etTime.setFocusable(false);
+        etTime.setClickable(true);
+        
+        etTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePickerDialog();
+            }
+        });
+    }
+
+    private void showTimePickerDialog() {
+        // Get current time
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+
+        // Create time picker dialog
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this,
+                new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        // Format time in 12-hour format with AM/PM
+                        String timeString = formatTime(hourOfDay, minute);
+                        etTime.setText(timeString);
+                    }
+                }, hour, minute, false); // false for 12-hour format
+
+        timePickerDialog.show();
+    }
+
+    private String formatTime(int hour, int minute) {
+        String amPm = "AM";
+        int displayHour = hour;
+        
+        if (hour == 0) {
+            displayHour = 12;
+        } else if (hour > 12) {
+            displayHour = hour - 12;
+            amPm = "PM";
+        } else if (hour == 12) {
+            amPm = "PM";
+        }
+        
+        return String.format(Locale.getDefault(), "%d:%02d %s", displayHour, minute, amPm);
     }
 
     private void setupButtonListeners() {
@@ -202,7 +257,7 @@ public class AddYogaClassActivity extends AppCompatActivity {
         yogaClass.setPrice(Double.parseDouble(etPrice.getText().toString().trim()));
         yogaClass.setClassType(spinnerClassType.getSelectedItem().toString());
         yogaClass.setDescription(etDescription.getText().toString().trim());
-        yogaClass.setInstructor(etInstructor.getText().toString().trim());
+        yogaClass.setInstructor(""); // Set empty string for instructor field
         yogaClass.setDifficulty(spinnerDifficulty.getSelectedItem().toString());
 
         // Pass to confirmation activity
@@ -214,7 +269,6 @@ public class AddYogaClassActivity extends AppCompatActivity {
         intent.putExtra("price", yogaClass.getPrice());
         intent.putExtra("classType", yogaClass.getClassType());
         intent.putExtra("description", yogaClass.getDescription());
-        intent.putExtra("instructor", yogaClass.getInstructor());
         intent.putExtra("difficulty", yogaClass.getDifficulty());
         startActivity(intent);
         finish();

@@ -10,16 +10,16 @@ public class ClassInstance {
     private long id;
     private long yogaClassId; // Foreign key to YogaClass
     private String date; // Format: dd/MM/yyyy
-    private String teacher; // Required field
+    private String instructor; // Required field
     private String additionalComments; // Optional field
 
     // Constructor
     public ClassInstance() {}
 
-    public ClassInstance(long yogaClassId, String date, String teacher, String additionalComments) {
+    public ClassInstance(long yogaClassId, String date, String instructor, String additionalComments) {
         this.yogaClassId = yogaClassId;
         this.date = date;
-        this.teacher = teacher;
+        this.instructor = instructor;
         this.additionalComments = additionalComments;
     }
 
@@ -33,8 +33,8 @@ public class ClassInstance {
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
 
-    public String getTeacher() { return teacher; }
-    public void setTeacher(String teacher) { this.teacher = teacher; }
+    public String getInstructor() { return instructor; }
+    public void setInstructor(String instructor) { this.instructor = instructor; }
 
     public String getAdditionalComments() { return additionalComments; }
     public void setAdditionalComments(String additionalComments) { this.additionalComments = additionalComments; }
@@ -73,6 +73,6 @@ public class ClassInstance {
 
     @Override
     public String toString() {
-        return date + " - " + teacher;
+        return date + " - " + instructor;
     }
 }

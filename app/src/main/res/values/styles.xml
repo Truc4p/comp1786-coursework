@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="MenuButtonStyle">
+    <style name="ButtonStyle">
         <item name="android:background">@drawable/button_background</item>
         <item name="android:textColor">@color/dark_purple</item>
         <item name="android:textSize">16sp</item>

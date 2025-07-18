@@ -14,7 +14,7 @@
 
     <Button
         android:id="@+id/btn_select_date"
-        style="@style/MenuButtonStyle"
+        style="@style/ButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -32,19 +32,19 @@
         android:textSize="12sp"
         android:textStyle="italic" />
 
-    <!-- Teacher Field -->
+    <!-- Instructor Field -->
     <TextView
         style="@style/LabelStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Teacher *" />
+        android:text="Instructor *" />
 
     <EditText
-        android:id="@+id/et_teacher"
+        android:id="@+id/et_instructor"
         style="@style/InputFieldStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter teacher name"
+        android:hint="Enter instructor name"
         android:inputType="textPersonName" />
 
     <!-- Additional Comments Field -->

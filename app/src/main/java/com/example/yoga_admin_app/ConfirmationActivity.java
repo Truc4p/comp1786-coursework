@@ -18,7 +18,6 @@ public class ConfirmationActivity extends AppCompatActivity {
     private TextView tvPrice;
     private TextView tvClassType;
     private TextView tvDescription;
-    private TextView tvInstructor;
     private TextView tvDifficulty;
     private Button btnSave;
     private Button btnBack;
@@ -55,7 +54,6 @@ public class ConfirmationActivity extends AppCompatActivity {
         tvPrice = findViewById(R.id.tv_price);
         tvClassType = findViewById(R.id.tv_class_type);
         tvDescription = findViewById(R.id.tv_description);
-        tvInstructor = findViewById(R.id.tv_instructor);
         tvDifficulty = findViewById(R.id.tv_difficulty);
         btnSave = findViewById(R.id.btn_save);
         btnBack = findViewById(R.id.btn_back);
@@ -71,7 +69,7 @@ public class ConfirmationActivity extends AppCompatActivity {
         yogaClass.setPrice(intent.getDoubleExtra("price", 0.0));
         yogaClass.setClassType(intent.getStringExtra("classType"));
         yogaClass.setDescription(intent.getStringExtra("description"));
-        yogaClass.setInstructor(intent.getStringExtra("instructor"));
+        yogaClass.setInstructor(""); // Set empty string for instructor field
         yogaClass.setDifficulty(intent.getStringExtra("difficulty"));
     }
 
@@ -90,14 +88,6 @@ public class ConfirmationActivity extends AppCompatActivity {
             tvDescription.setTypeface(null, android.graphics.Typeface.ITALIC);
         } else {
             tvDescription.setText(description);
-        }
-
-        String instructor = yogaClass.getInstructor();
-        if (instructor == null || instructor.trim().isEmpty()) {
-            tvInstructor.setText("Not specified");
-            tvInstructor.setTypeface(null, android.graphics.Typeface.ITALIC);
-        } else {
-            tvInstructor.setText(instructor);
         }
 
         tvDifficulty.setText(yogaClass.getDifficulty());

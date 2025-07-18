@@ -94,7 +94,7 @@
     <!-- Add Instance Button -->
     <Button
         android:id="@+id/btn_add_instance"
-        style="@style/MenuButtonStyle"
+        style="@style/ButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -103,7 +103,7 @@
     <!-- Back Button -->
     <Button
         android:id="@+id/btn_back"
-        style="@style/MenuButtonStyle"
+        style="@style/ButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

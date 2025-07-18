@@ -47,6 +47,12 @@
             android:exported="false"
             android:parentActivityName=".ViewYogaClassesActivity" />
         
+        <!-- Search Yoga Classes Activity -->
+        <activity
+            android:name=".SearchYogaClassesActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        
         <!-- Manage Class Instances Activity -->
         <activity
             android:name=".ManageClassInstancesActivity"
