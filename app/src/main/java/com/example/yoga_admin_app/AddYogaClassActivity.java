@@ -71,6 +71,9 @@ public class AddYogaClassActivity extends AppCompatActivity {
         
         // Setup button listeners
         setupButtonListeners();
+        
+        // Check if returning from confirmation with data to restore
+        restoreFormDataIfNeeded();
     }
 
     private void initializeViews() {
@@ -394,5 +397,100 @@ public class AddYogaClassActivity extends AppCompatActivity {
         intent.putExtra("locationAddress", yogaClass.getLocationAddress());
         startActivity(intent);
         finish();
+    }
+    
+    private void restoreFormDataIfNeeded() {
+        Intent intent = getIntent();
+        boolean isEditMode = intent.getBooleanExtra("isEditMode", false);
+        
+        if (isEditMode) {
+            // Restore all form fields with the data passed back from confirmation
+            
+            // Day of week
+            String dayOfWeek = intent.getStringExtra("dayOfWeek");
+            if (dayOfWeek != null) {
+                for (int i = 0; i < spinnerDayOfWeek.getCount(); i++) {
+                    if (spinnerDayOfWeek.getItemAtPosition(i).toString().equals(dayOfWeek)) {
+                        spinnerDayOfWeek.setSelection(i);
+                        break;
+                    }
+                }
+            }
+            
+            // Time
+            String time = intent.getStringExtra("time");
+            if (time != null) {
+                etTime.setText(time);
+            }
+            
+            // Capacity
+            int capacity = intent.getIntExtra("capacity", 0);
+            if (capacity > 0) {
+                etCapacity.setText(String.valueOf(capacity));
+            }
+            
+            // Duration
+            int duration = intent.getIntExtra("duration", 0);
+            if (duration > 0) {
+                etDuration.setText(String.valueOf(duration));
+            }
+            
+            // Price
+            double price = intent.getDoubleExtra("price", 0.0);
+            if (price > 0) {
+                etPrice.setText(String.valueOf(price));
+            }
+            
+            // Class type
+            String classType = intent.getStringExtra("classType");
+            if (classType != null) {
+                for (int i = 0; i < spinnerClassType.getCount(); i++) {
+                    if (spinnerClassType.getItemAtPosition(i).toString().equals(classType)) {
+                        spinnerClassType.setSelection(i);
+                        break;
+                    }
+                }
+            }
+            
+            // Description
+            String description = intent.getStringExtra("description");
+            if (description != null) {
+                etDescription.setText(description);
+            }
+            
+            // Difficulty
+            String difficulty = intent.getStringExtra("difficulty");
+            if (difficulty != null) {
+                for (int i = 0; i < spinnerDifficulty.getCount(); i++) {
+                    if (spinnerDifficulty.getItemAtPosition(i).toString().equals(difficulty)) {
+                        spinnerDifficulty.setSelection(i);
+                        break;
+                    }
+                }
+            }
+            
+            // Location data
+            double latitude = intent.getDoubleExtra("latitude", 0.0);
+            double longitude = intent.getDoubleExtra("longitude", 0.0);
+            String locationAddress = intent.getStringExtra("locationAddress");
+            
+            if (latitude != 0.0 || longitude != 0.0 || (locationAddress != null && !locationAddress.isEmpty())) {
+                currentLatitude = latitude;
+                currentLongitude = longitude;
+                currentLocationAddress = locationAddress != null ? locationAddress : "";
+                
+                if (etLocationAddress != null) {
+                    etLocationAddress.setText(currentLocationAddress);
+                }
+                
+                if (tvLocationStatus != null) {
+                    if (!currentLocationAddress.isEmpty()) {
+                        tvLocationStatus.setText("✅ Location detected: " + currentLocationAddress);
+                    } else if (latitude != 0.0 || longitude != 0.0) {
+                        tvLocationStatus.setText("✅ Location detected: " + latitude + ", " + longitude);
+                    }
+                }
+            }
+        }
     }
 } 

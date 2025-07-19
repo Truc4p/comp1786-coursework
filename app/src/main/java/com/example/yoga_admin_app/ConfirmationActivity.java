@@ -122,8 +122,23 @@ public class ConfirmationActivity extends AppCompatActivity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Go back to AddYogaClassActivity
+                // Go back to AddYogaClassActivity with current data
                 Intent intent = new Intent(ConfirmationActivity.this, AddYogaClassActivity.class);
+                
+                // Pass all the data back so form fields are preserved
+                intent.putExtra("dayOfWeek", yogaClass.getDayOfWeek());
+                intent.putExtra("time", yogaClass.getTime());
+                intent.putExtra("capacity", yogaClass.getCapacity());
+                intent.putExtra("duration", yogaClass.getDuration());
+                intent.putExtra("price", yogaClass.getPrice());
+                intent.putExtra("classType", yogaClass.getClassType());
+                intent.putExtra("description", yogaClass.getDescription());
+                intent.putExtra("difficulty", yogaClass.getDifficulty());
+                intent.putExtra("latitude", yogaClass.getLatitude());
+                intent.putExtra("longitude", yogaClass.getLongitude());
+                intent.putExtra("locationAddress", yogaClass.getLocationAddress());
+                intent.putExtra("isEditMode", true); // Flag to indicate this is returning from confirmation
+                
                 startActivity(intent);
                 finish();
             }
