@@ -85,6 +85,16 @@
             android:drawablePadding="8dp" />
 
         <Button
+            android:id="@+id/btn_cloud_sync"
+            style="@style/ButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="Cloud Sync"
+            android:drawableStart="@android:drawable/stat_sys_upload"
+            android:drawablePadding="8dp" />
+
+        <Button
             android:id="@+id/btn_reset_database"
             style="@style/ButtonStyle"
             android:layout_width="match_parent"

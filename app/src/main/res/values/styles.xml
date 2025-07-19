@@ -35,4 +35,22 @@
         <item name="android:textColor">@color/medium_purple</item>
         <item name="android:textSize">16sp</item>
     </style>
+        
+    <style name="ButtonStyleSecondary" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/accent_green</item>
+    </style>
+    
+    <style name="ButtonStyleSecondary2" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/accent_yellow</item>
+    </style>
+
+    <style name="ButtonStyleOutline" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/accent_orange</item>
+    </style>
 </resources> 

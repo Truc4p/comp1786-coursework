@@ -4,12 +4,17 @@
     <color name="white">#FFFFFFFF</color>
     
     <!-- Yoga-themed colors -->
-    <color name="mint_green">#e6f5f7</color>
     <color name="light_purple">#F3E5F5</color>
     <color name="light_purple_2">#E1BEE7</color>
     <color name="medium_purple">#9C27B0</color>
     <color name="dark_purple">#661a72</color>
+
+    <color name="accent_blue">#def4f7</color>
     <color name="accent_teal">#26A69A</color>
+    <color name="accent_yellow">#fcf6c9</color>
+    <color name="accent_orange">#fce4c9</color>
+    <color name="accent_green">#defce3</color>
+
     <color name="warning_red">#F44336</color>
     <color name="success_green">#4CAF50</color>
     <color name="light_gray">#F5F5F5</color>
