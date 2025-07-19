@@ -81,12 +81,12 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
             adapter = new YogaClassAdapter(this, filteredYogaClassList);
             listViewYogaClasses.setAdapter(adapter);
 
-            // Set up item click listener for editing
+            // Set up item click listener for viewing details directly
             listViewYogaClasses.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     YogaClass selectedClass = filteredYogaClassList.get(position);
-                    showClassOptionsDialog(selectedClass);
+                    showClassDetails(selectedClass);
                 }
             });
         }
@@ -123,25 +123,76 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
     }
 
     private void showClassDetails(YogaClass yogaClass) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Class Details");
-
-        StringBuilder details = new StringBuilder();
-        details.append("Day: ").append(yogaClass.getDayOfWeek()).append("\n\n");
-        details.append("Time: ").append(yogaClass.getTime()).append("\n\n");
-        details.append("Type: ").append(yogaClass.getClassType()).append("\n\n");
-        details.append("Capacity: ").append(yogaClass.getCapacity()).append(" people\n\n");
-        details.append("Duration: ").append(yogaClass.getDuration()).append(" minutes\n\n");
-        details.append("Price: £").append(String.format("%.2f", yogaClass.getPrice())).append("\n\n");
+        Intent intent = new Intent(this, ClassDetailsActivity.class);
+        intent.putExtra("classId", yogaClass.getId());
+        startActivity(intent);
+    }
+    
+    private void populateClassDetailsViews(View dialogView, YogaClass yogaClass) {
+        // Schedule section
+        TextView tvDay = dialogView.findViewById(R.id.tv_day);
+        TextView tvTime = dialogView.findViewById(R.id.tv_time);
+        TextView tvDuration = dialogView.findViewById(R.id.tv_duration);
         
-        details.append("Difficulty: ").append(yogaClass.getDifficulty()).append("\n\n");
-        details.append("Description: ").append(
-            yogaClass.getDescription() != null && !yogaClass.getDescription().trim().isEmpty() 
-                ? yogaClass.getDescription() : "No description provided");
-
-        builder.setMessage(details.toString());
-        builder.setPositiveButton("OK", null);
-        builder.show();
+        tvDay.setText(yogaClass.getDayOfWeek());
+        tvTime.setText(yogaClass.getTime());
+        tvDuration.setText(yogaClass.getDuration() + " minutes");
+        
+        // Class information section
+        TextView tvType = dialogView.findViewById(R.id.tv_type);
+        TextView tvDifficulty = dialogView.findViewById(R.id.tv_difficulty);
+        TextView tvCapacity = dialogView.findViewById(R.id.tv_capacity);
+        TextView tvPrice = dialogView.findViewById(R.id.tv_price);
+        
+        tvType.setText(yogaClass.getClassType());
+        tvDifficulty.setText(getDifficultyWithIndicator(yogaClass.getDifficulty()));
+        tvCapacity.setText(yogaClass.getCapacity() + " people");
+        tvPrice.setText("£" + String.format("%.2f", yogaClass.getPrice()));
+        
+        // Location section
+        TextView tvLocation = dialogView.findViewById(R.id.tv_location);
+        tvLocation.setText(getLocationDisplayText(yogaClass));
+        
+        // Description section
+        TextView tvDescription = dialogView.findViewById(R.id.tv_description);
+        String description = yogaClass.getDescription() != null && !yogaClass.getDescription().trim().isEmpty() 
+            ? yogaClass.getDescription() : "No description provided";
+        tvDescription.setText(description);
+    }
+    
+    private String getDifficultyWithIndicator(String difficulty) {
+        if (difficulty == null) return "Not specified";
+        
+        switch (difficulty.toLowerCase()) {
+            case "beginner":
+                return "🟢 " + difficulty;
+            case "intermediate":
+                return "🟡 " + difficulty;
+            case "advanced":
+                return "🔴 " + difficulty;
+            case "all levels":
+                return "🌈 " + difficulty;
+            default:
+                return "⚪ " + difficulty;
+        }
+    }
+    
+    private String getLocationDisplayText(YogaClass yogaClass) {
+        String locationAddress = yogaClass.getLocationAddress();
+        
+        // If we have a readable address, use it
+        if (locationAddress != null && !locationAddress.trim().isEmpty() 
+            && !locationAddress.equals("Unknown location")) {
+            return locationAddress;
+        }
+        
+        // If we have coordinates but no address, show coordinates
+        if (yogaClass.getLatitude() != 0.0 || yogaClass.getLongitude() != 0.0) {
+            return String.format("📍 %.6f, %.6f", yogaClass.getLatitude(), yogaClass.getLongitude());
+        }
+        
+        // No location information available
+        return "Not specified";
     }
 
     private void editYogaClass(YogaClass yogaClass) {

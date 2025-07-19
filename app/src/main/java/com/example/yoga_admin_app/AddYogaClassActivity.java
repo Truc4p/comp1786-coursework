@@ -1,22 +1,28 @@
 package com.example.yoga_admin_app;
 
+import android.Manifest;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.util.Calendar;
 import java.util.Locale;
 
 public class AddYogaClassActivity extends AppCompatActivity {
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
     private Spinner spinnerDayOfWeek;
     private EditText etTime;
@@ -28,16 +34,28 @@ public class AddYogaClassActivity extends AppCompatActivity {
     private Spinner spinnerDifficulty;
     private Button btnConfirm;
     private Button btnCancel;
-
+    
+    // Location fields
+    private Button btnGetLocation;
+    private TextView tvLocationStatus;
+    private EditText etLocationAddress;
+    
     private DatabaseHelper databaseHelper;
+    private LocationService locationService;
+    
+    // Location data
+    private double currentLatitude = 0.0;
+    private double currentLongitude = 0.0;
+    private String currentLocationAddress = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_yoga_class);
 
-        // Initialize database helper
+        // Initialize database helper and location service
         databaseHelper = new DatabaseHelper(this);
+        locationService = new LocationService(this);
 
         // Initialize views
         initializeViews();
@@ -47,6 +65,9 @@ public class AddYogaClassActivity extends AppCompatActivity {
         
         // Setup time picker
         setupTimePicker();
+        
+        // Setup location functionality
+        setupLocationFunctionality();
         
         // Setup button listeners
         setupButtonListeners();
@@ -63,6 +84,11 @@ public class AddYogaClassActivity extends AppCompatActivity {
         spinnerDifficulty = findViewById(R.id.spinner_difficulty);
         btnConfirm = findViewById(R.id.btn_confirm);
         btnCancel = findViewById(R.id.btn_cancel);
+        
+        // Location views
+        btnGetLocation = findViewById(R.id.btn_get_location);
+        tvLocationStatus = findViewById(R.id.tv_location_status);
+        etLocationAddress = findViewById(R.id.et_location_address);
     }
 
     private void setupSpinners() {
@@ -129,6 +155,94 @@ public class AddYogaClassActivity extends AppCompatActivity {
         }
         
         return String.format(Locale.getDefault(), "%d:%02d %s", displayHour, minute, amPm);
+    }
+
+    private void setupLocationFunctionality() {
+        btnGetLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getCurrentLocation();
+            }
+        });
+    }
+
+    private void getCurrentLocation() {
+        // Check permissions first
+        if (!locationService.hasLocationPermissions()) {
+            requestLocationPermissions();
+            return;
+        }
+
+        // Show loading state
+        btnGetLocation.setEnabled(false);
+        tvLocationStatus.setText("🔄 Getting your location...");
+        
+        locationService.getCurrentLocation(new LocationService.LocationCallback() {
+            @Override
+            public void onLocationReceived(double latitude, double longitude, String address) {
+                runOnUiThread(() -> {
+                    currentLatitude = latitude;
+                    currentLongitude = longitude;
+                    currentLocationAddress = address;
+                    
+                    // Update UI
+                    etLocationAddress.setText(address);
+                    tvLocationStatus.setText("✅ Location detected successfully");
+                    btnGetLocation.setEnabled(true);
+                    btnGetLocation.setText("📍 Update Location");
+                    
+                    Toast.makeText(AddYogaClassActivity.this, "Location detected!", Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onLocationError(String error) {
+                runOnUiThread(() -> {
+                    tvLocationStatus.setText("❌ " + error);
+                    btnGetLocation.setEnabled(true);
+                    Toast.makeText(AddYogaClassActivity.this, "Location error: " + error, Toast.LENGTH_LONG).show();
+                });
+            }
+
+            @Override
+            public void onPermissionRequired() {
+                runOnUiThread(() -> {
+                    requestLocationPermissions();
+                });
+            }
+        });
+    }
+
+    private void requestLocationPermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                },
+                LOCATION_PERMISSION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                tvLocationStatus.setText("Permission granted! Tap to get location");
+                Toast.makeText(this, "Location permission granted. Tap the button to get your location.", Toast.LENGTH_SHORT).show();
+            } else {
+                tvLocationStatus.setText("Location permission required for automatic detection");
+                Toast.makeText(this, "Location permission denied. You can still create classes without location.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (locationService != null) {
+            locationService.stopLocationUpdates();
+        }
     }
 
     private void setupButtonListeners() {
@@ -259,6 +373,11 @@ public class AddYogaClassActivity extends AppCompatActivity {
         yogaClass.setDescription(etDescription.getText().toString().trim());
         yogaClass.setInstructor(""); // Set empty string for instructor field
         yogaClass.setDifficulty(spinnerDifficulty.getSelectedItem().toString());
+        
+        // Set location data
+        yogaClass.setLatitude(currentLatitude);
+        yogaClass.setLongitude(currentLongitude);
+        yogaClass.setLocationAddress(currentLocationAddress);
 
         // Pass to confirmation activity
         Intent intent = new Intent(this, ConfirmationActivity.class);
@@ -270,6 +389,9 @@ public class AddYogaClassActivity extends AppCompatActivity {
         intent.putExtra("classType", yogaClass.getClassType());
         intent.putExtra("description", yogaClass.getDescription());
         intent.putExtra("difficulty", yogaClass.getDifficulty());
+        intent.putExtra("latitude", yogaClass.getLatitude());
+        intent.putExtra("longitude", yogaClass.getLongitude());
+        intent.putExtra("locationAddress", yogaClass.getLocationAddress());
         startActivity(intent);
         finish();
     }

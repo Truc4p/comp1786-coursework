@@ -19,6 +19,7 @@ public class ConfirmationActivity extends AppCompatActivity {
     private TextView tvClassType;
     private TextView tvDescription;
     private TextView tvDifficulty;
+    private TextView tvLocation;
     private Button btnSave;
     private Button btnBack;
 
@@ -55,6 +56,7 @@ public class ConfirmationActivity extends AppCompatActivity {
         tvClassType = findViewById(R.id.tv_class_type);
         tvDescription = findViewById(R.id.tv_description);
         tvDifficulty = findViewById(R.id.tv_difficulty);
+        tvLocation = findViewById(R.id.tv_location);
         btnSave = findViewById(R.id.btn_save);
         btnBack = findViewById(R.id.btn_back);
     }
@@ -71,6 +73,9 @@ public class ConfirmationActivity extends AppCompatActivity {
         yogaClass.setDescription(intent.getStringExtra("description"));
         yogaClass.setInstructor(""); // Set empty string for instructor field
         yogaClass.setDifficulty(intent.getStringExtra("difficulty"));
+        yogaClass.setLatitude(intent.getDoubleExtra("latitude", 0.0));
+        yogaClass.setLongitude(intent.getDoubleExtra("longitude", 0.0));
+        yogaClass.setLocationAddress(intent.getStringExtra("locationAddress"));
     }
 
     private void displayData() {
@@ -91,6 +96,19 @@ public class ConfirmationActivity extends AppCompatActivity {
         }
 
         tvDifficulty.setText(yogaClass.getDifficulty());
+        
+        // Handle location display
+        String locationAddress = yogaClass.getLocationAddress();
+        if (locationAddress == null || locationAddress.trim().isEmpty()) {
+            if (yogaClass.getLatitude() != 0.0 || yogaClass.getLongitude() != 0.0) {
+                tvLocation.setText(String.format("%.6f, %.6f", yogaClass.getLatitude(), yogaClass.getLongitude()));
+            } else {
+                tvLocation.setText("No location specified");
+                tvLocation.setTypeface(null, android.graphics.Typeface.ITALIC);
+            }
+        } else {
+            tvLocation.setText(locationAddress);
+        }
     }
 
     private void setupButtonListeners() {

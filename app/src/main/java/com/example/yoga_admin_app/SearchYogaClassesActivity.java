@@ -269,54 +269,24 @@ public class SearchYogaClassesActivity extends AppCompatActivity {
     }
 
     private void showClassDetailsDialog(YogaClass yogaClass) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(yogaClass.getClassType() + " - " + yogaClass.getDayOfWeek());
+        Intent intent = new Intent(this, ClassDetailsActivity.class);
+        intent.putExtra("classId", yogaClass.getId());
         
-        StringBuilder details = new StringBuilder();
-        details.append("Time: ").append(yogaClass.getTime()).append("\n");
-        details.append("Duration: ").append(yogaClass.getDuration()).append(" minutes\n");
-        details.append("Capacity: ").append(yogaClass.getCapacity()).append(" people\n");
-        details.append("Price: $").append(String.format("%.2f", yogaClass.getPrice())).append("\n");
+        // Pass search context if available
+        String instructorName = etInstructorName.getText().toString().trim();
+        String selectedDate = etDate.getText().toString().trim();
         
-        details.append("Difficulty: ").append(yogaClass.getDifficulty()).append("\n");
-        
-        if (yogaClass.getDescription() != null && !yogaClass.getDescription().trim().isEmpty()) {
-            details.append("\nDescription: ").append(yogaClass.getDescription());
+        if (!instructorName.isEmpty()) {
+            intent.putExtra("searchInstructor", instructorName);
         }
         
-        // Get class instances count
-        int instanceCount = databaseHelper.getClassInstanceCount(yogaClass.getId());
-        details.append("\n\nClass Instances: ").append(instanceCount);
+        if (!selectedDate.isEmpty()) {
+            intent.putExtra("searchDate", selectedDate);
+        }
         
-        builder.setMessage(details.toString());
-        
-        String[] options = {"View All Classes", "Manage Class Instances", "Close"};
-        
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0: // View All Classes
-                        Intent viewIntent = new Intent(SearchYogaClassesActivity.this, ViewYogaClassesActivity.class);
-                        startActivity(viewIntent);
-                        break;
-                    case 1: // Manage Class Instances
-                        Intent manageIntent = new Intent(SearchYogaClassesActivity.this, ManageClassInstancesActivity.class);
-                        manageIntent.putExtra("yoga_class_id", yogaClass.getId());
-                        manageIntent.putExtra("class_type", yogaClass.getClassType());
-                        manageIntent.putExtra("day_of_week", yogaClass.getDayOfWeek());
-                        startActivity(manageIntent);
-                        break;
-                    case 2: // Close
-                        dialog.dismiss();
-                        break;
-                }
-            }
-        });
-        
-        builder.show();
+        startActivity(intent);
     }
-
+    
     @Override
     protected void onResume() {
         super.onResume();

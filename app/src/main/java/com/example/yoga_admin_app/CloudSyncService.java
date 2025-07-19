@@ -148,6 +148,9 @@ public class CloudSyncService {
             classObj.put("classType", yogaClass.getClassType());
             classObj.put("description", yogaClass.getDescription());
             classObj.put("difficulty", yogaClass.getDifficulty());
+            classObj.put("latitude", yogaClass.getLatitude());
+            classObj.put("longitude", yogaClass.getLongitude());
+            classObj.put("locationAddress", yogaClass.getLocationAddress());
             
             // Get instances for this class
             List<ClassInstance> instances = databaseHelper.getClassInstancesByYogaClassId(yogaClass.getId());
@@ -353,6 +356,9 @@ public class CloudSyncService {
         yogaClass.setClassType(json.getString("classType"));
         yogaClass.setDescription(json.optString("description", ""));
         yogaClass.setDifficulty(json.optString("difficulty", ""));
+        yogaClass.setLatitude(json.optDouble("latitude", 0.0));
+        yogaClass.setLongitude(json.optDouble("longitude", 0.0));
+        yogaClass.setLocationAddress(json.optString("locationAddress", ""));
         return yogaClass;
     }
     

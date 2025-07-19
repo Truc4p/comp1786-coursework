@@ -12,6 +12,11 @@ public class YogaClass {
     private String instructor; // Additional field
     private String difficulty; // Additional field (Beginner, Intermediate, Advanced)
     
+    // Location fields
+    private double latitude;
+    private double longitude;
+    private String locationAddress; // Human-readable address
+    
     // Search context fields - to show additional info when displaying search results
     private String searchInstructor; // Instructor name from class instances for search results
     private String searchDate; // Specific date from class instances for search results
@@ -31,6 +36,28 @@ public class YogaClass {
         this.description = description;
         this.instructor = instructor;
         this.difficulty = difficulty;
+        this.latitude = 0.0;
+        this.longitude = 0.0;
+        this.locationAddress = "";
+    }
+
+    // Full constructor with location
+    public YogaClass(String dayOfWeek, String time, int capacity, int duration, 
+                     double price, String classType, String description, 
+                     String instructor, String difficulty, double latitude, 
+                     double longitude, String locationAddress) {
+        this.dayOfWeek = dayOfWeek;
+        this.time = time;
+        this.capacity = capacity;
+        this.duration = duration;
+        this.price = price;
+        this.classType = classType;
+        this.description = description;
+        this.instructor = instructor;
+        this.difficulty = difficulty;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.locationAddress = locationAddress;
     }
 
     // Getters and setters
@@ -63,6 +90,15 @@ public class YogaClass {
 
     public String getDifficulty() { return difficulty; }
     public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
+
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public String getLocationAddress() { return locationAddress; }
+    public void setLocationAddress(String locationAddress) { this.locationAddress = locationAddress; }
 
     public String getSearchInstructor() { return searchInstructor; }
     public void setSearchInstructor(String searchInstructor) { this.searchInstructor = searchInstructor; }

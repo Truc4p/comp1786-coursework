@@ -5,6 +5,10 @@
     <!-- Network permissions for cloud synchronization -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Location permissions for automatic location pickup -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -44,6 +48,12 @@
             android:name=".ViewYogaClassesActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
+        
+        <!-- Class Details Activity -->
+        <activity
+            android:name=".ClassDetailsActivity"
+            android:exported="false"
+            android:parentActivityName=".ViewYogaClassesActivity" />
         
         <!-- Edit Yoga Class Activity -->
         <activity

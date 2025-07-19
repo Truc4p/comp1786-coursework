@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 6; // Forced complete database recreation
+    private static final int DATABASE_VERSION = 7; // Added location fields
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
@@ -26,6 +26,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_CLASS_TYPE = "class_type";
     private static final String KEY_DIFFICULTY = "difficulty";
     private static final String KEY_DESCRIPTION = "description";
+    
+    // Location columns
+    private static final String KEY_LATITUDE = "latitude";
+    private static final String KEY_LONGITUDE = "longitude";
+    private static final String KEY_LOCATION_ADDRESS = "location_address";
 
     
     // Column names for class_instances table
@@ -63,7 +68,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_PRICE + " REAL NOT NULL,"
                 + KEY_CLASS_TYPE + " TEXT NOT NULL,"
                 + KEY_DESCRIPTION + " TEXT,"
-                + KEY_DIFFICULTY + " TEXT" + ")";
+                + KEY_DIFFICULTY + " TEXT,"
+                + KEY_LATITUDE + " REAL DEFAULT 0.0,"
+                + KEY_LONGITUDE + " REAL DEFAULT 0.0,"
+                + KEY_LOCATION_ADDRESS + " TEXT" + ")";
         db.execSQL(CREATE_YOGA_CLASSES_TABLE);
         
         // Create class instances table
@@ -82,13 +90,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Enable foreign key constraints
         db.execSQL("PRAGMA foreign_keys=ON");
         
-        // For any version before 6, do a complete recreation
-        if (oldVersion < 6) {
+        // For any version before 7, do a complete recreation to add location fields
+        if (oldVersion < 7) {
             // Drop all tables and recreate from scratch
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
             
-            // Recreate tables with correct schema
+            // Recreate tables with correct schema including location fields
             String CREATE_YOGA_CLASSES_TABLE = "CREATE TABLE " + TABLE_YOGA_CLASSES + "("
                     + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + KEY_DAY_OF_WEEK + " TEXT NOT NULL,"
@@ -98,7 +106,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + KEY_PRICE + " REAL NOT NULL,"
                     + KEY_CLASS_TYPE + " TEXT NOT NULL,"
                     + KEY_DESCRIPTION + " TEXT,"
-                    + KEY_DIFFICULTY + " TEXT" + ")";
+                    + KEY_DIFFICULTY + " TEXT,"
+                    + KEY_LATITUDE + " REAL DEFAULT 0.0,"
+                    + KEY_LONGITUDE + " REAL DEFAULT 0.0,"
+                    + KEY_LOCATION_ADDRESS + " TEXT" + ")";
             db.execSQL(CREATE_YOGA_CLASSES_TABLE);
             
             String CREATE_CLASS_INSTANCES_TABLE = "CREATE TABLE " + TABLE_CLASS_INSTANCES + "("
@@ -130,6 +141,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_CLASS_TYPE, yogaClass.getClassType());
         values.put(KEY_DESCRIPTION, yogaClass.getDescription());
         values.put(KEY_DIFFICULTY, yogaClass.getDifficulty());
+        values.put(KEY_LATITUDE, yogaClass.getLatitude());
+        values.put(KEY_LONGITUDE, yogaClass.getLongitude());
+        values.put(KEY_LOCATION_ADDRESS, yogaClass.getLocationAddress());
         
         long id = db.insert(TABLE_YOGA_CLASSES, null, values);
         db.close();
@@ -156,6 +170,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
                 yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
                 yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+                yogaClass.setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LATITUDE)));
+                yogaClass.setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LONGITUDE)));
+                yogaClass.setLocationAddress(cursor.getString(cursor.getColumnIndexOrThrow(KEY_LOCATION_ADDRESS)));
                 
                 yogaClassList.add(yogaClass);
             } while (cursor.moveToNext());
@@ -182,6 +199,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
             yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
             yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+            yogaClass.setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LATITUDE)));
+            yogaClass.setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LONGITUDE)));
+            yogaClass.setLocationAddress(cursor.getString(cursor.getColumnIndexOrThrow(KEY_LOCATION_ADDRESS)));
             cursor.close();
             db.close();
             return yogaClass;
@@ -204,6 +224,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_CLASS_TYPE, yogaClass.getClassType());
         values.put(KEY_DESCRIPTION, yogaClass.getDescription());
         values.put(KEY_DIFFICULTY, yogaClass.getDifficulty());
+        values.put(KEY_LATITUDE, yogaClass.getLatitude());
+        values.put(KEY_LONGITUDE, yogaClass.getLongitude());
+        values.put(KEY_LOCATION_ADDRESS, yogaClass.getLocationAddress());
         
         int result = db.update(TABLE_YOGA_CLASSES, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(yogaClass.getId())});
