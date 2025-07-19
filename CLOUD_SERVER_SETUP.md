@@ -105,12 +105,31 @@ app.listen(port, () => {
 4. Deploy: `git push heroku main`
 5. Update CloudSyncService.java with your Heroku URL
 
-## Option 3: Firebase Realtime Database
+## Option 3: Firebase Realtime Database (Recommended)
 
-1. Go to Firebase Console: https://console.firebase.google.com/
-2. Create new project
-3. Enable Realtime Database
-4. Set rules to allow read/write (for testing):
+### Step-by-Step Firebase Setup:
+
+1. **Go to Firebase Console**: https://console.firebase.google.com/
+2. **Create new project**:
+   - Project name: `yoga-admin-app` (or your preferred name)
+   - **Enable Google Analytics**: ✅ YES (Recommended for insights and error tracking)
+   - Choose your Google Analytics account or create new one
+   - Accept terms and create project
+
+3. **Add Android App**:
+   - Click "Add app" → Android icon
+   - Package name: `com.example.yoga_admin_app` (must match your app)
+   - App nickname: `Yoga Admin App`
+   - Download `google-services.json` file
+   - Place the file in `app/` directory (same level as `build.gradle`)
+
+4. **Enable Realtime Database**:
+   - Go to "Realtime Database" in left sidebar
+   - Click "Create Database"
+   - Choose location (closest to your users)
+   - Start in **test mode** (allows read/write without auth)
+
+5. **Database Rules** (for testing):
 ```json
 {
   "rules": {
@@ -119,10 +138,54 @@ app.listen(port, () => {
   }
 }
 ```
-5. Update CloudSyncService.java:
+
+6. **Get your Database URL**:
+   - In Realtime Database, copy the URL (looks like: `https://yoga-admin-app-12345-default-rtdb.firebaseio.com/`)
+
+7. **Update CloudSyncService.java**:
 ```java
 private static final String BASE_URL = "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com/";
 ```
+
+### Why Enable Google Analytics?
+- **Free unlimited analytics** for your yoga admin app
+- **Crashlytics integration** - automatically track app crashes and errors
+- **User behavior insights** - see which features are used most
+- **Performance monitoring** - identify slow operations
+- **Future features** - A/B testing, user segmentation
+- **No cost** and can be disabled anytime
+
+### Firebase Integration (After downloading google-services.json):
+
+**Add to project-level build.gradle.kts**:
+```kotlin
+plugins {
+    // Add this line
+    id("com.google.gms.google-services") version "4.4.0" apply false
+}
+```
+
+**Add to app-level build.gradle.kts**:
+```kotlin
+plugins {
+    // Add this line
+    id("com.google.gms.google-services")
+}
+
+dependencies {
+    // Add Firebase dependencies
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-analytics") // If you enabled Analytics
+}
+```
+
+### Testing Firebase Connection:
+1. Place `google-services.json` in `app/` folder
+2. Add Firebase dependencies to build.gradle
+3. Update BASE_URL in CloudSyncService.java
+4. Build and run your app
+5. Try cloud sync - data should appear in Firebase Realtime Database
 
 ## Current Configuration in CloudSyncService.java
 

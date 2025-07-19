@@ -25,10 +25,10 @@ public class CloudSyncService {
     // private static final String BASE_URL = "https://api.jsonbin.io/v3/b/YOUR_BIN_ID/";
     
     // Option 2: Firebase Realtime Database - Replace YOUR_PROJECT_ID
-    // private static final String BASE_URL = "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com/";
+    private static final String BASE_URL = "https://yogaapp-12d2b-default-rtdb.asia-southeast1.firebasedatabase.app/";
     
-    // Option 3: Your actual cloud service
-    private static final String BASE_URL = "https://your-cloud-service.com/api/";
+    // // Option 3: Your actual cloud service
+    // private static final String BASE_URL = "https://your-cloud-service.com/api/";
     
     private static final String YOGA_CLASSES_ENDPOINT = "yoga-classes";
     private static final String CLASS_INSTANCES_ENDPOINT = "class-instances";
@@ -175,15 +175,16 @@ public class CloudSyncService {
     }
     
     /**
-     * Send data to cloud service
+     * Send data to cloud service (Firebase Realtime Database format)
      */
     private String sendDataToCloud(String endpoint, JSONObject data) {
         try {
-            URL url = new URL(BASE_URL + endpoint);
+            // Firebase Realtime Database REST API format
+            URL url = new URL(BASE_URL + endpoint + ".json");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             
             // Set request properties
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod("PUT"); // Firebase uses PUT for writing data
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Accept", "application/json");
             connection.setDoOutput(true);
@@ -198,6 +199,8 @@ public class CloudSyncService {
             
             // Get response
             int responseCode = connection.getResponseCode();
+            Log.d(TAG, "Firebase response code: " + responseCode);
+            
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder response = new StringBuilder();
@@ -208,9 +211,20 @@ public class CloudSyncService {
                 }
                 reader.close();
                 
+                Log.d(TAG, "Firebase response: " + response.toString());
                 return response.toString();
             } else {
-                Log.e(TAG, "HTTP Error: " + responseCode);
+                // Read error response
+                BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                StringBuilder errorResponse = new StringBuilder();
+                String errorLine;
+                
+                while ((errorLine = errorReader.readLine()) != null) {
+                    errorResponse.append(errorLine);
+                }
+                errorReader.close();
+                
+                Log.e(TAG, "HTTP Error: " + responseCode + ", Response: " + errorResponse.toString());
                 return null;
             }
             
@@ -221,11 +235,12 @@ public class CloudSyncService {
     }
     
     /**
-     * Download data from cloud service
+     * Download data from cloud service (Firebase Realtime Database format)
      */
     private String downloadDataFromCloud(String endpoint) {
         try {
-            URL url = new URL(BASE_URL + endpoint + "?deviceId=" + getDeviceId());
+            // Firebase Realtime Database REST API format
+            URL url = new URL(BASE_URL + endpoint + ".json");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             
             // Set request properties
@@ -236,6 +251,8 @@ public class CloudSyncService {
             
             // Get response
             int responseCode = connection.getResponseCode();
+            Log.d(TAG, "Firebase download response code: " + responseCode);
+            
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder response = new StringBuilder();
@@ -246,6 +263,7 @@ public class CloudSyncService {
                 }
                 reader.close();
                 
+                Log.d(TAG, "Firebase download response: " + response.toString());
                 return response.toString();
             } else {
                 Log.e(TAG, "HTTP Error: " + responseCode);
@@ -259,10 +277,23 @@ public class CloudSyncService {
     }
     
     /**
-     * Sync downloaded data with local database
+     * Sync downloaded data with local database (Firebase format)
      */
     private void syncWithLocalDatabase(String cloudData) throws JSONException {
+        // Firebase might return null if no data exists
+        if (cloudData == null || cloudData.equals("null")) {
+            Log.d(TAG, "No cloud data found, nothing to sync");
+            return;
+        }
+        
         JSONObject data = new JSONObject(cloudData);
+        
+        // Check if yogaClasses exists in the response
+        if (!data.has("yogaClasses")) {
+            Log.d(TAG, "No yogaClasses found in cloud data");
+            return;
+        }
+        
         JSONArray yogaClasses = data.getJSONArray("yogaClasses");
         
         // For this implementation, we'll do a simple overwrite sync
@@ -280,12 +311,14 @@ public class CloudSyncService {
                 YogaClass newClass = createYogaClassFromJson(classObj);
                 long newId = databaseHelper.addYogaClass(newClass);
                 
-                // Add instances
-                JSONArray instances = classObj.getJSONArray("instances");
-                for (int j = 0; j < instances.length(); j++) {
-                    JSONObject instanceObj = instances.getJSONObject(j);
-                    ClassInstance instance = createInstanceFromJson(instanceObj, newId);
-                    databaseHelper.addClassInstance(instance);
+                // Add instances if they exist
+                if (classObj.has("instances")) {
+                    JSONArray instances = classObj.getJSONArray("instances");
+                    for (int j = 0; j < instances.length(); j++) {
+                        JSONObject instanceObj = instances.getJSONObject(j);
+                        ClassInstance instance = createInstanceFromJson(instanceObj, newId);
+                        databaseHelper.addClassInstance(instance);
+                    }
                 }
             } else {
                 // Update existing class if needed
@@ -295,11 +328,13 @@ public class CloudSyncService {
                 
                 // Sync instances (simple approach: delete and recreate)
                 databaseHelper.deleteAllInstancesForYogaClass(classId);
-                JSONArray instances = classObj.getJSONArray("instances");
-                for (int j = 0; j < instances.length(); j++) {
-                    JSONObject instanceObj = instances.getJSONObject(j);
-                    ClassInstance instance = createInstanceFromJson(instanceObj, classId);
-                    databaseHelper.addClassInstance(instance);
+                if (classObj.has("instances")) {
+                    JSONArray instances = classObj.getJSONArray("instances");
+                    for (int j = 0; j < instances.length(); j++) {
+                        JSONObject instanceObj = instances.getJSONObject(j);
+                        ClassInstance instance = createInstanceFromJson(instanceObj, classId);
+                        databaseHelper.addClassInstance(instance);
+                    }
                 }
             }
         }
@@ -345,7 +380,7 @@ public class CloudSyncService {
     }
     
     /**
-     * Check if cloud service is reachable
+     * Check if cloud service is reachable (Firebase format)
      */
     public void checkCloudConnection(SyncCallback callback) {
         if (!NetworkUtils.isNetworkAvailable(context)) {
@@ -355,21 +390,25 @@ public class CloudSyncService {
         
         executorService.execute(() -> {
             try {
-                URL url = new URL(BASE_URL + "health");
+                // Test Firebase connection by trying to read from root
+                URL url = new URL(BASE_URL + ".json");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
                 
                 int responseCode = connection.getResponseCode();
+                Log.d(TAG, "Firebase connection test response: " + responseCode);
+                
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    callback.onSuccess("Cloud service is reachable");
+                    callback.onSuccess("Firebase cloud service is reachable");
                 } else {
-                    callback.onError("Cloud service returned error: " + responseCode);
+                    callback.onError("Firebase cloud service returned error: " + responseCode);
                 }
                 
             } catch (IOException e) {
-                callback.onError("Cannot reach cloud service: " + e.getMessage());
+                Log.e(TAG, "Firebase connection test failed", e);
+                callback.onError("Cannot reach Firebase cloud service: " + e.getMessage());
             }
         });
     }
