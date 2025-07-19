@@ -82,80 +82,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Enable foreign key constraints
         db.execSQL("PRAGMA foreign_keys=ON");
         
-        if (oldVersion < 2) {
-            // Create class instances table if upgrading from version 1
-            String CREATE_CLASS_INSTANCES_TABLE = "CREATE TABLE " + TABLE_CLASS_INSTANCES + "("
-                    + KEY_INSTANCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + KEY_YOGA_CLASS_ID + " INTEGER NOT NULL,"
-                    + KEY_DATE + " TEXT NOT NULL,"
-                    + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
-                    + KEY_ADDITIONAL_COMMENTS + " TEXT,"
-                    + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
-            db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
-        } else if (oldVersion < 3) {
-            // Update the foreign key constraint to include ON DELETE CASCADE
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
-            String CREATE_CLASS_INSTANCES_TABLE = "CREATE TABLE " + TABLE_CLASS_INSTANCES + "("
-                    + KEY_INSTANCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + KEY_YOGA_CLASS_ID + " INTEGER NOT NULL,"
-                    + KEY_DATE + " TEXT NOT NULL,"
-                    + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
-                    + KEY_ADDITIONAL_COMMENTS + " TEXT,"
-                    + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
-            db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
-        }
-        
-        if (oldVersion < 4) {
-            // Remove instructor column from yoga_classes table and recreate it without instructor
-            // First, save existing data (excluding instructor column)
-            try {
-                db.execSQL("CREATE TABLE yoga_classes_backup AS SELECT " +
-                        KEY_ID + ", " + KEY_DAY_OF_WEEK + ", " + KEY_TIME + ", " + KEY_CAPACITY + ", " +
-                        KEY_DURATION + ", " + KEY_PRICE + ", " + KEY_CLASS_TYPE + ", " + KEY_DESCRIPTION + ", " +
-                        KEY_DIFFICULTY + " FROM " + TABLE_YOGA_CLASSES);
-            } catch (Exception e) {
-                // If the backup fails (maybe instructor column doesn't exist), create empty backup
-                db.execSQL("CREATE TABLE yoga_classes_backup AS SELECT " +
-                        KEY_ID + ", " + KEY_DAY_OF_WEEK + ", " + KEY_TIME + ", " + KEY_CAPACITY + ", " +
-                        KEY_DURATION + ", " + KEY_PRICE + ", " + KEY_CLASS_TYPE + ", " + KEY_DESCRIPTION + ", " +
-                        KEY_DIFFICULTY + " FROM " + TABLE_YOGA_CLASSES + " WHERE 1=0");
-            }
-            
-            // Drop the old table
-            db.execSQL("DROP TABLE " + TABLE_YOGA_CLASSES);
-            
-            // Create new table without instructor column
-            String CREATE_YOGA_CLASSES_TABLE = "CREATE TABLE " + TABLE_YOGA_CLASSES + "("
-                    + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + KEY_DAY_OF_WEEK + " TEXT NOT NULL,"
-                    + KEY_TIME + " TEXT NOT NULL,"
-                    + KEY_CAPACITY + " INTEGER NOT NULL,"
-                    + KEY_DURATION + " INTEGER NOT NULL,"
-                    + KEY_PRICE + " REAL NOT NULL,"
-                    + KEY_CLASS_TYPE + " TEXT NOT NULL,"
-                    + KEY_DESCRIPTION + " TEXT,"
-                    + KEY_DIFFICULTY + " TEXT" + ")";
-            db.execSQL(CREATE_YOGA_CLASSES_TABLE);
-            
-            // Restore data
-            try {
-                db.execSQL("INSERT INTO " + TABLE_YOGA_CLASSES + " SELECT * FROM yoga_classes_backup");
-            } catch (Exception e) {
-                // If restore fails, that's okay - we'll have an empty table
-            }
-            
-            // Drop backup table
-            db.execSQL("DROP TABLE IF EXISTS yoga_classes_backup");
-        }
-        
-        if (oldVersion < 5) {
-            // Version 5: Ensure class_instances table has the instructor column
-            // This is a safety check to make sure the upgrade is complete
-            // No changes needed, just increment version to trigger upgrade
-        }
-        
+        // For any version before 6, do a complete recreation
         if (oldVersion < 6) {
-            // Version 6: Complete database recreation to fix persistent schema issues
             // Drop all tables and recreate from scratch
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
@@ -182,6 +110,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
             db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
         }
+        
+        // Future upgrade logic can be added here
+        // if (oldVersion < 7) {
+        //     // Add future schema changes here
+        // }
     }
 
     // Add a new yoga class
@@ -419,7 +352,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Search yoga classes by instructor name (from class instances)
     public List<YogaClass> searchYogaClassesByInstructor(String instructorName) {
         List<YogaClass> yogaClassList = new ArrayList<>();
-        String searchQuery = "SELECT DISTINCT yc.* FROM " + TABLE_YOGA_CLASSES + " yc " +
+        String searchQuery = "SELECT DISTINCT yc.*, " +
+                "COALESCE(ci." + KEY_INSTANCE_INSTRUCTOR + ", 'No Instructor Assigned') as instructor_name " +
+                "FROM " + TABLE_YOGA_CLASSES + " yc " +
                 "INNER JOIN " + TABLE_CLASS_INSTANCES + " ci ON yc." + KEY_ID + " = ci." + KEY_YOGA_CLASS_ID +
                 " WHERE ci." + KEY_INSTANCE_INSTRUCTOR + " LIKE ? " +
                 "ORDER BY yc." + KEY_DAY_OF_WEEK + ", yc." + KEY_TIME;
@@ -439,6 +374,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
                 yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
                 yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+                
+                // Set search context - instructor name from the search
+                yogaClass.setSearchInstructor(cursor.getString(cursor.getColumnIndexOrThrow("instructor_name")));
                 
                 yogaClassList.add(yogaClass);
             } while (cursor.moveToNext());
@@ -482,7 +420,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Search yoga classes by specific date (from class instances)
     public List<YogaClass> searchYogaClassesByDate(String date) {
         List<YogaClass> yogaClassList = new ArrayList<>();
-        String searchQuery = "SELECT DISTINCT yc.* FROM " + TABLE_YOGA_CLASSES + " yc " +
+        String searchQuery = "SELECT DISTINCT yc.*, ci." + KEY_DATE + " as search_date, " +
+                "COALESCE(ci." + KEY_INSTANCE_INSTRUCTOR + ", 'No Instructor Assigned') as instructor_name " +
+                "FROM " + TABLE_YOGA_CLASSES + " yc " +
                 "INNER JOIN " + TABLE_CLASS_INSTANCES + " ci ON yc." + KEY_ID + " = ci." + KEY_YOGA_CLASS_ID +
                 " WHERE ci." + KEY_DATE + " = ? " +
                 "ORDER BY yc." + KEY_TIME;
@@ -503,6 +443,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
                 yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
                 
+                // Set search context - date and instructor from the search
+                yogaClass.setSearchDate(cursor.getString(cursor.getColumnIndexOrThrow("search_date")));
+                yogaClass.setSearchInstructor(cursor.getString(cursor.getColumnIndexOrThrow("instructor_name")));
+                
                 yogaClassList.add(yogaClass);
             } while (cursor.moveToNext());
         }
@@ -517,10 +461,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         StringBuilder queryBuilder = new StringBuilder();
         List<String> params = new ArrayList<>();
         
-        queryBuilder.append("SELECT DISTINCT yc.* FROM ").append(TABLE_YOGA_CLASSES).append(" yc ");
+        // Build select clause to include search context fields
+        queryBuilder.append("SELECT DISTINCT yc.*");
         
         boolean hasInstanceCriteria = (instructorName != null && !instructorName.trim().isEmpty()) || 
                                     (date != null && !date.trim().isEmpty());
+        
+        if (hasInstanceCriteria) {
+            queryBuilder.append(", COALESCE(ci.").append(KEY_INSTANCE_INSTRUCTOR).append(", 'No Instructor Assigned') as instructor_name");
+            queryBuilder.append(", ci.").append(KEY_DATE).append(" as search_date");
+        }
+        
+        queryBuilder.append(" FROM ").append(TABLE_YOGA_CLASSES).append(" yc ");
         
         if (hasInstanceCriteria) {
             queryBuilder.append("INNER JOIN ").append(TABLE_CLASS_INSTANCES).append(" ci ON yc.")
@@ -561,6 +513,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
                 yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
                 yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+                
+                // Set search context if available
+                if (hasInstanceCriteria) {
+                    try {
+                        // Always get instructor name when we have instance criteria
+                        String instructorFromDb = cursor.getString(cursor.getColumnIndexOrThrow("instructor_name"));
+                        yogaClass.setSearchInstructor(instructorFromDb);
+                        
+                        // Set search date if we're searching by date
+                        if (date != null && !date.trim().isEmpty()) {
+                            yogaClass.setSearchDate(cursor.getString(cursor.getColumnIndexOrThrow("search_date")));
+                        }
+                    } catch (Exception e) {
+                        // In case columns don't exist, just continue without search context
+                    }
+                }
                 
                 yogaClassList.add(yogaClass);
             } while (cursor.moveToNext());

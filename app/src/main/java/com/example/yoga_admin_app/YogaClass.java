@@ -11,6 +11,10 @@ public class YogaClass {
     private String description;
     private String instructor; // Additional field
     private String difficulty; // Additional field (Beginner, Intermediate, Advanced)
+    
+    // Search context fields - to show additional info when displaying search results
+    private String searchInstructor; // Instructor name from class instances for search results
+    private String searchDate; // Specific date from class instances for search results
 
     // Constructor
     public YogaClass() {}
@@ -59,6 +63,12 @@ public class YogaClass {
 
     public String getDifficulty() { return difficulty; }
     public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
+
+    public String getSearchInstructor() { return searchInstructor; }
+    public void setSearchInstructor(String searchInstructor) { this.searchInstructor = searchInstructor; }
+
+    public String getSearchDate() { return searchDate; }
+    public void setSearchDate(String searchDate) { this.searchDate = searchDate; }
 
     @Override
     public String toString() {

@@ -46,6 +46,7 @@ public class YogaClassAdapter extends BaseAdapter {
             holder.tvClassType = convertView.findViewById(R.id.tv_class_type);
             holder.tvDayAndTime = convertView.findViewById(R.id.tv_day_and_time);
             holder.tvCapacityAndPrice = convertView.findViewById(R.id.tv_capacity_and_price);
+            holder.tvSearchContext = convertView.findViewById(R.id.tv_search_context);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -58,6 +59,30 @@ public class YogaClassAdapter extends BaseAdapter {
         holder.tvCapacityAndPrice.setText(yogaClass.getCapacity() + " people • £" + 
                 String.format("%.2f", yogaClass.getPrice()));
 
+        // Show search context information if available
+        StringBuilder searchContext = new StringBuilder();
+        boolean hasSearchContext = false;
+        
+        if (yogaClass.getSearchInstructor() != null && !yogaClass.getSearchInstructor().trim().isEmpty()) {
+            searchContext.append("Instructor: ").append(yogaClass.getSearchInstructor());
+            hasSearchContext = true;
+        }
+        
+        if (yogaClass.getSearchDate() != null && !yogaClass.getSearchDate().trim().isEmpty()) {
+            if (hasSearchContext) {
+                searchContext.append(" • ");
+            }
+            searchContext.append("Date: ").append(yogaClass.getSearchDate());
+            hasSearchContext = true;
+        }
+        
+        if (hasSearchContext) {
+            holder.tvSearchContext.setText(searchContext.toString());
+            holder.tvSearchContext.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvSearchContext.setVisibility(View.GONE);
+        }
+
         return convertView;
     }
 
@@ -65,5 +90,6 @@ public class YogaClassAdapter extends BaseAdapter {
         TextView tvClassType;
         TextView tvDayAndTime;
         TextView tvCapacityAndPrice;
+        TextView tvSearchContext;
     }
 } 
