@@ -7,6 +7,7 @@ import {
   Image,
 } from 'react-native';
 import { formatTime, formatDate } from '../utils/helpers';
+import { getYogaClassImage } from '../utils/imageMapping';
 
 const YogaClassCard = ({ yogaClass, onPress, onBook }) => {
   const {
@@ -25,17 +26,16 @@ const YogaClassCard = ({ yogaClass, onPress, onBook }) => {
   } = yogaClass;
 
   const isFullyBooked = availableSpots <= 0;
+  const imageUrl = getYogaClassImage(yogaClass);
 
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(yogaClass)}>
       <View style={styles.imageContainer}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Text style={styles.placeholderText}>🧘</Text>
-          </View>
-        )}
+        <Image 
+          source={{ uri: imageUrl }} 
+          style={styles.image}
+          defaultSource={require('../../assets/icon.png')}
+        />
         <View style={styles.levelBadge}>
           <Text style={styles.levelText}>{level || 'All Levels'}</Text>
         </View>
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bookButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#f0f0f0',
   },
   bookButtonText: {
     color: '#661a72',

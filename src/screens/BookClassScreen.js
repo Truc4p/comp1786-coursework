@@ -291,8 +291,6 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 12,
@@ -318,8 +316,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
   },
   totalContainer: {
     flexDirection: 'row',
@@ -344,7 +340,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bookButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#f0f0f0',
   },
   bookButtonText: {
     color: '#661a72',

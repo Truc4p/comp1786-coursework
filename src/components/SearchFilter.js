@@ -120,8 +120,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   title: {
     fontSize: 18,
@@ -158,8 +156,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
     backgroundColor: '#f8f8f8',
   },
   selectedOption: {
@@ -176,8 +172,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
   },
   applyButton: {
     backgroundColor: '#def4f7',
