@@ -114,7 +114,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-    elevation: 5,
     overflow: 'hidden',
   },
   imageContainer: {
@@ -140,13 +139,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(139, 76, 247, 0.9)',
+    backgroundColor: 'rgba(222, 244, 247, 0.9)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   levelText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 12,
     fontWeight: '500',
   },
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#8B4CF7',
+    color: '#661a72',
   },
   instructor: {
     fontSize: 14,
@@ -207,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   bookButton: {
-    backgroundColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -216,7 +215,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   bookButtonText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 16,
     fontWeight: '600',
   },

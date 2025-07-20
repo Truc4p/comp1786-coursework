@@ -218,7 +218,7 @@ const BookClassScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F3E5F5',
   },
   keyboardAvoid: {
     flex: 1,
@@ -246,7 +246,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-    elevation: 5,
   },
   className: {
     fontSize: 20,
@@ -308,8 +307,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 15,
     borderRadius: 10,
-    borderLeftWidth: 4,
-    borderLeftColor: '#8B4CF7',
     marginTop: 10,
   },
   disclaimerText: {
@@ -338,10 +335,10 @@ const styles = StyleSheet.create({
   totalAmount: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#8B4CF7',
+    color: '#661a72',
   },
   bookButton: {
-    backgroundColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -350,7 +347,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   bookButtonText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 16,
     fontWeight: '600',
   },

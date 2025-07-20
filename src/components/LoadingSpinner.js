@@ -9,7 +9,7 @@ import {
 const LoadingSpinner = ({ message = 'Loading...' }) => {
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#8B4CF7" />
+      <ActivityIndicator size="large" color="#def4f7" />
       <Text style={styles.message}>{message}</Text>
     </View>
   );

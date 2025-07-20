@@ -15,11 +15,13 @@ const AppNavigator = () => {
         initialRouteName="DemoInfo"
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#8B4CF7',
+            backgroundColor: '#def4f7',
+            height: 90,
           },
-          headerTintColor: '#fff',
+          headerTintColor: '#661a72',
           headerTitleStyle: {
             fontWeight: 'bold',
+            fontSize: 20,
           },
         }}
       >

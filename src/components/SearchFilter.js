@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     fontSize: 16,
-    color: '#8B4CF7',
+    color: '#661a72',
   },
   content: {
     flex: 1,
@@ -163,15 +163,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
   selectedOption: {
-    backgroundColor: '#8B4CF7',
-    borderColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
+    borderColor: '#def4f7',
   },
   optionText: {
     fontSize: 14,
     color: '#666',
   },
   selectedOptionText: {
-    color: '#fff',
+    color: '#661a72',
     fontWeight: '500',
   },
   footer: {
@@ -180,13 +180,13 @@ const styles = StyleSheet.create({
     borderTopColor: '#e0e0e0',
   },
   applyButton: {
-    backgroundColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
   },
   applyButtonText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 16,
     fontWeight: '600',
   },

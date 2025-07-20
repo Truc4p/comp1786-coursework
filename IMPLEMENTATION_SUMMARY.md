@@ -157,7 +157,7 @@ GET /customers/{id}/bookings - Customer booking history
 ## 🎨 UI/UX Features
 
 ### Design Elements:
-- **Purple Theme** (#8B4CF7) for consistency
+- **Purple Theme** (#def4f7) for consistency
 - **Card-based Layout** for easy scanning
 - **Clear Typography** with proper hierarchy
 - **Intuitive Icons** for quick recognition

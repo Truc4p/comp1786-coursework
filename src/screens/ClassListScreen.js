@@ -28,29 +28,25 @@ const ClassListScreen = ({ navigation }) => {
       setLoading(true);
       console.log('Loading classes from Firebase...');
       const response = await ApiService.getYogaClasses();
-      console.log('API response received:', response);
+    //   console.log('API response received:', response);
       
       // Handle Firebase response format
       let classData = [];
       if (Array.isArray(response)) {
         classData = response;
-        console.log('Response is array, using directly:', classData);
+        // console.log('Response is array, using directly:', classData);
       } else if (response && typeof response === 'object') {
         // If response has a data property
         classData = response.data || response || [];
         console.log('Response is object, extracted data:', classData);
       }
       
-      console.log('Final class data length:', classData.length);
+    //   console.log('Final class data length:', classData.length);
       
       // If we get data from Firebase, use it
       if (classData.length > 0) {
-        console.log('Using Firebase data:', classData);
+        // console.log('Using Firebase data:', classData);
         setClasses(classData);
-        Alert.alert(
-          'Firebase Connected!',
-          `Successfully loaded ${classData.length} yoga classes from your Firebase database.`
-        );
       } else {
         console.log('No classes found in Firebase, using demo data');
         // Use mock data if no data in Firebase yet
@@ -231,8 +227,8 @@ const ClassListScreen = ({ navigation }) => {
     return <LoadingSpinner message="Loading yoga classes..." />;
   }
 
-  return (
-    <SafeAreaView style={styles.container}>
+  const renderHeader = () => (
+    <>
       <View style={styles.header}>
         <Text style={styles.title}>Yoga Classes</Text>
         <TouchableOpacity
@@ -248,17 +244,22 @@ const ClassListScreen = ({ navigation }) => {
           Showing: {getActiveFilterText()} ({filteredClasses.length} classes)
         </Text>
       </View>
+    </>
+  );
 
+  return (
+    <SafeAreaView style={styles.container}>
       <FlatList
         data={filteredClasses}
         renderItem={renderClass}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.list}
+        ListHeaderComponent={renderHeader}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={renderEmptyComponent}
         showsVerticalScrollIndicator={false}
+        style={styles.list}
       />
 
       <SearchFilter
@@ -274,7 +275,7 @@ const ClassListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F3E5F5',
   },
   header: {
     flexDirection: 'row',
@@ -282,9 +283,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#F3E5F5',
   },
   title: {
     fontSize: 24,
@@ -292,22 +291,20 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   filterButton: {
-    backgroundColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
   filterButtonText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 14,
     fontWeight: '500',
   },
   filterInfo: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#F3E5F5',
   },
   filterInfoText: {
     fontSize: 14,

@@ -199,7 +199,7 @@ This customer app is designed to work with your existing admin yoga app. Ensure 
 ## Customization
 
 ### Styling
-- Main theme color: `#8B4CF7` (purple)
+- Main theme color: `#def4f7` (purple)
 - Modify colors in `src/utils/config.js`
 - Component styles are in individual StyleSheet objects
 

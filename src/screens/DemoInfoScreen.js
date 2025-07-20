@@ -96,23 +96,23 @@ const DemoInfoScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F3E5F5',
   },
   header: {
     alignItems: 'center',
     paddingVertical: 40,
     paddingHorizontal: 20,
-    backgroundColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#661a72',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#fff',
+    color: '#661a72',
     textAlign: 'center',
     opacity: 0.9,
   },
@@ -138,7 +138,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-    elevation: 5,
   },
   featureIcon: {
     fontSize: 30,
@@ -168,8 +167,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 15,
     marginBottom: 15,
-    borderLeftWidth: 4,
-    borderLeftColor: '#8B4CF7',
   },
   configText: {
     fontSize: 14,
@@ -181,7 +178,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   startButton: {
-    backgroundColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
     marginHorizontal: 20,
     paddingVertical: 15,
     borderRadius: 10,
@@ -189,7 +186,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   startButtonText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 16,
     fontWeight: '600',
   },

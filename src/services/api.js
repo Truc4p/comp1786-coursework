@@ -22,7 +22,7 @@ class ApiService {
     };
 
     try {
-      console.log('Making API request to:', url);
+    //   console.log('Making API request to:', url);
       const response = await fetch(url, config);
       
       if (!response.ok) {
@@ -30,7 +30,7 @@ class ApiService {
       }
       
       const data = await response.json();
-      console.log('Firebase response data:', data);
+    //   console.log('Firebase response data:', data);
       
       // Handle Firebase null response
       if (data === null || data === undefined) {
@@ -48,7 +48,7 @@ class ApiService {
         return arrayData;
       }
       
-      console.log('Returning data as-is:', data);
+    //   console.log('Returning data as-is:', data);
       return data;
     } catch (error) {
       console.error('API request failed:', error);
@@ -102,10 +102,10 @@ class ApiService {
       // First try the nested structure from your admin app
       const response = await this.request('/sync/yogaClasses');
       if (response && response.length > 0) {
-        console.log('Found admin app data:', response);
+        // console.log('Found admin app data:', response);
         // Map the admin app data structure to customer app format
         const mappedData = this.mapAdminDataToCustomerFormat(response);
-        console.log('Mapped data for customer app:', mappedData);
+        // console.log('Mapped data for customer app:', mappedData);
         return mappedData;
       }
     } catch (error) {

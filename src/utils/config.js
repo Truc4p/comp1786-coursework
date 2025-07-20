@@ -12,7 +12,7 @@ export const CONFIG = {
   
   // UI Configuration
   THEME: {
-    PRIMARY_COLOR: '#8B4CF7',
+    PRIMARY_COLOR: '#def4f7',
     SECONDARY_COLOR: '#f5f5f5',
     TEXT_COLOR: '#333',
     LIGHT_TEXT_COLOR: '#666',

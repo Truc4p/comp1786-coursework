@@ -183,13 +183,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     right: 20,
-    backgroundColor: 'rgba(139, 76, 247, 0.9)',
+    backgroundColor: 'rgba(222, 244, 247, 0.9)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
   },
   levelText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#8B4CF7',
+    color: '#661a72',
   },
   instructor: {
     fontSize: 16,
@@ -276,13 +276,13 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
   },
   instructorInitial: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -314,14 +314,14 @@ const styles = StyleSheet.create({
   footerPrice: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#8B4CF7',
+    color: '#661a72',
   },
   priceLabel: {
     fontSize: 12,
     color: '#666',
   },
   bookButton: {
-    backgroundColor: '#8B4CF7',
+    backgroundColor: '#def4f7',
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   bookButtonText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 16,
     fontWeight: '600',
   },
