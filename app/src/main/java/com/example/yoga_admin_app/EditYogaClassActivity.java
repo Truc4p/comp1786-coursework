@@ -1,22 +1,28 @@
 package com.example.yoga_admin_app;
 
+import android.Manifest;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.util.Calendar;
 import java.util.Locale;
 
 public class EditYogaClassActivity extends AppCompatActivity {
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
     private Spinner spinnerDayOfWeek;
     private EditText etTime;
@@ -28,17 +34,29 @@ public class EditYogaClassActivity extends AppCompatActivity {
     private Spinner spinnerDifficulty;
     private Button btnUpdate;
     private Button btnCancel;
+    
+    // Location fields
+    private Button btnGetLocation;
+    private TextView tvLocationStatus;
+    private EditText etLocationAddress;
 
     private DatabaseHelper databaseHelper;
+    private LocationService locationService;
     private long classId;
+    
+    // Location data
+    private double currentLatitude = 0.0;
+    private double currentLongitude = 0.0;
+    private String currentLocationAddress = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_yoga_class);
 
-        // Initialize database helper
+        // Initialize database helper and location service
         databaseHelper = new DatabaseHelper(this);
+        locationService = new LocationService(this);
 
         // Get class ID from intent
         classId = getIntent().getLongExtra("classId", -1);
@@ -56,6 +74,9 @@ public class EditYogaClassActivity extends AppCompatActivity {
         
         // Setup time picker
         setupTimePicker();
+        
+        // Setup location functionality
+        setupLocationFunctionality();
         
         // Load existing data
         loadExistingData();
@@ -75,6 +96,11 @@ public class EditYogaClassActivity extends AppCompatActivity {
         spinnerDifficulty = findViewById(R.id.spinner_difficulty);
         btnUpdate = findViewById(R.id.btn_update);
         btnCancel = findViewById(R.id.btn_cancel);
+        
+        // Location views
+        btnGetLocation = findViewById(R.id.btn_get_location);
+        tvLocationStatus = findViewById(R.id.tv_location_status);
+        etLocationAddress = findViewById(R.id.et_location_address);
     }
 
     private void setupSpinners() {
@@ -171,19 +197,37 @@ public class EditYogaClassActivity extends AppCompatActivity {
     }
 
     private void loadExistingData() {
-        Intent intent = getIntent();
-        
-        // Set spinner selections
-        setSpinnerSelection(spinnerDayOfWeek, intent.getStringExtra("dayOfWeek"));
-        setSpinnerSelection(spinnerClassType, intent.getStringExtra("classType"));
-        setSpinnerSelection(spinnerDifficulty, intent.getStringExtra("difficulty"));
-        
-        // Set text fields
-        etTime.setText(intent.getStringExtra("time"));
-        etCapacity.setText(String.valueOf(intent.getIntExtra("capacity", 0)));
-        etDuration.setText(String.valueOf(intent.getIntExtra("duration", 0)));
-        etPrice.setText(String.valueOf(intent.getDoubleExtra("price", 0.0)));
-        etDescription.setText(intent.getStringExtra("description"));
+        // Load data from database using the class ID
+        YogaClass yogaClass = databaseHelper.getYogaClass(classId);
+        if (yogaClass != null) {
+            // Set spinner selections
+            setSpinnerSelection(spinnerDayOfWeek, yogaClass.getDayOfWeek());
+            setSpinnerSelection(spinnerClassType, yogaClass.getClassType());
+            setSpinnerSelection(spinnerDifficulty, yogaClass.getDifficulty());
+            
+            // Set text fields
+            etTime.setText(yogaClass.getTime());
+            etCapacity.setText(String.valueOf(yogaClass.getCapacity()));
+            etDuration.setText(String.valueOf(yogaClass.getDuration()));
+            etPrice.setText(String.valueOf(yogaClass.getPrice()));
+            etDescription.setText(yogaClass.getDescription());
+            
+            // Set location data
+            currentLatitude = yogaClass.getLatitude();
+            currentLongitude = yogaClass.getLongitude();
+            currentLocationAddress = yogaClass.getLocationAddress() != null ? yogaClass.getLocationAddress() : "";
+            
+            // Update location UI
+            if (!currentLocationAddress.isEmpty()) {
+                etLocationAddress.setText(currentLocationAddress);
+                tvLocationStatus.setText("Location set");
+            } else if (currentLatitude != 0.0 || currentLongitude != 0.0) {
+                etLocationAddress.setText(String.format("📍 %.6f, %.6f", currentLatitude, currentLongitude));
+                tvLocationStatus.setText("Coordinates available");
+            } else {
+                tvLocationStatus.setText("No location set");
+            }
+        }
     }
 
     private void setSpinnerSelection(Spinner spinner, String value) {
@@ -328,6 +372,11 @@ public class EditYogaClassActivity extends AppCompatActivity {
         yogaClass.setDescription(etDescription.getText().toString().trim());
         yogaClass.setInstructor(""); // Set empty string for instructor field
         yogaClass.setDifficulty(spinnerDifficulty.getSelectedItem().toString());
+        
+        // Set location data
+        yogaClass.setLatitude(currentLatitude);
+        yogaClass.setLongitude(currentLongitude);
+        yogaClass.setLocationAddress(etLocationAddress.getText().toString().trim());
 
         // Update in database
         int result = databaseHelper.updateYogaClass(yogaClass);
@@ -338,5 +387,61 @@ public class EditYogaClassActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Error updating yoga class. Please try again.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void setupLocationFunctionality() {
+        btnGetLocation.setOnClickListener(v -> {
+            if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) 
+                != PackageManager.PERMISSION_GRANTED) {
+                requestLocationPermissions();
+            } else {
+                getCurrentLocation();
+            }
+        });
+    }
+
+    private void requestLocationPermissions() {
+        requestPermissions(
+            new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+            LOCATION_PERMISSION_REQUEST_CODE
+        );
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getCurrentLocation();
+            } else {
+                Toast.makeText(this, "Location permission is required to get current location", 
+                    Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void getCurrentLocation() {
+        tvLocationStatus.setText("Getting location...");
+        locationService.getCurrentLocation(new LocationService.LocationCallback() {
+            @Override
+            public void onLocationReceived(double latitude, double longitude, String address) {
+                currentLatitude = latitude;
+                currentLongitude = longitude;
+                etLocationAddress.setText(address);
+                tvLocationStatus.setText("Location retrieved successfully");
+            }
+
+            @Override
+            public void onLocationError(String error) {
+                tvLocationStatus.setText("Error: " + error);
+                Toast.makeText(EditYogaClassActivity.this, "Failed to get location: " + error, 
+                    Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPermissionRequired() {
+                requestLocationPermissions();
+            }
+        });
     }
 } 
