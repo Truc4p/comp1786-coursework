@@ -153,7 +153,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Get all yoga classes
     public List<YogaClass> getAllYogaClasses() {
         List<YogaClass> yogaClassList = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_YOGA_CLASSES + " ORDER BY " + KEY_DAY_OF_WEEK + ", " + KEY_TIME;
+        String selectQuery = "SELECT * FROM " + TABLE_YOGA_CLASSES + 
+                " ORDER BY CASE " + KEY_DAY_OF_WEEK + 
+                " WHEN 'Monday' THEN 1" +
+                " WHEN 'Tuesday' THEN 2" +
+                " WHEN 'Wednesday' THEN 3" +
+                " WHEN 'Thursday' THEN 4" +
+                " WHEN 'Friday' THEN 5" +
+                " WHEN 'Saturday' THEN 6" +
+                " WHEN 'Sunday' THEN 7" +
+                " END, " +
+                " CASE WHEN " + KEY_TIME + " LIKE '%AM' THEN " +
+                "   CASE WHEN SUBSTR(" + KEY_TIME + ", 1, INSTR(" + KEY_TIME + ", ':') - 1) = '12' THEN " +
+                "     '00' || SUBSTR(" + KEY_TIME + ", INSTR(" + KEY_TIME + ", ':'), LENGTH(" + KEY_TIME + ") - INSTR(" + KEY_TIME + ", ':') - 2)" +
+                "   ELSE " +
+                "     PRINTF('%02d', CAST(SUBSTR(" + KEY_TIME + ", 1, INSTR(" + KEY_TIME + ", ':') - 1) AS INTEGER)) || SUBSTR(" + KEY_TIME + ", INSTR(" + KEY_TIME + ", ':'), LENGTH(" + KEY_TIME + ") - INSTR(" + KEY_TIME + ", ':') - 2)" +
+                "   END " +
+                " ELSE " +
+                "   CASE WHEN SUBSTR(" + KEY_TIME + ", 1, INSTR(" + KEY_TIME + ", ':') - 1) = '12' THEN " +
+                "     '12' || SUBSTR(" + KEY_TIME + ", INSTR(" + KEY_TIME + ", ':'), LENGTH(" + KEY_TIME + ") - INSTR(" + KEY_TIME + ", ':') - 2)" +
+                "   ELSE " +
+                "     PRINTF('%02d', CAST(SUBSTR(" + KEY_TIME + ", 1, INSTR(" + KEY_TIME + ", ':') - 1) AS INTEGER) + 12) || SUBSTR(" + KEY_TIME + ", INSTR(" + KEY_TIME + ", ':'), LENGTH(" + KEY_TIME + ") - INSTR(" + KEY_TIME + ", ':') - 2)" +
+                "   END " +
+                " END";
         
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -380,7 +402,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FROM " + TABLE_YOGA_CLASSES + " yc " +
                 "INNER JOIN " + TABLE_CLASS_INSTANCES + " ci ON yc." + KEY_ID + " = ci." + KEY_YOGA_CLASS_ID +
                 " WHERE ci." + KEY_INSTANCE_INSTRUCTOR + " LIKE ? " +
-                "ORDER BY yc." + KEY_DAY_OF_WEEK + ", yc." + KEY_TIME;
+                " ORDER BY CASE yc." + KEY_DAY_OF_WEEK + 
+                " WHEN 'Monday' THEN 1" +
+                " WHEN 'Tuesday' THEN 2" +
+                " WHEN 'Wednesday' THEN 3" +
+                " WHEN 'Thursday' THEN 4" +
+                " WHEN 'Friday' THEN 5" +
+                " WHEN 'Saturday' THEN 6" +
+                " WHEN 'Sunday' THEN 7" +
+                " END, " +
+                " CASE WHEN yc." + KEY_TIME + " LIKE '%AM' THEN " +
+                "   CASE WHEN SUBSTR(yc." + KEY_TIME + ", 1, INSTR(yc." + KEY_TIME + ", ':') - 1) = '12' THEN " +
+                "     '00' || SUBSTR(yc." + KEY_TIME + ", INSTR(yc." + KEY_TIME + ", ':'), LENGTH(yc." + KEY_TIME + ") - INSTR(yc." + KEY_TIME + ", ':') - 2)" +
+                "   ELSE " +
+                "     PRINTF('%02d', CAST(SUBSTR(yc." + KEY_TIME + ", 1, INSTR(yc." + KEY_TIME + ", ':') - 1) AS INTEGER)) || SUBSTR(yc." + KEY_TIME + ", INSTR(yc." + KEY_TIME + ", ':'), LENGTH(yc." + KEY_TIME + ") - INSTR(yc." + KEY_TIME + ", ':') - 2)" +
+                "   END " +
+                " ELSE " +
+                "   CASE WHEN SUBSTR(yc." + KEY_TIME + ", 1, INSTR(yc." + KEY_TIME + ", ':') - 1) = '12' THEN " +
+                "     '12' || SUBSTR(yc." + KEY_TIME + ", INSTR(yc." + KEY_TIME + ", ':'), LENGTH(yc." + KEY_TIME + ") - INSTR(yc." + KEY_TIME + ", ':') - 2)" +
+                "   ELSE " +
+                "     PRINTF('%02d', CAST(SUBSTR(yc." + KEY_TIME + ", 1, INSTR(yc." + KEY_TIME + ", ':') - 1) AS INTEGER) + 12) || SUBSTR(yc." + KEY_TIME + ", INSTR(yc." + KEY_TIME + ", ':'), LENGTH(yc." + KEY_TIME + ") - INSTR(yc." + KEY_TIME + ", ':') - 2)" +
+                "   END " +
+                " END";
         
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(searchQuery, new String[]{"%" + instructorName + "%"});
@@ -519,7 +562,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             params.add(date);
         }
         
-        queryBuilder.append("ORDER BY yc.").append(KEY_DAY_OF_WEEK).append(", yc.").append(KEY_TIME);
+        queryBuilder.append(" ORDER BY CASE yc.").append(KEY_DAY_OF_WEEK)
+                .append(" WHEN 'Monday' THEN 1")
+                .append(" WHEN 'Tuesday' THEN 2")
+                .append(" WHEN 'Wednesday' THEN 3")
+                .append(" WHEN 'Thursday' THEN 4")
+                .append(" WHEN 'Friday' THEN 5")
+                .append(" WHEN 'Saturday' THEN 6")
+                .append(" WHEN 'Sunday' THEN 7")
+                .append(" END, ")
+                .append(" CASE WHEN yc.").append(KEY_TIME).append(" LIKE '%AM' THEN ")
+                .append("   CASE WHEN SUBSTR(yc.").append(KEY_TIME).append(", 1, INSTR(yc.").append(KEY_TIME).append(", ':') - 1) = '12' THEN ")
+                .append("     '00' || SUBSTR(yc.").append(KEY_TIME).append(", INSTR(yc.").append(KEY_TIME).append(", ':'), LENGTH(yc.").append(KEY_TIME).append(") - INSTR(yc.").append(KEY_TIME).append(", ':') - 2)")
+                .append("   ELSE ")
+                .append("     PRINTF('%02d', CAST(SUBSTR(yc.").append(KEY_TIME).append(", 1, INSTR(yc.").append(KEY_TIME).append(", ':') - 1) AS INTEGER)) || SUBSTR(yc.").append(KEY_TIME).append(", INSTR(yc.").append(KEY_TIME).append(", ':'), LENGTH(yc.").append(KEY_TIME).append(") - INSTR(yc.").append(KEY_TIME).append(", ':') - 2)")
+                .append("   END ")
+                .append(" ELSE ")
+                .append("   CASE WHEN SUBSTR(yc.").append(KEY_TIME).append(", 1, INSTR(yc.").append(KEY_TIME).append(", ':') - 1) = '12' THEN ")
+                .append("     '12' || SUBSTR(yc.").append(KEY_TIME).append(", INSTR(yc.").append(KEY_TIME).append(", ':'), LENGTH(yc.").append(KEY_TIME).append(") - INSTR(yc.").append(KEY_TIME).append(", ':') - 2)")
+                .append("   ELSE ")
+                .append("     PRINTF('%02d', CAST(SUBSTR(yc.").append(KEY_TIME).append(", 1, INSTR(yc.").append(KEY_TIME).append(", ':') - 1) AS INTEGER) + 12) || SUBSTR(yc.").append(KEY_TIME).append(", INSTR(yc.").append(KEY_TIME).append(", ':'), LENGTH(yc.").append(KEY_TIME).append(") - INSTR(yc.").append(KEY_TIME).append(", ':') - 2)")
+                .append("   END ")
+                .append(" END");
         
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(queryBuilder.toString(), params.toArray(new String[0]));
