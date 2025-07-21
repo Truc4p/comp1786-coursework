@@ -17,7 +17,7 @@ export const CONFIG = {
     TEXT_COLOR: '#333',
     LIGHT_TEXT_COLOR: '#666',
     SUCCESS_COLOR: '#4CAF50',
-    ERROR_COLOR: '#ff4444',
+    ERROR_COLOR: '#fa7575ff',
     WARNING_COLOR: '#ff9800',
   },
   

@@ -44,7 +44,7 @@ class ApiService {
           id: key, 
           ...data[key] 
         }));
-        console.log('Converted Firebase object to array:', arrayData);
+        // console.log('Converted Firebase object to array:', arrayData);
         return arrayData;
       }
       
@@ -177,6 +177,63 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(bookingData),
     });
+  }
+
+  // Create a new booking with multiple classes (shopping cart)
+  async createBooking(bookingData) {
+    try {
+      const response = await this.request('/bookings', {
+        method: 'POST',
+        body: JSON.stringify(bookingData),
+      });
+      
+      // Firebase POST returns an object with the new key
+      if (response && response.name) {
+        return { success: true, id: response.name };
+      }
+      
+      return { success: true, id: `booking_${Date.now()}` };
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Update booking status
+  async updateBookingStatus(bookingId, status) {
+    try {
+      const updateData = {
+        status,
+        updatedDate: new Date().toISOString()
+      };
+      
+      return this.request(`/bookings/${bookingId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updateData),
+      });
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get customer bookings by email
+  async getCustomerBookingsByEmail(email) {
+    try {
+      const bookings = await this.request('/bookings');
+      if (!bookings || bookings.length === 0) {
+        return [];
+      }
+      
+      return bookings.filter(booking => 
+        booking.customerInfo && 
+        booking.customerInfo.email && 
+        booking.customerInfo.email.toLowerCase() === email.toLowerCase()
+      );
+    } catch (error) {
+      console.error('Error getting customer bookings:', error);
+      return [];
+    }
   }
 
   // Get customer bookings

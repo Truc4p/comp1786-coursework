@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   fullyBookedText: {
-    color: '#ff4444',
+    color: '#fa7575ff',
   },
   descriptionSection: {
     marginBottom: 25,

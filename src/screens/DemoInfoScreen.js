@@ -43,13 +43,6 @@ const DemoInfoScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Customer Yoga App</Text>
-        <Text style={styles.subtitle}>
-          A hybrid React Native app for booking yoga classes
-        </Text>
-      </View>
-
       <View style={styles.featuresSection}>
         <Text style={styles.sectionTitle}>Key Features</Text>
         {features.map((feature, index) => (
@@ -97,24 +90,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F3E5F5',
-  },
-  header: {
-    alignItems: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    backgroundColor: '#def4f7',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#661a72',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#661a72',
-    textAlign: 'center',
-    opacity: 0.9,
   },
   featuresSection: {
     padding: 20,

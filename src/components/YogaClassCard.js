@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import { formatTime, formatDate } from '../utils/helpers';
 import { getYogaClassImage } from '../utils/imageMapping';
+import { useCart } from '../context/CartContext';
 
-const YogaClassCard = ({ yogaClass, onPress, onBook }) => {
+const YogaClassCard = ({ yogaClass, onPress, onBook, onAddToCart }) => {
   const {
     id,
     name,
@@ -27,6 +28,14 @@ const YogaClassCard = ({ yogaClass, onPress, onBook }) => {
 
   const isFullyBooked = availableSpots <= 0;
   const imageUrl = getYogaClassImage(yogaClass);
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart(yogaClass);
+    if (onAddToCart) {
+      onAddToCart(yogaClass);
+    }
+  };
 
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(yogaClass)}>
@@ -81,21 +90,39 @@ const YogaClassCard = ({ yogaClass, onPress, onBook }) => {
           </Text>
         )}
 
-        <TouchableOpacity
-          style={[
-            styles.bookButton,
-            isFullyBooked && styles.bookButtonDisabled
-          ]}
-          onPress={() => onBook(yogaClass)}
-          disabled={isFullyBooked}
-        >
-          <Text style={[
-            styles.bookButtonText,
-            isFullyBooked && styles.bookButtonTextDisabled
-          ]}>
-            {isFullyBooked ? 'Fully Booked' : 'Book Now'}
-          </Text>
-        </TouchableOpacity>
+                {/* Buttons */}
+        {isFullyBooked ? (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.addToCartButton, styles.buttonDisabled, styles.fullWidthButton]}
+              disabled={true}
+            >
+              <Text style={[styles.addToCartButtonText, styles.buttonTextDisabled]}>
+                Fully Booked
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.addToCartButton]}
+              onPress={() => addToCart(yogaClass)}
+            >
+              <Text style={[styles.addToCartButtonText]}>
+                Add to Cart
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.bookButton]}
+              onPress={() => onBook(yogaClass)}
+            >
+              <Text style={[styles.bookButtonText]}>
+                Book Now
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -197,7 +224,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   fullyBookedText: {
-    color: '#ff4444',
+    color: '#fa7575ff',
   },
   description: {
     fontSize: 14,
@@ -205,21 +232,45 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 12,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  addToCartButton: {
+    flex: 1,
+    backgroundColor: '#def4f7',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#def4f7',
+  },
   bookButton: {
+    flex: 1,
     backgroundColor: '#def4f7',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
-  bookButtonDisabled: {
+  buttonDisabled: {
     backgroundColor: '#f0f0f0',
+  },
+  fullWidthButton: {
+    flex: 0,
+    width: '100%',
+    borderWidth: 0,
+  },
+  addToCartButtonText: {
+    color: '#661a72',
+    fontSize: 14,
+    fontWeight: '600',
   },
   bookButtonText: {
     color: '#661a72',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
-  bookButtonTextDisabled: {
+  buttonTextDisabled: {
     color: '#666',
   },
 });

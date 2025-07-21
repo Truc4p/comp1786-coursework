@@ -5,6 +5,8 @@ import DemoInfoScreen from '../screens/DemoInfoScreen';
 import ClassListScreen from '../screens/ClassListScreen';
 import ClassDetailsScreen from '../screens/ClassDetailsScreen';
 import BookClassScreen from '../screens/BookClassScreen';
+import CartScreen from '../screens/CartScreen';
+import MyBookingsScreen from '../screens/MyBookingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -17,6 +19,7 @@ const AppNavigator = () => {
           headerStyle: {
             backgroundColor: '#def4f7',
             height: 90,
+            elevation: 0, // Remove shadow on Android
           },
           headerTintColor: '#661a72',
           headerTitleStyle: {
@@ -54,6 +57,22 @@ const AppNavigator = () => {
           component={BookClassScreen}
           options={{
             title: 'Book Class',
+            headerTitleAlign: 'center',
+          }}
+        />
+        <Stack.Screen
+          name="Cart"
+          component={CartScreen}
+          options={{
+            title: 'Shopping Cart',
+            headerTitleAlign: 'center',
+          }}
+        />
+        <Stack.Screen
+          name="MyBookings"
+          component={MyBookingsScreen}
+          options={{
+            title: 'My Bookings',
             headerTitleAlign: 'center',
           }}
         />

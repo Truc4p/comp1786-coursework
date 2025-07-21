@@ -14,6 +14,7 @@ import SearchFilter from '../components/SearchFilter';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ApiService from '../services/api';
 import { filterClassesBySearchCriteria } from '../utils/helpers';
+import { useCart } from '../context/CartContext';
 
 const ClassListScreen = ({ navigation }) => {
   const [classes, setClasses] = useState([]);
@@ -22,6 +23,7 @@ const ClassListScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({ dayOfWeek: 'All', timeOfDay: 'All' });
+  const { getCartItemCount } = useCart();
 
   const loadClasses = useCallback(async () => {
     try {
@@ -194,6 +196,17 @@ const ClassListScreen = ({ navigation }) => {
     setFilters(newFilters);
   };
 
+  const handleAddToCart = (yogaClass) => {
+    Alert.alert(
+      'Added to Cart',
+      `${yogaClass.name} has been added to your cart!`,
+      [
+        { text: 'Continue Shopping', style: 'cancel' },
+        { text: 'View Cart', onPress: () => navigation.navigate('Cart') },
+      ]
+    );
+  };
+
   const getActiveFilterText = () => {
     const activeFilters = [];
     if (filters.dayOfWeek && filters.dayOfWeek !== 'All') {
@@ -210,6 +223,7 @@ const ClassListScreen = ({ navigation }) => {
       yogaClass={item}
       onPress={handleClassPress}
       onBook={handleBookClass}
+      onAddToCart={handleAddToCart}
     />
   );
 
@@ -231,12 +245,31 @@ const ClassListScreen = ({ navigation }) => {
     <>
       <View style={styles.header}>
         <Text style={styles.title}>Yoga Classes</Text>
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={() => setShowFilter(true)}
-        >
-          <Text style={styles.filterButtonText}>Filter</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => navigation.navigate('MyBookings')}
+          >
+            <Text style={styles.iconButtonText}>📅</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.cartButton}
+            onPress={() => navigation.navigate('Cart')}
+          >
+            <Text style={styles.cartButtonText}>🛒</Text>
+            {getCartItemCount() > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{getCartItemCount()}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => setShowFilter(true)}
+          >
+            <Text style={styles.filterButtonText}>Filter</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.filterInfo}>
@@ -289,6 +322,61 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#c245d8',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  iconButtonText: {
+    fontSize: 18,
+  },
+  cartButton: {
+    position: 'relative',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#c245d8',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cartButtonText: {
+    fontSize: 18,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#fa7575ff',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cartBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   filterButton: {
     backgroundColor: '#def4f7',
