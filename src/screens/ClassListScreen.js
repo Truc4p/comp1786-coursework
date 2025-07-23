@@ -237,21 +237,16 @@ const ClassListScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <>
-      <View style={styles.header}>
-        <View style={styles.headerRight}>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => setShowFilter(true)}
-          >
-            <Text style={styles.filterButtonText}>Filter</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <View style={styles.filterInfo}>
         <Text style={styles.filterInfoText}>
           Showing: {getActiveFilterText()} ({filteredClasses.length} classes)
         </Text>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setShowFilter(true)}
+        >
+          <Text style={styles.filterButtonText}>Filter</Text>
+        </TouchableOpacity>
       </View>
     </>
   );
@@ -298,23 +293,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F3E5F5',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#F3E5F5',
-  },
-  headerLeft: {
-    width: 60,
-    alignItems: 'flex-start',
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
   },
   filterButton: {
     backgroundColor: '#def4f7',
@@ -365,13 +343,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   filterInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 5,
     backgroundColor: '#F3E5F5',
   },
   filterInfoText: {
     fontSize: 14,
     color: '#666',
+    flex: 1,
   },
   list: {
     paddingVertical: 10,

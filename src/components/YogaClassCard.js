@@ -22,7 +22,6 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
     availableSpots,
     price,
     level,
-    description,
     image,
   } = yogaClass;
 
@@ -40,8 +39,8 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(yogaClass)}>
       <View style={styles.imageContainer}>
-        <Image 
-          source={{ uri: imageUrl }} 
+        <Image
+          source={{ uri: imageUrl }}
           style={styles.image}
           defaultSource={require('../../assets/icon.png')}
         />
@@ -84,13 +83,7 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
           </View>
         </View>
 
-        {description && (
-          <Text style={styles.description} numberOfLines={2}>
-            {description}
-          </Text>
-        )}
-
-                {/* Buttons */}
+        {/* Buttons */}
         {isFullyBooked ? (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -216,12 +209,6 @@ const styles = StyleSheet.create({
   },
   fullyBookedText: {
     color: '#fa7575ff',
-  },
-  description: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    marginBottom: 12,
   },
   buttonContainer: {
     flexDirection: 'row',
