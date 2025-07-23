@@ -1,6 +1,4 @@
 // Utility functions for date and time formatting
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 export const formatTime = (time) => {
   if (!time) return '';
   
@@ -91,26 +89,4 @@ export const filterClassesBySearchCriteria = (classes, searchCriteria) => {
     
     return matchesDay && matchesTime;
   });
-};
-
-// App launch utilities
-export const resetFirstLaunchFlag = async () => {
-  try {
-    await AsyncStorage.removeItem('hasLaunchedBefore');
-    console.log('First launch flag reset - app will show demo on next launch');
-    return true;
-  } catch (error) {
-    console.error('Error resetting first launch flag:', error);
-    return false;
-  }
-};
-
-export const checkIsFirstLaunch = async () => {
-  try {
-    const hasLaunched = await AsyncStorage.getItem('hasLaunchedBefore');
-    return hasLaunched === null;
-  } catch (error) {
-    console.error('Error checking first launch:', error);
-    return true; // Default to true on error
-  }
 };

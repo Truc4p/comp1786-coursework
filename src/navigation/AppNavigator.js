@@ -1,51 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import DemoInfoScreen from '../screens/DemoInfoScreen';
 import ClassListScreen from '../screens/ClassListScreen';
 import ClassDetailsScreen from '../screens/ClassDetailsScreen';
 import BookClassScreen from '../screens/BookClassScreen';
 import CartScreen from '../screens/CartScreen';
 import MyBookingsScreen from '../screens/MyBookingsScreen';
-import LoadingSpinner from '../components/LoadingSpinner';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const [isFirstLaunch, setIsFirstLaunch] = useState(null);
-
-  useEffect(() => {
-    const checkFirstLaunch = async () => {
-      try {
-        const hasLaunched = await AsyncStorage.getItem('hasLaunchedBefore');
-        if (hasLaunched === null) {
-          // First time launching the app
-          setIsFirstLaunch(true);
-          await AsyncStorage.setItem('hasLaunchedBefore', 'true');
-        } else {
-          // App has been launched before
-          setIsFirstLaunch(false);
-        }
-      } catch (error) {
-        console.error('Error checking first launch:', error);
-        // Default to showing DemoInfo on error
-        setIsFirstLaunch(true);
-      }
-    };
-
-    checkFirstLaunch();
-  }, []);
-
-  // Show loading spinner while checking first launch status
-  if (isFirstLaunch === null) {
-    return <LoadingSpinner message="Loading..." />;
-  }
-
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={isFirstLaunch ? "DemoInfo" : "ClassList"}
+        initialRouteName="ClassList"
         screenOptions={{
           headerStyle: {
             backgroundColor: '#def4f7',
@@ -59,14 +27,6 @@ const AppNavigator = () => {
           },
         }}
       >
-        <Stack.Screen
-          name="DemoInfo"
-          component={DemoInfoScreen}
-          options={{
-            title: 'Yoga Studio App',
-            headerTitleAlign: 'center',
-          }}
-        />
         <Stack.Screen
           name="ClassList"
           component={ClassListScreen}

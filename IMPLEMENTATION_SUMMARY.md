@@ -45,10 +45,9 @@ Successfully implemented a hybrid React Native mobile application for customers 
 ## 📱 Application Structure
 
 ### Screens:
-1. **DemoInfoScreen** - Introduction and feature overview
-2. **ClassListScreen** - Main class listing with search/filter
-3. **ClassDetailsScreen** - Detailed view of individual classes
-4. **BookClassScreen** - Booking form and confirmation
+1. **ClassListScreen** - Main class listing with search/filter
+2. **ClassDetailsScreen** - Detailed view of individual classes
+3. **BookClassScreen** - Booking form and confirmation
 
 ### Components:
 - **YogaClassCard** - Individual class display component

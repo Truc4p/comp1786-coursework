@@ -248,12 +248,6 @@ const ClassListScreen = ({ navigation }) => {
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.iconButton}
-            onPress={() => navigation.navigate('DemoInfo')}
-          >
-            <Text style={styles.iconButtonText}>ℹ️</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.iconButton}
             onPress={() => navigation.navigate('MyBookings')}
           >
             <Text style={styles.iconButtonText}>📅</Text>
