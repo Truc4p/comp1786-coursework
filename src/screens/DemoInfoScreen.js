@@ -6,8 +6,18 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DemoInfoScreen = ({ navigation }) => {
+  const handleContinue = async () => {
+    try {
+      // Ensure the flag is set when user continues
+      await AsyncStorage.setItem('hasLaunchedBefore', 'true');
+    } catch (error) {
+      console.error('Error setting launch flag:', error);
+    }
+    navigation.navigate('ClassList');
+  };
   const features = [
     {
       icon: '🧘‍♀️',
@@ -56,23 +66,9 @@ const DemoInfoScreen = ({ navigation }) => {
         ))}
       </View>
 
-      <View style={styles.configSection}>
-        <Text style={styles.sectionTitle}>Configuration Required</Text>
-        <View style={styles.configCard}>
-          <Text style={styles.configText}>
-            📡 <Text style={styles.bold}>API Configuration:</Text> Update the API_BASE_URL in src/utils/config.js to connect to your cloud service.
-          </Text>
-        </View>
-        <View style={styles.configCard}>
-          <Text style={styles.configText}>
-            🔗 <Text style={styles.bold}>Cloud Service:</Text> Ensure your cloud service provides the required endpoints for yoga classes and bookings.
-          </Text>
-        </View>
-      </View>
-
       <TouchableOpacity
         style={styles.startButton}
-        onPress={() => navigation.navigate('ClassList')}
+        onPress={handleContinue}
       >
         <Text style={styles.startButtonText}>Explore Yoga Classes</Text>
       </TouchableOpacity>
