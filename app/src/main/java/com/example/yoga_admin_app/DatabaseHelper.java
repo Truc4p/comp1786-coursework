@@ -128,6 +128,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // }
     }
 
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Handle downgrade by recreating the database
+        // This is typically used during development when you need to go back to an earlier version
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
+        onCreate(db);
+    }
+
     // Add a new yoga class
     public long addYogaClass(YogaClass yogaClass) {
         SQLiteDatabase db = this.getWritableDatabase();
