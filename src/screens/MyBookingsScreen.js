@@ -7,38 +7,36 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
-  TextInput,
   RefreshControl,
 } from 'react-native';
 import { useBooking } from '../context/BookingContext';
+import { useAuth } from '../context/AuthContext';
 import { formatTime, formatDate } from '../utils/helpers';
 
 const MyBookingsScreen = ({ route, navigation }) => {
   const { bookings, getBookingsByEmail, cancelBooking, loading } = useBooking();
-  const [searchEmail, setSearchEmail] = useState(route.params?.userEmail || '');
+  const { user } = useAuth();
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    if (searchEmail) {
-      handleSearch();
+    if (user && user.email) {
+      // Automatically load bookings for the logged-in user
+      loadUserBookings();
     }
-  }, [bookings, searchEmail]);
+  }, [bookings, user]);
 
-  const handleSearch = () => {
-    if (!searchEmail.trim()) {
-      Alert.alert('Error', 'Please enter your email address');
-      return;
+  const loadUserBookings = () => {
+    if (user && user.email) {
+      const userBookings = getBookingsByEmail(user.email);
+      setFilteredBookings(userBookings);
     }
-
-    const userBookings = getBookingsByEmail(searchEmail.trim());
-    setFilteredBookings(userBookings);
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    if (searchEmail) {
-      handleSearch();
+    if (user && user.email) {
+      loadUserBookings();
     }
     setRefreshing(false);
   };
@@ -56,7 +54,7 @@ const MyBookingsScreen = ({ route, navigation }) => {
             const result = await cancelBooking(booking.id);
             if (result.success) {
               Alert.alert('Success', 'Booking cancelled successfully');
-              handleSearch(); // Refresh the list
+              loadUserBookings(); // Refresh the list
             } else {
               Alert.alert('Error', result.error || 'Failed to cancel booking');
             }
@@ -69,11 +67,11 @@ const MyBookingsScreen = ({ route, navigation }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'confirmed':
-        return '#4CAF50';
+        return '#4caf4f';
       case 'cancelled':
-        return '#f44336';
+        return '#fa7575ff';
       case 'completed':
-        return '#2196F3';
+        return '#41a4f6ff';
       default:
         return '#999';
     }
@@ -150,37 +148,51 @@ const MyBookingsScreen = ({ route, navigation }) => {
     </View>
   );
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>📅</Text>
-      <Text style={styles.emptyTitle}>No bookings found</Text>
-      <Text style={styles.emptySubtitle}>
-        {searchEmail 
-          ? `No bookings found for ${searchEmail}` 
-          : 'Enter your email to view your bookings'
-        }
-      </Text>
-    </View>
-  );
+  const renderEmptyState = () => {
+    if (!user) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>�</Text>
+          <Text style={styles.emptyTitle}>Please Sign In</Text>
+          <Text style={styles.emptySubtitle}>
+            You need to sign in to view your bookings
+          </Text>
+          <TouchableOpacity
+            style={styles.signInButton}
+            onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={styles.signInButtonText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyIcon}>📅</Text>
+        <Text style={styles.emptyTitle}>No bookings yet</Text>
+        <Text style={styles.emptySubtitle}>
+          You haven't made any bookings yet. Start exploring yoga classes!
+        </Text>
+        <TouchableOpacity
+          style={styles.exploreButton}
+          onPress={() => navigation.navigate('ClassList')}
+        >
+          <Text style={styles.exploreButtonText}>Explore Classes</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.searchContainer}>
-        <Text style={styles.searchLabel}>Enter your email to view bookings:</Text>
-        <View style={styles.searchRow}>
-          <TextInput
-            style={styles.searchInput}
-            value={searchEmail}
-            onChangeText={setSearchEmail}
-            placeholder="your.email@example.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-            <Text style={styles.searchButtonText}>Search</Text>
-          </TouchableOpacity>
+      {user && (
+        <View style={styles.userInfoContainer}>
+          <Text style={styles.userInfoText}>
+            Bookings for: {user.firstName} {user.lastName} ({user.email})
+          </Text>
         </View>
-      </View>
+      )}
 
       {filteredBookings.length > 0 ? (
         <FlatList
@@ -204,40 +216,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F3E5F5',
   },
-  searchContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
+  userInfoContainer: {
+    backgroundColor: '#F3E5F5',
+    padding: 16,
   },
-  searchLabel: {
+  userInfoText: {
     fontSize: 16,
     fontWeight: '500',
     color: '#333',
-    marginBottom: 12,
-  },
-  searchRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  searchInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  searchButton: {
-    backgroundColor: '#def4f7',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-  },
-  searchButtonText: {
-    color: '#333',
-    fontSize: 16,
-    fontWeight: 'bold',
+    textAlign: 'center',
   },
   bookingCard: {
     backgroundColor: '#fff',
@@ -385,6 +372,29 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 24,
+    marginBottom: 24,
+  },
+  signInButton: {
+    backgroundColor: '#661a72',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  signInButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  exploreButton: {
+    backgroundColor: '#def4f7',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  exploreButtonText: {
+    color: '#661a72',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

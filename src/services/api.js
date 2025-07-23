@@ -240,6 +240,167 @@ class ApiService {
   async getCustomerBookings(customerId) {
     return this.request(`/bookings`);
   }
+
+  // Authentication methods
+  async login(email, password) {
+    try {
+      // console.log('Attempting login for:', email);
+      
+      // Check if user exists in Firebase
+      const response = await this.request('/users');
+      // console.log('Users response:', response);
+      
+      let users = [];
+      
+      // Handle Firebase response format
+      if (Array.isArray(response)) {
+        users = response;
+      } else if (response && typeof response === 'object' && response !== null) {
+        // Convert Firebase object format to array
+        users = Object.keys(response).map(key => ({
+          firebaseKey: key,
+          ...response[key]
+        }));
+      }
+      
+      // console.log('Processed users array:', users);
+      
+      // Find user by email and password
+      const user = users.find(u => u.email === email && u.password === password);
+      console.log('Found user:', user ? 'Yes' : 'No');
+      
+      if (user) {
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user;
+        console.log('Login successful for user:', userWithoutPassword.email);
+        return {
+          success: true,
+          user: userWithoutPassword,
+          token: `token_${user.id || user.firebaseKey}_${Date.now()}`,
+        };
+      } else {
+        console.log('No user found with matching credentials');
+        return {
+          success: false,
+          message: 'Invalid email or password',
+        };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return {
+        success: false,
+        message: error.message || 'Login failed',
+      };
+    }
+  }
+
+  async register(userData) {
+    try {
+      console.log('Attempting to register user:', userData.email);
+      
+      // Check if user already exists
+      const response = await this.request('/users');
+      console.log('Existing users response:', response);
+      
+      let users = [];
+      
+      // Handle Firebase response format
+      if (Array.isArray(response)) {
+        users = response;
+      } else if (response && typeof response === 'object' && response !== null) {
+        // Convert Firebase object format to array
+        users = Object.keys(response).map(key => ({
+          firebaseKey: key,
+          ...response[key]
+        }));
+      }
+      
+      // Check for existing user
+      const existingUser = users.find(u => u.email === userData.email);
+      
+      if (existingUser) {
+        console.log('User already exists with email:', userData.email);
+        return {
+          success: false,
+          message: 'An account with this email already exists',
+        };
+      }
+      
+      // Create new user
+      const newUser = {
+        ...userData,
+        id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      console.log('Creating new user:', newUser);
+      
+      // Save to Firebase - Firebase will auto-generate a key
+      const saveResponse = await this.request('/users', {
+        method: 'POST',
+        body: JSON.stringify(newUser),
+      });
+      
+      console.log('Firebase save response:', saveResponse);
+      
+      if (saveResponse) {
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = newUser;
+        console.log('Registration successful for user:', userWithoutPassword.email);
+        return {
+          success: true,
+          user: userWithoutPassword,
+          token: `token_${newUser.id}_${Date.now()}`,
+        };
+      } else {
+        console.log('Failed to save user to Firebase');
+        return {
+          success: false,
+          message: 'Failed to create account',
+        };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      return {
+        success: false,
+        message: error.message || 'Registration failed',
+      };
+    }
+  }
+
+  async updateProfile(userId, profileData) {
+    try {
+      const updatedData = {
+        ...profileData,
+        updatedAt: new Date().toISOString(),
+      };
+      
+      // In Firebase, we need to update the specific user
+      const response = await this.request(`/users/${userId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updatedData),
+      });
+      
+      if (response) {
+        return {
+          success: true,
+          user: { ...profileData, id: userId },
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Failed to update profile',
+        };
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      return {
+        success: false,
+        message: error.message || 'Profile update failed',
+      };
+    }
+  }
 }
 
 export default new ApiService();

@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { formatTime, formatDate } from '../utils/helpers';
 import { getYogaClassImage } from '../utils/imageMapping';
+import { useCart } from '../context/CartContext';
 
 const ClassDetailsScreen = ({ route, navigation }) => {
   const { yogaClass } = route.params;
+  const { addToCart } = useCart();
 
   const {
     name,
@@ -31,11 +34,19 @@ const ClassDetailsScreen = ({ route, navigation }) => {
   const isFullyBooked = availableSpots <= 0;
   const imageUrl = getYogaClassImage(yogaClass);
 
-  const handleBook = () => {
+  const handleAddToCart = () => {
     if (isFullyBooked) {
       return;
     }
-    navigation.navigate('BookClass', { yogaClass });
+    addToCart(yogaClass);
+    Alert.alert(
+      'Added to Cart',
+      `${name} has been added to your cart!`,
+      [
+        { text: 'Continue Shopping', style: 'cancel' },
+        { text: 'View Cart', onPress: () => navigation.navigate('Cart') },
+      ]
+    );
   };
 
   return (
@@ -134,17 +145,17 @@ const ClassDetailsScreen = ({ route, navigation }) => {
         </View>
         <TouchableOpacity
           style={[
-            styles.bookButton,
-            isFullyBooked && styles.bookButtonDisabled
+            styles.addToCartButton,
+            isFullyBooked && styles.addToCartButtonDisabled
           ]}
-          onPress={handleBook}
+          onPress={handleAddToCart}
           disabled={isFullyBooked}
         >
           <Text style={[
-            styles.bookButtonText,
-            isFullyBooked && styles.bookButtonTextDisabled
+            styles.addToCartButtonText,
+            isFullyBooked && styles.addToCartButtonTextDisabled
           ]}>
-            {isFullyBooked ? 'Fully Booked' : 'Book This Class'}
+            {isFullyBooked ? 'Fully Booked' : 'Add to Cart'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -212,7 +223,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#661a72',
+    color: '#4caf4f',
   },
   instructor: {
     fontSize: 16,
@@ -312,13 +323,13 @@ const styles = StyleSheet.create({
   footerPrice: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#661a72',
+    color: '#4caf4f',
   },
   priceLabel: {
     fontSize: 12,
     color: '#666',
   },
-  bookButton: {
+  addToCartButton: {
     backgroundColor: '#def4f7',
     paddingVertical: 15,
     paddingHorizontal: 30,
@@ -326,15 +337,15 @@ const styles = StyleSheet.create({
     minWidth: 150,
     alignItems: 'center',
   },
-  bookButtonDisabled: {
+  addToCartButtonDisabled: {
     backgroundColor: '#f0f0f0',
   },
-  bookButtonText: {
+  addToCartButtonText: {
     color: '#661a72',
     fontSize: 16,
     fontWeight: '600',
   },
-  bookButtonTextDisabled: {
+  addToCartButtonTextDisabled: {
     color: '#666',
   },
 });

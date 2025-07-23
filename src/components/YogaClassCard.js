@@ -10,7 +10,7 @@ import { formatTime, formatDate } from '../utils/helpers';
 import { getYogaClassImage } from '../utils/imageMapping';
 import { useCart } from '../context/CartContext';
 
-const YogaClassCard = ({ yogaClass, onPress, onBook, onAddToCart }) => {
+const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
   const {
     id,
     name,
@@ -105,20 +105,11 @@ const YogaClassCard = ({ yogaClass, onPress, onBook, onAddToCart }) => {
         ) : (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.addToCartButton]}
+              style={[styles.addToCartButton, styles.fullWidthButton]}
               onPress={() => addToCart(yogaClass)}
             >
               <Text style={[styles.addToCartButtonText]}>
                 Add to Cart
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.bookButton]}
-              onPress={() => onBook(yogaClass)}
-            >
-              <Text style={[styles.bookButtonText]}>
-                Book Now
               </Text>
             </TouchableOpacity>
           </View>
@@ -242,15 +233,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#def4f7',
-  },
-  bookButton: {
-    flex: 1,
-    backgroundColor: '#def4f7',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
   },
   buttonDisabled: {
     backgroundColor: '#f0f0f0',
@@ -261,11 +243,6 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   addToCartButtonText: {
-    color: '#661a72',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  bookButtonText: {
     color: '#661a72',
     fontSize: 14,
     fontWeight: '600',

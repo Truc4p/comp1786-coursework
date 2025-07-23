@@ -12,17 +12,31 @@ import {
 } from 'react-native';
 import { useCart } from '../context/CartContext';
 import { useBooking } from '../context/BookingContext';
+import { useAuth } from '../context/AuthContext';
 import { formatTime, formatDate } from '../utils/helpers';
 
 const CartScreen = ({ navigation }) => {
   const { cart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
   const { submitBooking, loading } = useBooking();
+  const { user } = useAuth();
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
     phone: '',
   });
   const [showCheckout, setShowCheckout] = useState(false);
+  
+  const handleProceedToCheckout = () => {
+    // Auto-fill customer info if user is logged in
+    if (user) {
+      setCustomerInfo({
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        phone: user.phone || '',
+      });
+    }
+    setShowCheckout(true);
+  };
 
   const handleQuantityChange = (classId, newQuantity) => {
     if (newQuantity === 0) {
@@ -173,6 +187,20 @@ const CartScreen = ({ navigation }) => {
           keyboardType="phone-pad"
         />
       </View>
+      
+      {!user && (
+        <View style={styles.guestNotice}>
+          <Text style={styles.guestNoticeText}>
+            💡 Tip: Sign in to auto-fill this information next time!
+          </Text>
+          <TouchableOpacity
+            style={styles.signInLink}
+            onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={styles.signInLinkText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 
@@ -225,7 +253,7 @@ const CartScreen = ({ navigation }) => {
           {!showCheckout ? (
             <TouchableOpacity
               style={styles.checkoutButton}
-              onPress={() => setShowCheckout(true)}
+              onPress={handleProceedToCheckout}
             >
               <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
             </TouchableOpacity>
@@ -359,6 +387,43 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
+  },
+  autoFillNotice: {
+    backgroundColor: '#E8F5E8',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  autoFillText: {
+    fontSize: 14,
+    color: '#2E7D32',
+    fontWeight: '500',
+  },
+  guestNotice: {
+    backgroundColor: '#FFF3E0',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  guestNoticeText: {
+    fontSize: 14,
+    color: '#E65100',
+    flex: 1,
+    marginRight: 12,
+  },
+  signInLink: {
+    backgroundColor: '#661a72',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  signInLinkText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   inputGroup: {
     marginBottom: 16,

@@ -16,9 +16,9 @@ export const CONFIG = {
     SECONDARY_COLOR: '#f5f5f5',
     TEXT_COLOR: '#333',
     LIGHT_TEXT_COLOR: '#666',
-    SUCCESS_COLOR: '#4CAF50',
+    SUCCESS_COLOR: '#4caf4f',
     ERROR_COLOR: '#fa7575ff',
-    WARNING_COLOR: '#ff9800',
+    WARNING_COLOR: '#fbac35ff',
   },
   
   // Feature flags
@@ -26,6 +26,8 @@ export const CONFIG = {
     ENABLE_PUSH_NOTIFICATIONS: false,
     ENABLE_PAYMENT_INTEGRATION: false,
     ENABLE_SOCIAL_LOGIN: false,
+    ENABLE_AUTHENTICATION: true,
+    ENABLE_GUEST_MODE: true,
   },
   
   // API endpoints
@@ -34,5 +36,9 @@ export const CONFIG = {
     BOOK_CLASS: '/yoga-classes/{id}/book',
     CUSTOMER_BOOKINGS: '/customers/{id}/bookings',
     INSTRUCTORS: '/instructors',
+    USERS: '/users',
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
+    PROFILE: '/users/{id}',
   },
 };

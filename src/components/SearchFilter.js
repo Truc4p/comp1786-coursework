@@ -160,7 +160,6 @@ const styles = StyleSheet.create({
   },
   selectedOption: {
     backgroundColor: '#def4f7',
-    borderColor: '#def4f7',
   },
   optionText: {
     fontSize: 14,

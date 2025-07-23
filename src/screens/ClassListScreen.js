@@ -15,6 +15,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ApiService from '../services/api';
 import { filterClassesBySearchCriteria } from '../utils/helpers';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const ClassListScreen = ({ navigation }) => {
   const [classes, setClasses] = useState([]);
@@ -22,8 +23,10 @@ const ClassListScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [filters, setFilters] = useState({ dayOfWeek: 'All', timeOfDay: 'All' });
   const { getCartItemCount } = useCart();
+  const { user } = useAuth();
 
   const loadClasses = useCallback(async () => {
     try {
@@ -184,14 +187,6 @@ const ClassListScreen = ({ navigation }) => {
     navigation.navigate('ClassDetails', { yogaClass });
   };
 
-  const handleBookClass = (yogaClass) => {
-    if (yogaClass.availableSpots <= 0) {
-      Alert.alert('Sorry', 'This class is fully booked.');
-      return;
-    }
-    navigation.navigate('BookClass', { yogaClass });
-  };
-
   const handleApplyFilters = (newFilters) => {
     setFilters(newFilters);
   };
@@ -222,7 +217,6 @@ const ClassListScreen = ({ navigation }) => {
     <YogaClassCard
       yogaClass={item}
       onPress={handleClassPress}
-      onBook={handleBookClass}
       onAddToCart={handleAddToCart}
     />
   );
@@ -244,25 +238,7 @@ const ClassListScreen = ({ navigation }) => {
   const renderHeader = () => (
     <>
       <View style={styles.header}>
-        <Text style={styles.title}>Yoga Classes</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => navigation.navigate('MyBookings')}
-          >
-            <Text style={styles.iconButtonText}>📅</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.cartButton}
-            onPress={() => navigation.navigate('Cart')}
-          >
-            <Text style={styles.cartButtonText}>🛒</Text>
-            {getCartItemCount() > 0 && (
-              <View style={styles.cartBadge}>
-                <Text style={styles.cartBadgeText}>{getCartItemCount()}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+        <View style={styles.headerRight}>
           <TouchableOpacity
             style={styles.filterButton}
             onPress={() => setShowFilter(true)}
@@ -295,6 +271,19 @@ const ClassListScreen = ({ navigation }) => {
         style={styles.list}
       />
 
+      {/* Floating Cart Button */}
+      <TouchableOpacity
+        style={styles.floatingCartButton}
+        onPress={() => navigation.navigate('Cart')}
+      >
+        <Text style={styles.floatingCartButtonText}>🛒</Text>
+        {getCartItemCount() > 0 && (
+          <View style={styles.floatingCartBadge}>
+            <Text style={styles.floatingCartBadgeText}>{getCartItemCount()}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
       <SearchFilter
         visible={showFilter}
         onClose={() => setShowFilter(false)}
@@ -312,71 +301,20 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 15,
     backgroundColor: '#F3E5F5',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
+  headerLeft: {
+    width: 60,
+    alignItems: 'flex-start',
   },
-  headerButtons: {
+  headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#c245d8',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  iconButtonText: {
-    fontSize: 18,
-  },
-  cartButton: {
-    position: 'relative',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#c245d8',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cartButtonText: {
-    fontSize: 18,
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: '#fa7575ff',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cartBadgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
+    justifyContent: 'flex-end',
   },
   filterButton: {
     backgroundColor: '#def4f7',
@@ -388,6 +326,43 @@ const styles = StyleSheet.create({
     color: '#661a72',
     fontSize: 14,
     fontWeight: '500',
+  },
+  floatingCartButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#fce4c9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1000,
+  },
+  floatingCartButtonText: {
+    fontSize: 20,
+    color: '#fff',
+  },
+  floatingCartBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#fa7575ff',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  floatingCartBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   filterInfo: {
     paddingHorizontal: 20,
