@@ -34,6 +34,21 @@ const ClassDetailsScreen = ({ route, navigation }) => {
   const isFullyBooked = availableSpots <= 0;
   const imageUrl = getYogaClassImage(yogaClass);
 
+  // Function to get level badge colors
+  const getLevelBadgeStyle = (level) => {
+    const levelLower = level?.toLowerCase() || '';
+    
+    if (levelLower.includes('beginner')) {
+      return { backgroundColor: 'rgba(76, 175, 79, 0.9)' }; // Green for beginner
+    } else if (levelLower.includes('intermediate')) {
+      return { backgroundColor: 'rgba(251, 172, 53, 0.9)' }; // Orange for intermediate  
+    } else if (levelLower.includes('advanced')) {
+      return { backgroundColor: 'rgba(250, 117, 117, 0.9)' }; // Red for advanced
+    } else {
+      return { backgroundColor: 'rgba(222, 244, 247, 0.9)' }; // Default blue
+    }
+  };
+
   const handleAddToCart = () => {
     if (isFullyBooked) {
       return;
@@ -54,11 +69,11 @@ const ClassDetailsScreen = ({ route, navigation }) => {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
           <Image 
-            source={{ uri: imageUrl }} 
+            source={imageUrl} 
             style={styles.image}
             defaultSource={require('../../assets/icon.png')}
           />
-          <View style={styles.levelBadge}>
+          <View style={[styles.levelBadge, getLevelBadgeStyle(level)]}>
             <Text style={styles.levelText}>{level || 'All Levels'}</Text>
           </View>
         </View>
@@ -76,15 +91,11 @@ const ClassDetailsScreen = ({ route, navigation }) => {
             
             <View style={styles.detailGrid}>
               <View style={styles.detailItem}>
-                <Text style={styles.detailIcon}>📅</Text>
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>Date</Text>
-                  <Text style={styles.detailValue}>{formatDate(date)}</Text>
-                </View>
+                <Text style={styles.detailLabel}>Date</Text>
+                <Text style={styles.detailValue}>{formatDate(date)}</Text>
               </View>
 
               <View style={styles.detailItem}>
-                <Text style={styles.detailIcon}>⏰</Text>
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Time</Text>
                   <Text style={styles.detailValue}>{formatTime(time)}</Text>
@@ -92,7 +103,6 @@ const ClassDetailsScreen = ({ route, navigation }) => {
               </View>
 
               <View style={styles.detailItem}>
-                <Text style={styles.detailIcon}>⏱️</Text>
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Duration</Text>
                   <Text style={styles.detailValue}>{duration} minutes</Text>
@@ -100,7 +110,6 @@ const ClassDetailsScreen = ({ route, navigation }) => {
               </View>
 
               <View style={styles.detailItem}>
-                <Text style={styles.detailIcon}>👥</Text>
                 <View style={styles.detailContent}>
                   <Text style={styles.detailLabel}>Available Spots</Text>
                   <Text style={[
@@ -194,13 +203,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     right: 20,
-    backgroundColor: 'rgba(222, 244, 247, 0.9)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
   },
   levelText: {
-    color: '#661a72',
+    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -246,11 +254,6 @@ const styles = StyleSheet.create({
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  detailIcon: {
-    fontSize: 20,
-    marginRight: 15,
-    width: 25,
   },
   detailContent: {
     flex: 1,

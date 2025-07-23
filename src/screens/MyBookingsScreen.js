@@ -318,8 +318,6 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   bookingFooter: {
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
     paddingTop: 16,
   },
   totalContainer: {

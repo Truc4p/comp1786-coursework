@@ -29,7 +29,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="ClassList"
         screenOptions={{
           headerStyle: {
             backgroundColor: '#def4f7',

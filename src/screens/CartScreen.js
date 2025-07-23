@@ -75,40 +75,57 @@ const CartScreen = ({ navigation }) => {
   };
 
   const handleCheckout = async () => {
-    if (!validateForm()) return;
+    console.log('🛒 handleCheckout called');
     
-    if (cart.items.length === 0) {
-      Alert.alert('Empty Cart', 'Please add some classes to your cart first.');
-      return;
-    }
+    try {
+      if (!validateForm()) {
+        console.log('❌ Form validation failed');
+        return;
+      }
+      
+      if (cart.items.length === 0) {
+        console.log('❌ Cart is empty');
+        Alert.alert('Empty Cart', 'Please add some classes to your cart first.');
+        return;
+      }
 
-    const result = await submitBooking(cart.items, customerInfo);
-    
-    if (result.success) {
-      Alert.alert(
-        'Booking Confirmed!',
-        `Your booking has been confirmed. Booking ID: ${result.booking.id}`,
-        [
-          {
-            text: 'View Bookings',
-            onPress: () => {
-              clearCart();
-              navigation.navigate('MyBookings', { 
-                userEmail: customerInfo.email 
-              });
+      console.log('🚀 Starting booking process...');
+      
+      const result = await submitBooking(cart.items, customerInfo);
+      console.log('📝 Final booking submission result:', result);
+      
+      if (result && result.success) {
+        console.log('🎉 Booking successful, showing confirmation');
+        Alert.alert(
+          'Booking Confirmed!',
+          `Your booking has been confirmed. Booking ID: ${result.booking?.id || 'N/A'}`,
+          [
+            {
+              text: 'View Bookings',
+              onPress: () => {
+                clearCart();
+                navigation.navigate('MyBookings', { 
+                  userEmail: customerInfo.email 
+                });
+              },
             },
-          },
-          {
-            text: 'Continue Shopping',
-            onPress: () => {
-              clearCart();
-              navigation.navigate('ClassList');
+            {
+              text: 'Continue Shopping',
+              onPress: () => {
+                clearCart();
+                navigation.navigate('ClassList');
+              },
             },
-          },
-        ]
-      );
-    } else {
-      Alert.alert('Booking Failed', result.error || 'Something went wrong. Please try again.');
+          ]
+        );
+      } else {
+        const errorMessage = result?.error || 'Something went wrong. Please try again.';
+        console.log('❌ Booking failed:', errorMessage);
+        Alert.alert('Booking Failed', errorMessage);
+      }
+    } catch (error) {
+      console.error('💥 Unexpected error in handleCheckout:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     }
   };
 

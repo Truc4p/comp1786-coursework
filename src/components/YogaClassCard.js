@@ -12,7 +12,6 @@ import { useCart } from '../context/CartContext';
 
 const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
   const {
-    id,
     name,
     instructor,
     date,
@@ -22,17 +21,24 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
     availableSpots,
     price,
     level,
-    image,
   } = yogaClass;
 
   const isFullyBooked = availableSpots <= 0;
   const imageUrl = getYogaClassImage(yogaClass);
   const { addToCart } = useCart();
 
-  const handleAddToCart = () => {
-    addToCart(yogaClass);
-    if (onAddToCart) {
-      onAddToCart(yogaClass);
+  // Function to get level badge colors
+  const getLevelBadgeStyle = (level) => {
+    const levelLower = level?.toLowerCase() || '';
+    
+    if (levelLower.includes('beginner')) {
+      return { backgroundColor: 'rgba(76, 175, 79, 0.9)' }; // Green for beginner
+    } else if (levelLower.includes('intermediate')) {
+      return { backgroundColor: 'rgba(251, 172, 53, 0.9)' }; // Orange for intermediate  
+    } else if (levelLower.includes('advanced')) {
+      return { backgroundColor: 'rgba(250, 117, 117, 0.9)' }; // Red for advanced
+    } else {
+      return { backgroundColor: 'rgba(222, 244, 247, 0.9)' }; // Default blue
     }
   };
 
@@ -40,11 +46,11 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
     <TouchableOpacity style={styles.card} onPress={() => onPress(yogaClass)}>
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: imageUrl }}
+          source={imageUrl}
           style={styles.image}
           defaultSource={require('../../assets/icon.png')}
         />
-        <View style={styles.levelBadge}>
+        <View style={[styles.levelBadge, getLevelBadgeStyle(level)]}>
           <Text style={styles.levelText}>{level || 'All Levels'}</Text>
         </View>
       </View>
@@ -61,19 +67,19 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
 
         <View style={styles.details}>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>📅 Date:</Text>
+            <Text style={styles.detailLabel}>Date:</Text>
             <Text style={styles.detailValue}>{formatDate(date)}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>⏰ Time:</Text>
+            <Text style={styles.detailLabel}>Time:</Text>
             <Text style={styles.detailValue}>{formatTime(time)}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>⏱️ Duration:</Text>
+            <Text style={styles.detailLabel}>Duration:</Text>
             <Text style={styles.detailValue}>{duration} min</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>👥 Available:</Text>
+            <Text style={styles.detailLabel}>Available:</Text>
             <Text style={[
               styles.detailValue,
               isFullyBooked && styles.fullyBookedText
@@ -150,15 +156,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(222, 244, 247, 0.9)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   levelText: {
-    color: '#661a72',
+    color: '#fff',
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   content: {
     padding: 16,
@@ -179,7 +184,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#661a72',
+    color: '#4caf4f',
   },
   instructor: {
     fontSize: 14,

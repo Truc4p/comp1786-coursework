@@ -34,7 +34,9 @@ export const BookingProvider = ({ children }) => {
   };
 
   const submitBooking = async (cartItems, customerInfo) => {
+    console.log('🔄 Starting booking submission...');
     setLoading(true);
+    
     try {
       // Create booking object
       const booking = {
@@ -46,22 +48,29 @@ export const BookingProvider = ({ children }) => {
         status: 'confirmed',
       };
 
+      console.log('📦 Booking object created:', JSON.stringify(booking, null, 2));
+
       // Submit to Firebase
+      console.log('🔗 Calling ApiService.createBooking...');
       const result = await ApiService.createBooking(booking);
+      console.log('📨 ApiService.createBooking result:', result);
       
-      if (result.success) {
+      if (result && result.success) {
         // Add to local bookings
         const updatedBookings = [...bookings, { ...booking, firebaseId: result.id }];
         setBookings(updatedBookings);
         await saveBookingsToStorage(updatedBookings);
         
+        console.log('✅ Booking submitted successfully');
         setLoading(false);
         return { success: true, booking };
       } else {
-        throw new Error(result.error || 'Failed to submit booking');
+        console.log('❌ Booking failed with result:', result);
+        setLoading(false);
+        throw new Error(result?.error || 'Failed to submit booking');
       }
     } catch (error) {
-      console.error('Error submitting booking:', error);
+      console.error('💥 Error submitting booking:', error);
       setLoading(false);
       return { success: false, error: error.message };
     }

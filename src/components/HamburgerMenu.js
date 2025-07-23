@@ -52,7 +52,6 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <TouchableOpacity style={styles.overlayTouchable} onPress={onClose} />
         <Animated.View
           style={[
             styles.menuContainer,
@@ -72,9 +71,6 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
             {user && (
               <View style={styles.userInfo}>
                 <View style={styles.userAvatar}>
-                  <Text style={styles.userAvatarText}>
-                    {(user.firstName?.charAt(0) + user.lastName?.charAt(0)).toUpperCase()}
-                  </Text>
                 </View>
                 <View style={styles.userDetails}>
                   <Text style={styles.userName}>
@@ -92,7 +88,6 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
                     style={styles.menuItem}
                     onPress={() => handleMenuItemPress('Profile')}
                   >
-                    <Text style={styles.menuItemIcon}>👤</Text>
                     <Text style={styles.menuItemText}>My Profile</Text>
                     <Text style={styles.menuItemArrow}>›</Text>
                   </TouchableOpacity>
@@ -101,7 +96,6 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
                     style={styles.menuItem}
                     onPress={() => handleMenuItemPress('MyBookings')}
                   >
-                    <Text style={styles.menuItemIcon}>📅</Text>
                     <Text style={styles.menuItemText}>My Bookings</Text>
                     <Text style={styles.menuItemArrow}>›</Text>
                   </TouchableOpacity>
@@ -110,18 +104,14 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
                     style={styles.menuItem}
                     onPress={() => handleMenuItemPress('Cart')}
                   >
-                    <Text style={styles.menuItemIcon}>🛒</Text>
                     <Text style={styles.menuItemText}>Shopping Cart</Text>
                     <Text style={styles.menuItemArrow}>›</Text>
                   </TouchableOpacity>
-
-                  <View style={styles.divider} />
 
                   <TouchableOpacity
                     style={[styles.menuItem, styles.logoutItem]}
                     onPress={handleLogout}
                   >
-                    <Text style={styles.menuItemIcon}>👋</Text>
                     <Text style={[styles.menuItemText, styles.logoutText]}>Sign Out</Text>
                     <Text style={styles.menuItemArrow}>›</Text>
                   </TouchableOpacity>
@@ -132,7 +122,6 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
                     style={styles.menuItem}
                     onPress={() => handleMenuItemPress('Login')}
                   >
-                    <Text style={styles.menuItemIcon}>🔐</Text>
                     <Text style={styles.menuItemText}>Sign In</Text>
                     <Text style={styles.menuItemArrow}>›</Text>
                   </TouchableOpacity>
@@ -141,7 +130,6 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
                     style={styles.menuItem}
                     onPress={() => handleMenuItemPress('Register')}
                   >
-                    <Text style={styles.menuItemIcon}>📝</Text>
                     <Text style={styles.menuItemText}>Create Account</Text>
                     <Text style={styles.menuItemArrow}>›</Text>
                   </TouchableOpacity>
@@ -150,7 +138,6 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
                     style={styles.menuItem}
                     onPress={() => handleMenuItemPress('Cart')}
                   >
-                    <Text style={styles.menuItemIcon}>🛒</Text>
                     <Text style={styles.menuItemText}>Shopping Cart</Text>
                     <Text style={styles.menuItemArrow}>›</Text>
                   </TouchableOpacity>
@@ -159,6 +146,7 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
             </View>
           </SafeAreaView>
         </Animated.View>
+        <TouchableOpacity style={styles.overlayTouchable} onPress={onClose} />
       </View>
     </Modal>
   );
@@ -168,10 +156,13 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    flexDirection: 'row',
   },
   overlayTouchable: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 280,
+    right: 0,
   },
   menuContainer: {
     width: 280,
@@ -185,6 +176,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 5,
     elevation: 5,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
   },
   menu: {
     flex: 1,
@@ -196,8 +191,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: '#def4f7',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
   },
   menuTitle: {
     fontSize: 20,
@@ -222,22 +215,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#F8F8F8',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
   },
   userAvatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#661a72',
+    backgroundColor: '#def4f7',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
-  },
-  userAvatarText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   userDetails: {
     flex: 1,
@@ -261,13 +247,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  menuItemIcon: {
-    fontSize: 20,
-    marginRight: 15,
-    width: 25,
   },
   menuItemText: {
     flex: 1,
@@ -277,11 +256,6 @@ const styles = StyleSheet.create({
   menuItemArrow: {
     fontSize: 18,
     color: '#666',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E0E0E0',
-    marginVertical: 10,
   },
   logoutItem: {
     marginTop: 10,
