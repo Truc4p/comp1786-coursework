@@ -105,7 +105,7 @@ public class CloudSyncActivity extends AppCompatActivity {
     private void uploadData() {
         showProgress("Uploading data...");
         
-        cloudSyncService.uploadAllData(new CloudSyncService.SyncCallback() {
+        cloudSyncService.uploadChangedData(new CloudSyncService.SyncCallback() {
             @Override
             public void onSuccess(String message) {
                 runOnUiThread(() -> {
@@ -137,7 +137,7 @@ public class CloudSyncActivity extends AppCompatActivity {
     private void downloadAndSync() {
         showProgress("Syncing with cloud...");
         
-        cloudSyncService.downloadAndSync(new CloudSyncService.SyncCallback() {
+        cloudSyncService.performTwoWaySync(new CloudSyncService.SyncCallback() {
             @Override
             public void onSuccess(String message) {
                 runOnUiThread(() -> {

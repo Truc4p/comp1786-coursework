@@ -20,6 +20,11 @@ public class YogaClass {
     // Search context fields - to show additional info when displaying search results
     private String searchInstructor; // Instructor name from class instances for search results
     private String searchDate; // Specific date from class instances for search results
+    
+    // Sync fields for cloud synchronization
+    private long lastModified; // timestamp when record was last changed
+    private boolean needsSync; // flag to indicate if record needs to be synced
+    private String cloudId; // Firebase ID for this record
 
     // Constructor
     public YogaClass() {}
@@ -39,6 +44,8 @@ public class YogaClass {
         this.latitude = 0.0;
         this.longitude = 0.0;
         this.locationAddress = "";
+        this.lastModified = System.currentTimeMillis();
+        this.needsSync = true;
     }
 
     // Full constructor with location
@@ -58,6 +65,8 @@ public class YogaClass {
         this.latitude = latitude;
         this.longitude = longitude;
         this.locationAddress = locationAddress;
+        this.lastModified = System.currentTimeMillis();
+        this.needsSync = true;
     }
 
     // Getters and setters
@@ -105,6 +114,16 @@ public class YogaClass {
 
     public String getSearchDate() { return searchDate; }
     public void setSearchDate(String searchDate) { this.searchDate = searchDate; }
+
+    // Sync field getters and setters
+    public long getLastModified() { return lastModified; }
+    public void setLastModified(long lastModified) { this.lastModified = lastModified; }
+
+    public boolean needsSync() { return needsSync; }
+    public void setNeedsSync(boolean needsSync) { this.needsSync = needsSync; }
+
+    public String getCloudId() { return cloudId; }
+    public void setCloudId(String cloudId) { this.cloudId = cloudId; }
 
     @Override
     public String toString() {

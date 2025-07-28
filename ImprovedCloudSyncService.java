@@ -1,8 +1,6 @@
 package com.example.yoga_admin_app;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,13 +12,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CloudSyncService {
-    private static final String TAG = "CloudSyncService";
+public class ImprovedCloudSyncService {
+    private static final String TAG = "ImprovedCloudSyncService";
     private static final String BASE_URL = "https://yogaapp-12d2b-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String YOGA_CLASSES_ENDPOINT = "yoga-classes";
     private static final String CLASS_INSTANCES_ENDPOINT = "class-instances";
@@ -29,7 +26,7 @@ public class CloudSyncService {
     private DatabaseHelper databaseHelper;
     private ExecutorService executorService;
     
-    public CloudSyncService(Context context) {
+    public ImprovedCloudSyncService(Context context) {
         this.context = context;
         this.databaseHelper = new DatabaseHelper(context);
         this.executorService = Executors.newSingleThreadExecutor();
@@ -217,9 +214,7 @@ public class CloudSyncService {
         JSONObject cloudClasses = new JSONObject(cloudData);
         
         // Process each class from cloud
-        Iterator<String> keys = cloudClasses.keys();
-        while (keys.hasNext()) {
-            String classId = keys.next();
+        for (String classId : cloudClasses.keys()) {
             JSONObject cloudClass = cloudClasses.getJSONObject(classId);
             long cloudTimestamp = cloudClass.optLong("lastModified", 0);
             

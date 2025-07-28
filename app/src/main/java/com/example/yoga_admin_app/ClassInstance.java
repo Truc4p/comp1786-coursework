@@ -12,6 +12,11 @@ public class ClassInstance {
     private String date; // Format: dd/MM/yyyy
     private String instructor; // Required field
     private String additionalComments; // Optional field
+    
+    // Sync fields for cloud synchronization
+    private long lastModified; // timestamp when record was last changed
+    private boolean needsSync; // flag to indicate if record needs to be synced
+    private String cloudId; // Firebase ID for this record
 
     // Constructor
     public ClassInstance() {}
@@ -21,6 +26,8 @@ public class ClassInstance {
         this.date = date;
         this.instructor = instructor;
         this.additionalComments = additionalComments;
+        this.lastModified = System.currentTimeMillis();
+        this.needsSync = true;
     }
 
     // Getters and setters
@@ -38,6 +45,16 @@ public class ClassInstance {
 
     public String getAdditionalComments() { return additionalComments; }
     public void setAdditionalComments(String additionalComments) { this.additionalComments = additionalComments; }
+
+    // Sync field getters and setters
+    public long getLastModified() { return lastModified; }
+    public void setLastModified(long lastModified) { this.lastModified = lastModified; }
+
+    public boolean needsSync() { return needsSync; }
+    public void setNeedsSync(boolean needsSync) { this.needsSync = needsSync; }
+
+    public String getCloudId() { return cloudId; }
+    public void setCloudId(String cloudId) { this.cloudId = cloudId; }
 
     // Helper method to validate if the date matches the day of week of the associated yoga class
     public boolean isDateMatchingDayOfWeek(String dayOfWeek) {

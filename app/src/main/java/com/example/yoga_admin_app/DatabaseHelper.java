@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 7; // Added location fields
+    private static final int DATABASE_VERSION = 8; // Added sync fields for cloud synchronization
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
@@ -31,6 +31,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_LATITUDE = "latitude";
     private static final String KEY_LONGITUDE = "longitude";
     private static final String KEY_LOCATION_ADDRESS = "location_address";
+    
+    // Sync columns for yoga_classes
+    private static final String KEY_LAST_MODIFIED = "last_modified";
+    private static final String KEY_NEEDS_SYNC = "needs_sync";
+    private static final String KEY_CLOUD_ID = "cloud_id";
 
     
     // Column names for class_instances table
@@ -39,6 +44,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_DATE = "date";
     private static final String KEY_INSTANCE_INSTRUCTOR = "instructor";
     private static final String KEY_ADDITIONAL_COMMENTS = "additional_comments";
+    
+    // Sync columns for class_instances
+    private static final String KEY_INSTANCE_LAST_MODIFIED = "last_modified";
+    private static final String KEY_INSTANCE_NEEDS_SYNC = "needs_sync";
+    private static final String KEY_INSTANCE_CLOUD_ID = "cloud_id";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -71,7 +81,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_DIFFICULTY + " TEXT,"
                 + KEY_LATITUDE + " REAL DEFAULT 0.0,"
                 + KEY_LONGITUDE + " REAL DEFAULT 0.0,"
-                + KEY_LOCATION_ADDRESS + " TEXT" + ")";
+                + KEY_LOCATION_ADDRESS + " TEXT,"
+                + KEY_LAST_MODIFIED + " INTEGER DEFAULT 0,"
+                + KEY_NEEDS_SYNC + " INTEGER DEFAULT 1,"
+                + KEY_CLOUD_ID + " TEXT" + ")";
         db.execSQL(CREATE_YOGA_CLASSES_TABLE);
         
         // Create class instances table
@@ -81,6 +94,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_DATE + " TEXT NOT NULL,"
                 + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
                 + KEY_ADDITIONAL_COMMENTS + " TEXT,"
+                + KEY_INSTANCE_LAST_MODIFIED + " INTEGER DEFAULT 0,"
+                + KEY_INSTANCE_NEEDS_SYNC + " INTEGER DEFAULT 1,"
+                + KEY_INSTANCE_CLOUD_ID + " TEXT,"
                 + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
         db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
     }
@@ -90,13 +106,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Enable foreign key constraints
         db.execSQL("PRAGMA foreign_keys=ON");
         
-        // For any version before 7, do a complete recreation to add location fields
-        if (oldVersion < 7) {
+        // For any version before 8, do a complete recreation to add sync fields
+        if (oldVersion < 8) {
             // Drop all tables and recreate from scratch
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
             
-            // Recreate tables with correct schema including location fields
+            // Recreate tables with correct schema including sync fields
             String CREATE_YOGA_CLASSES_TABLE = "CREATE TABLE " + TABLE_YOGA_CLASSES + "("
                     + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + KEY_DAY_OF_WEEK + " TEXT NOT NULL,"
@@ -109,7 +125,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + KEY_DIFFICULTY + " TEXT,"
                     + KEY_LATITUDE + " REAL DEFAULT 0.0,"
                     + KEY_LONGITUDE + " REAL DEFAULT 0.0,"
-                    + KEY_LOCATION_ADDRESS + " TEXT" + ")";
+                    + KEY_LOCATION_ADDRESS + " TEXT,"
+                    + KEY_LAST_MODIFIED + " INTEGER DEFAULT 0,"
+                    + KEY_NEEDS_SYNC + " INTEGER DEFAULT 1,"
+                    + KEY_CLOUD_ID + " TEXT" + ")";
             db.execSQL(CREATE_YOGA_CLASSES_TABLE);
             
             String CREATE_CLASS_INSTANCES_TABLE = "CREATE TABLE " + TABLE_CLASS_INSTANCES + "("
@@ -118,12 +137,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + KEY_DATE + " TEXT NOT NULL,"
                     + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
                     + KEY_ADDITIONAL_COMMENTS + " TEXT,"
+                    + KEY_INSTANCE_LAST_MODIFIED + " INTEGER DEFAULT 0,"
+                    + KEY_INSTANCE_NEEDS_SYNC + " INTEGER DEFAULT 1,"
+                    + KEY_INSTANCE_CLOUD_ID + " TEXT,"
                     + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
             db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
         }
         
         // Future upgrade logic can be added here
-        // if (oldVersion < 7) {
+        // if (oldVersion < 9) {
         //     // Add future schema changes here
         // }
     }
@@ -153,6 +175,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_LATITUDE, yogaClass.getLatitude());
         values.put(KEY_LONGITUDE, yogaClass.getLongitude());
         values.put(KEY_LOCATION_ADDRESS, yogaClass.getLocationAddress());
+        values.put(KEY_LAST_MODIFIED, System.currentTimeMillis());
+        values.put(KEY_NEEDS_SYNC, 1);
+        values.put(KEY_CLOUD_ID, yogaClass.getCloudId());
         
         long id = db.insert(TABLE_YOGA_CLASSES, null, values);
         db.close();
@@ -204,6 +229,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 yogaClass.setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LATITUDE)));
                 yogaClass.setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LONGITUDE)));
                 yogaClass.setLocationAddress(cursor.getString(cursor.getColumnIndexOrThrow(KEY_LOCATION_ADDRESS)));
+                yogaClass.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_LAST_MODIFIED)));
+                yogaClass.setNeedsSync(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_NEEDS_SYNC)) == 1);
+                yogaClass.setCloudId(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLOUD_ID)));
                 
                 yogaClassList.add(yogaClass);
             } while (cursor.moveToNext());
@@ -233,6 +261,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             yogaClass.setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LATITUDE)));
             yogaClass.setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LONGITUDE)));
             yogaClass.setLocationAddress(cursor.getString(cursor.getColumnIndexOrThrow(KEY_LOCATION_ADDRESS)));
+            yogaClass.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_LAST_MODIFIED)));
+            yogaClass.setNeedsSync(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_NEEDS_SYNC)) == 1);
+            yogaClass.setCloudId(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLOUD_ID)));
             cursor.close();
             db.close();
             return yogaClass;
@@ -258,6 +289,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_LATITUDE, yogaClass.getLatitude());
         values.put(KEY_LONGITUDE, yogaClass.getLongitude());
         values.put(KEY_LOCATION_ADDRESS, yogaClass.getLocationAddress());
+        values.put(KEY_LAST_MODIFIED, System.currentTimeMillis());
+        values.put(KEY_NEEDS_SYNC, 1);
+        values.put(KEY_CLOUD_ID, yogaClass.getCloudId());
         
         int result = db.update(TABLE_YOGA_CLASSES, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(yogaClass.getId())});
@@ -305,6 +339,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_DATE, classInstance.getDate());
         values.put(KEY_INSTANCE_INSTRUCTOR, classInstance.getInstructor());
         values.put(KEY_ADDITIONAL_COMMENTS, classInstance.getAdditionalComments());
+        values.put(KEY_INSTANCE_LAST_MODIFIED, System.currentTimeMillis());
+        values.put(KEY_INSTANCE_NEEDS_SYNC, 1);
+        values.put(KEY_INSTANCE_CLOUD_ID, classInstance.getCloudId());
         
         long id = db.insert(TABLE_CLASS_INSTANCES, null, values);
         db.close();
@@ -328,6 +365,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 instance.setDate(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DATE)));
                 instance.setInstructor(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_INSTRUCTOR)));
                 instance.setAdditionalComments(cursor.getString(cursor.getColumnIndexOrThrow(KEY_ADDITIONAL_COMMENTS)));
+                instance.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_INSTANCE_LAST_MODIFIED)));
+                instance.setNeedsSync(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_INSTANCE_NEEDS_SYNC)) == 1);
+                instance.setCloudId(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_CLOUD_ID)));
                 
                 instanceList.add(instance);
             } while (cursor.moveToNext());
@@ -350,6 +390,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             instance.setDate(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DATE)));
             instance.setInstructor(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_INSTRUCTOR)));
             instance.setAdditionalComments(cursor.getString(cursor.getColumnIndexOrThrow(KEY_ADDITIONAL_COMMENTS)));
+            instance.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_INSTANCE_LAST_MODIFIED)));
+            instance.setNeedsSync(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_INSTANCE_NEEDS_SYNC)) == 1);
+            instance.setCloudId(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_CLOUD_ID)));
             cursor.close();
             db.close();
             return instance;
@@ -368,6 +411,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_DATE, instance.getDate());
         values.put(KEY_INSTANCE_INSTRUCTOR, instance.getInstructor());
         values.put(KEY_ADDITIONAL_COMMENTS, instance.getAdditionalComments());
+        values.put(KEY_INSTANCE_LAST_MODIFIED, System.currentTimeMillis());
+        values.put(KEY_INSTANCE_NEEDS_SYNC, 1);
+        values.put(KEY_INSTANCE_CLOUD_ID, instance.getCloudId());
         
         int result = db.update(TABLE_CLASS_INSTANCES, values, KEY_INSTANCE_ID + " = ?",
                 new String[]{String.valueOf(instance.getId())});
@@ -632,5 +678,128 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return yogaClassList;
+    }
+    
+    // SYNC-RELATED METHODS FOR IMPROVED CLOUD SYNC
+    
+    /**
+     * Get all yoga classes that need syncing to cloud
+     */
+    public List<YogaClass> getClassesNeedingSync() {
+        List<YogaClass> yogaClassList = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_YOGA_CLASSES + 
+                " WHERE " + KEY_NEEDS_SYNC + " = 1";
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        
+        if (cursor.moveToFirst()) {
+            do {
+                YogaClass yogaClass = new YogaClass();
+                yogaClass.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_ID)));
+                yogaClass.setDayOfWeek(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DAY_OF_WEEK)));
+                yogaClass.setTime(cursor.getString(cursor.getColumnIndexOrThrow(KEY_TIME)));
+                yogaClass.setCapacity(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_CAPACITY)));
+                yogaClass.setDuration(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_DURATION)));
+                yogaClass.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_PRICE)));
+                yogaClass.setClassType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLASS_TYPE)));
+                yogaClass.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DESCRIPTION)));
+                yogaClass.setDifficulty(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DIFFICULTY)));
+                yogaClass.setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LATITUDE)));
+                yogaClass.setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow(KEY_LONGITUDE)));
+                yogaClass.setLocationAddress(cursor.getString(cursor.getColumnIndexOrThrow(KEY_LOCATION_ADDRESS)));
+                yogaClass.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_LAST_MODIFIED)));
+                yogaClass.setNeedsSync(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_NEEDS_SYNC)) == 1);
+                yogaClass.setCloudId(cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLOUD_ID)));
+                
+                yogaClassList.add(yogaClass);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return yogaClassList;
+    }
+    
+    /**
+     * Mark a yoga class as synced (no longer needs sync)
+     */
+    public void markClassAsSynced(long classId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_NEEDS_SYNC, 0);
+        
+        db.update(TABLE_YOGA_CLASSES, values, KEY_ID + " = ?",
+                new String[]{String.valueOf(classId)});
+        db.close();
+    }
+    
+    /**
+     * Mark a class instance as synced (no longer needs sync)
+     */
+    public void markInstanceAsSynced(long instanceId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_INSTANCE_NEEDS_SYNC, 0);
+        
+        db.update(TABLE_CLASS_INSTANCES, values, KEY_INSTANCE_ID + " = ?",
+                new String[]{String.valueOf(instanceId)});
+        db.close();
+    }
+    
+    /**
+     * Get all class instances that need syncing
+     */
+    public List<ClassInstance> getInstancesNeedingSync() {
+        List<ClassInstance> instanceList = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_CLASS_INSTANCES + 
+                " WHERE " + KEY_INSTANCE_NEEDS_SYNC + " = 1";
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        
+        if (cursor.moveToFirst()) {
+            do {
+                ClassInstance instance = new ClassInstance();
+                instance.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_INSTANCE_ID)));
+                instance.setYogaClassId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_YOGA_CLASS_ID)));
+                instance.setDate(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DATE)));
+                instance.setInstructor(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_INSTRUCTOR)));
+                instance.setAdditionalComments(cursor.getString(cursor.getColumnIndexOrThrow(KEY_ADDITIONAL_COMMENTS)));
+                instance.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_INSTANCE_LAST_MODIFIED)));
+                instance.setNeedsSync(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_INSTANCE_NEEDS_SYNC)) == 1);
+                instance.setCloudId(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_CLOUD_ID)));
+                
+                instanceList.add(instance);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return instanceList;
+    }
+    
+    /**
+     * Set cloud ID for a yoga class
+     */
+    public void setClassCloudId(long classId, String cloudId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_CLOUD_ID, cloudId);
+        
+        db.update(TABLE_YOGA_CLASSES, values, KEY_ID + " = ?",
+                new String[]{String.valueOf(classId)});
+        db.close();
+    }
+    
+    /**
+     * Set cloud ID for a class instance
+     */
+    public void setInstanceCloudId(long instanceId, String cloudId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_INSTANCE_CLOUD_ID, cloudId);
+        
+        db.update(TABLE_CLASS_INSTANCES, values, KEY_INSTANCE_ID + " = ?",
+                new String[]{String.valueOf(instanceId)});
+        db.close();
     }
 }
