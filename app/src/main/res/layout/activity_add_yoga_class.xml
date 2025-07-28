@@ -49,8 +49,7 @@
             android:hint="Tap to select time"
             android:inputType="none"
             android:focusable="false"
-            android:clickable="true"
-            android:drawableEnd="@android:drawable/ic_menu_recent_history" />
+            android:clickable="true" />
 
         <!-- Capacity -->
         <TextView
