@@ -33,15 +33,33 @@ export const BookingProvider = ({ children }) => {
     }
   };
 
+  const clearAllBookings = async () => {
+    try {
+      await AsyncStorage.removeItem('yogaBookings');
+      setBookings([]);
+      console.log('All bookings cleared for security');
+    } catch (error) {
+      console.error('Error clearing bookings:', error);
+      // Still clear the state even if storage clearing fails
+      setBookings([]);
+    }
+  };
+
   const submitBooking = async (cartItems, customerInfo) => {
     console.log('🔄 Starting booking submission...');
     setLoading(true);
     
     try {
-      // Create booking object
+      // Create booking object with enhanced customerInfo
+      const enhancedCustomerInfo = {
+        ...customerInfo,
+        // Ensure we have a userId for future lookups 
+        userId: customerInfo.userId,
+      };
+      
       const booking = {
         id: `booking_${Date.now()}`,
-        customerInfo,
+        customerInfo: enhancedCustomerInfo,
         classes: cartItems,
         totalAmount: cartItems.reduce((total, item) => total + (item.price * item.quantity), 0),
         bookingDate: new Date().toISOString(),
@@ -76,9 +94,9 @@ export const BookingProvider = ({ children }) => {
     }
   };
 
-  const getBookingsByEmail = (email) => {
+  const getBookingsByUserId = (userId) => {
     return bookings.filter(booking => 
-      booking.customerInfo.email.toLowerCase() === email.toLowerCase()
+      booking.customerInfo.userId === userId
     );
   };
 
@@ -115,9 +133,10 @@ export const BookingProvider = ({ children }) => {
     bookings,
     loading,
     submitBooking,
-    getBookingsByEmail,
+    getBookingsByUserId,
     getBookingById,
     cancelBooking,
+    clearAllBookings,
   };
 
   return (

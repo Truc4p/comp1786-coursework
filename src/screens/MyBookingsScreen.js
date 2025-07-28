@@ -14,28 +14,53 @@ import { useAuth } from '../context/AuthContext';
 import { formatTime, formatDate } from '../utils/helpers';
 
 const MyBookingsScreen = ({ route, navigation }) => {
-  const { bookings, getBookingsByEmail, cancelBooking, loading } = useBooking();
+  const { bookings, getBookingsByUserId, cancelBooking, loading } = useBooking();
   const { user } = useAuth();
-  const [filteredBookings, setFilteredBookings] = useState([]);
+  const [userBookings, setUserBookings] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    if (user && user.email) {
+    if (user && (user.id || user.email)) {
       // Automatically load bookings for the logged-in user
       loadUserBookings();
+    } else {
+      // Clear bookings immediately when user logs out
+      setUserBookings([]);
+      // Navigate to login screen if trying to access bookings without being logged in
+      if (!user) {
+        // Small delay to avoid navigation conflicts
+        setTimeout(() => {
+          navigation.navigate('ClassList');
+        }, 100);
+      }
     }
-  }, [bookings, user]);
+  }, [bookings, user, navigation]);
 
   const loadUserBookings = () => {
-    if (user && user.email) {
-      const userBookings = getBookingsByEmail(user.email);
-      setFilteredBookings(userBookings);
+    // Security check: Only load bookings if user is actually logged in
+    if (!user) {
+      setUserBookings([]);
+      return;
+    }
+    
+    if (user) {
+      // Use userId (which is either user.id or user.email as fallback from CartScreen)
+      const userId = user.id || user.email;
+      const userBookingsList = getBookingsByUserId(userId);
+      
+      // Sort bookings by booking date in descending order (latest first)
+      const sortedBookings = userBookingsList.sort((a, b) => {
+        const dateA = new Date(a.bookingDate);
+        const dateB = new Date(b.bookingDate);
+        return dateB - dateA; // Latest bookings first
+      });
+      setUserBookings(sortedBookings);
     }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    if (user && user.email) {
+    if (user && user.id) {
       loadUserBookings();
     }
     setRefreshing(false);
@@ -152,7 +177,6 @@ const MyBookingsScreen = ({ route, navigation }) => {
     if (!user) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>�</Text>
           <Text style={styles.emptyTitle}>Please Sign In</Text>
           <Text style={styles.emptySubtitle}>
             You need to sign in to view your bookings
@@ -194,9 +218,9 @@ const MyBookingsScreen = ({ route, navigation }) => {
         </View>
       )}
 
-      {filteredBookings.length > 0 ? (
+      {userBookings.length > 0 ? (
         <FlatList
-          data={filteredBookings}
+          data={userBookings}
           renderItem={renderBookingItem}
           keyExtractor={(item) => item.id}
           refreshControl={
@@ -373,13 +397,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   signInButton: {
-    backgroundColor: '#661a72',
+    backgroundColor: '#def4f7',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   signInButtonText: {
-    color: '#fff',
+    color: '#661a72',
     fontSize: 16,
     fontWeight: '600',
   },

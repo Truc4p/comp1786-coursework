@@ -44,14 +44,14 @@ export const AuthProvider = ({ children }) => {
         const userData = response.user;
         const token = response.token;
         
-        console.log('AuthContext: Login successful, saving user data');
+        // console.log('AuthContext: Login successful, saving user data');
         await AsyncStorage.setItem('user', JSON.stringify(userData));
         await AsyncStorage.setItem('authToken', token);
         
         setUser(userData);
         return userData;
       } else {
-        console.log('AuthContext: Login failed:', response.message);
+        // console.log('AuthContext: Login failed:', response.message);
         throw new Error(response.message || 'Login failed');
       }
     } catch (error) {
@@ -62,21 +62,21 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      console.log('AuthContext: Attempting registration for:', userData.email);
+      // console.log('AuthContext: Attempting registration for:', userData.email);
       const response = await ApiService.register(userData);
       
       if (response.success) {
         const newUser = response.user;
         const token = response.token;
         
-        console.log('AuthContext: Registration successful, saving user data');
+        // console.log('AuthContext: Registration successful, saving user data');
         await AsyncStorage.setItem('user', JSON.stringify(newUser));
         await AsyncStorage.setItem('authToken', token);
         
         setUser(newUser);
         return newUser;
       } else {
-        console.log('AuthContext: Registration failed:', response.message);
+        // console.log('AuthContext: Registration failed:', response.message);
         throw new Error(response.message || 'Registration failed');
       }
     } catch (error) {
@@ -105,11 +105,18 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      // Clear all user-related data from AsyncStorage
       await AsyncStorage.removeItem('user');
       await AsyncStorage.removeItem('authToken');
+      
+      // Clear user state immediately
       setUser(null);
+      
+      console.log('User logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
+      // Even if there's an error clearing storage, clear the user state
+      setUser(null);
     }
   };
 

@@ -19,10 +19,33 @@ const AppNavigator = () => {
 
   const HamburgerIcon = ({ navigation }) => (
     <TouchableOpacity
-      onPress={() => setMenuVisible(true)}
+      onPress={() => {
+        try {
+          setMenuVisible(true);
+        } catch (error) {
+          console.error('Menu error:', error);
+        }
+      }}
       style={{ marginLeft: 20 }}
     >
       <Text style={{ fontSize: 24, color: '#661a72' }}>☰</Text>
+    </TouchableOpacity>
+  );
+
+  const HomeIcon = ({ navigation }) => (
+    <TouchableOpacity
+      onPress={() => {
+        try {
+          if (navigation && navigation.navigate) {
+            navigation.navigate('ClassList');
+          }
+        } catch (error) {
+          console.error('Navigation error:', error);
+        }
+      }}
+      style={{ marginRight: 20 }}
+    >
+      <Text style={{ fontSize: 24, color: '#661a72' }}>🏠</Text>
     </TouchableOpacity>
   );
 
@@ -46,18 +69,20 @@ const AppNavigator = () => {
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{
+          options={({ navigation }) => ({
             title: 'Sign In',
             headerTitleAlign: 'center',
-          }}
+            headerRight: () => <HomeIcon navigation={navigation} />,
+          })}
         />
         <Stack.Screen
           name="Register"
           component={RegisterScreen}
-          options={{
+          options={({ navigation }) => ({
             title: 'Create Account',
             headerTitleAlign: 'center',
-          }}
+            headerRight: () => <HomeIcon navigation={navigation} />,
+          })}
         />
         <Stack.Screen
           name="Profile"
@@ -66,6 +91,7 @@ const AppNavigator = () => {
             title: 'My Profile',
             headerTitleAlign: 'center',
             headerLeft: () => <HamburgerIcon navigation={navigation} />,
+            headerRight: () => <HomeIcon navigation={navigation} />,
           })}
         />
         <Stack.Screen
@@ -75,6 +101,7 @@ const AppNavigator = () => {
             title: 'Yoga Classes',
             headerTitleAlign: 'center',
             headerLeft: () => <HamburgerIcon navigation={navigation} />,
+            headerRight: null, // No home icon on home screen
           })}
         />
         <Stack.Screen
@@ -84,6 +111,7 @@ const AppNavigator = () => {
             title: 'Class Details',
             headerTitleAlign: 'center',
             headerLeft: () => <HamburgerIcon navigation={navigation} />,
+            headerRight: () => <HomeIcon navigation={navigation} />,
           })}
         />
         <Stack.Screen
@@ -93,6 +121,7 @@ const AppNavigator = () => {
             title: 'Shopping Cart',
             headerTitleAlign: 'center',
             headerLeft: () => <HamburgerIcon navigation={navigation} />,
+            headerRight: () => <HomeIcon navigation={navigation} />,
           })}
         />
         <Stack.Screen
@@ -102,6 +131,7 @@ const AppNavigator = () => {
             title: 'My Bookings',
             headerTitleAlign: 'center',
             headerLeft: () => <HamburgerIcon navigation={navigation} />,
+            headerRight: () => <HomeIcon navigation={navigation} />,
           })}
         />
       </Stack.Navigator>

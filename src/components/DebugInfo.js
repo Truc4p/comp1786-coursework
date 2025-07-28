@@ -3,9 +3,9 @@ import { View, Text, StyleSheet } from 'react-native';
 
 const DebugInfo = ({ children, componentName }) => {
   useEffect(() => {
-    console.log(`✅ ${componentName} mounted successfully`);
+    // console.log(`✅ ${componentName} mounted successfully`);
     return () => {
-      console.log(`🔄 ${componentName} unmounted`);
+      // console.log(`🔄 ${componentName} unmounted`);
     };
   }, [componentName]);
 

@@ -9,9 +9,11 @@ import {
   Animated,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useBooking } from '../context/BookingContext';
 
 const HamburgerMenu = ({ visible, onClose, navigation }) => {
   const { user, logout } = useAuth();
+  const { clearAllBookings } = useBooking();
   const [slideAnim] = useState(new Animated.Value(-300));
 
   React.useEffect(() => {
@@ -39,8 +41,14 @@ const HamburgerMenu = ({ visible, onClose, navigation }) => {
 
   const handleLogout = () => {
     onClose();
-    setTimeout(() => {
-      logout();
+    setTimeout(async () => {
+      // Clear all user data for security
+      await clearAllBookings();
+      await logout();
+      // Navigate to home screen immediately after logout to clear any sensitive data
+      if (navigation) {
+        navigation.navigate('ClassList');
+      }
     }, 300);
   };
 

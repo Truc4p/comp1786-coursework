@@ -27,14 +27,32 @@ const CartScreen = ({ navigation }) => {
   const [showCheckout, setShowCheckout] = useState(false);
   
   const handleProceedToCheckout = () => {
-    // Auto-fill customer info if user is logged in
-    if (user) {
-      setCustomerInfo({
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        phone: user.phone || '',
-      });
+    // Check if user is logged in
+    if (!user) {
+      Alert.alert(
+        'Sign In Required',
+        'Please sign in to your account to proceed with checkout.',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Sign In',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ]
+      );
+      return;
     }
+
+    // Auto-fill customer info if user is logged in
+    setCustomerInfo({
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      phone: user.phone || '',
+      userId: user.id, 
+    });
     setShowCheckout(true);
   };
 
@@ -75,27 +93,27 @@ const CartScreen = ({ navigation }) => {
   };
 
   const handleCheckout = async () => {
-    console.log('🛒 handleCheckout called');
+    // console.log('🛒 handleCheckout called');
     
     try {
       if (!validateForm()) {
-        console.log('❌ Form validation failed');
+        // console.log('❌ Form validation failed');
         return;
       }
       
       if (cart.items.length === 0) {
-        console.log('❌ Cart is empty');
+        // console.log('❌ Cart is empty');
         Alert.alert('Empty Cart', 'Please add some classes to your cart first.');
         return;
       }
 
-      console.log('🚀 Starting booking process...');
+      // console.log('🚀 Starting booking process...');
       
       const result = await submitBooking(cart.items, customerInfo);
-      console.log('📝 Final booking submission result:', result);
+      // console.log('📝 Final booking submission result:', result);
       
       if (result && result.success) {
-        console.log('🎉 Booking successful, showing confirmation');
+        // console.log('🎉 Booking successful, showing confirmation');
         Alert.alert(
           'Booking Confirmed!',
           `Your booking has been confirmed. Booking ID: ${result.booking?.id || 'N/A'}`,
@@ -120,7 +138,7 @@ const CartScreen = ({ navigation }) => {
         );
       } else {
         const errorMessage = result?.error || 'Something went wrong. Please try again.';
-        console.log('❌ Booking failed:', errorMessage);
+        // console.log('❌ Booking failed:', errorMessage);
         Alert.alert('Booking Failed', errorMessage);
       }
     } catch (error) {
@@ -204,20 +222,6 @@ const CartScreen = ({ navigation }) => {
           keyboardType="phone-pad"
         />
       </View>
-      
-      {!user && (
-        <View style={styles.guestNotice}>
-          <Text style={styles.guestNoticeText}>
-            💡 Tip: Sign in to auto-fill this information next time!
-          </Text>
-          <TouchableOpacity
-            style={styles.signInLink}
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.signInLinkText}>Sign In</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 

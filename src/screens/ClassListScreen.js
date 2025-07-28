@@ -31,7 +31,7 @@ const ClassListScreen = ({ navigation }) => {
   const loadClasses = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Loading classes from Firebase...');
+      // console.log('Loading classes from Firebase...');
       const response = await ApiService.getYogaClasses();
     //   console.log('API response received:', response);
       
@@ -43,7 +43,7 @@ const ClassListScreen = ({ navigation }) => {
       } else if (response && typeof response === 'object') {
         // If response has a data property
         classData = response.data || response || [];
-        console.log('Response is object, extracted data:', classData);
+        // console.log('Response is object, extracted data:', classData);
       }
       
     //   console.log('Final class data length:', classData.length);
@@ -53,7 +53,7 @@ const ClassListScreen = ({ navigation }) => {
         // console.log('Using Firebase data:', classData);
         setClasses(classData);
       } else {
-        console.log('No classes found in Firebase, using demo data');
+        // console.log('No classes found in Firebase, using demo data');
         // Use mock data if no data in Firebase yet
         const mockClasses = [
           {

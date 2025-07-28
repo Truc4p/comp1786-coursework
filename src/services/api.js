@@ -22,7 +22,7 @@ class ApiService {
     };
 
     try {
-      console.log('Making API request to:', url, 'with method:', options.method || 'GET');
+      // console.log('Making API request to:', url, 'with method:', options.method || 'GET');
       const response = await fetch(url, config);
       
       if (!response.ok) {
@@ -30,17 +30,17 @@ class ApiService {
       }
       
       const data = await response.json();
-      console.log('Firebase response data:', data);
+      // console.log('Firebase response data:', data);
       
       // Handle Firebase null response
       if (data === null || data === undefined) {
-        console.log('Firebase returned null data');
+        // console.log('Firebase returned null data');
         return [];
       }
       
       // For POST requests, Firebase returns {name: "id"}, don't convert to array
       if (options.method === 'POST' && data && typeof data === 'object' && data.name) {
-        console.log('POST response, returning as-is');
+        // console.log('POST response, returning as-is');
         return data;
       }
       
@@ -50,11 +50,11 @@ class ApiService {
           id: key, 
           ...data[key] 
         }));
-        console.log('Converted Firebase object to array:', arrayData);
+        // console.log('Converted Firebase object to array:', arrayData);
         return arrayData;
       }
       
-      console.log('Returning data as-is:', data);
+      // console.log('Returning data as-is:', data);
       return data;
     } catch (error) {
       console.error('API request failed:', error);
@@ -115,7 +115,7 @@ class ApiService {
         return mappedData;
       }
     } catch (error) {
-      console.log('Trying sync/yogaClasses path failed, trying direct yogaClasses path');
+      // console.log('Trying sync/yogaClasses path failed, trying direct yogaClasses path');
     }
     
     // Fallback to direct yogaClasses path
@@ -187,24 +187,24 @@ class ApiService {
 
   // Create a new booking with multiple classes (shopping cart)
   async createBooking(bookingData) {
-    console.log('ApiService.createBooking called with:', bookingData);
+    // console.log('ApiService.createBooking called with:', bookingData);
     
     try {
-      console.log('Making request to /bookings...');
+      // console.log('Making request to /bookings...');
       const response = await this.request('/bookings', {
         method: 'POST',
         body: JSON.stringify(bookingData),
       });
       
-      console.log('Firebase response:', response);
+      // console.log('Firebase response:', response);
       
       // Firebase POST returns an object with the new key
       if (response && response.name) {
-        console.log('Booking created successfully with ID:', response.name);
+        // console.log('Booking created successfully with ID:', response.name);
         return { success: true, id: response.name };
       }
       
-      console.log('No response.name, using fallback ID');
+      // console.log('No response.name, using fallback ID');
       return { success: true, id: `booking_${Date.now()}` };
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -280,19 +280,19 @@ class ApiService {
       
       // Find user by email and password
       const user = users.find(u => u.email === email && u.password === password);
-      console.log('Found user:', user ? 'Yes' : 'No');
+      // console.log('Found user:', user ? 'Yes' : 'No');
       
       if (user) {
         // Remove password from response
         const { password: _, ...userWithoutPassword } = user;
-        console.log('Login successful for user:', userWithoutPassword.email);
+        // console.log('Login successful for user:', userWithoutPassword.email);
         return {
           success: true,
           user: userWithoutPassword,
           token: `token_${user.id || user.firebaseKey}_${Date.now()}`,
         };
       } else {
-        console.log('No user found with matching credentials');
+        // console.log('No user found with matching credentials');
         return {
           success: false,
           message: 'Invalid email or password',
@@ -309,11 +309,11 @@ class ApiService {
 
   async register(userData) {
     try {
-      console.log('Attempting to register user:', userData.email);
+      // console.log('Attempting to register user:', userData.email);
       
       // Check if user already exists
       const response = await this.request('/users');
-      console.log('Existing users response:', response);
+      // console.log('Existing users response:', response);
       
       let users = [];
       
@@ -332,7 +332,7 @@ class ApiService {
       const existingUser = users.find(u => u.email === userData.email);
       
       if (existingUser) {
-        console.log('User already exists with email:', userData.email);
+        // console.log('User already exists with email:', userData.email);
         return {
           success: false,
           message: 'An account with this email already exists',
@@ -347,7 +347,7 @@ class ApiService {
         updatedAt: new Date().toISOString(),
       };
       
-      console.log('Creating new user:', newUser);
+      // console.log('Creating new user:', newUser);
       
       // Save to Firebase - Firebase will auto-generate a key
       const saveResponse = await this.request('/users', {
@@ -355,19 +355,19 @@ class ApiService {
         body: JSON.stringify(newUser),
       });
       
-      console.log('Firebase save response:', saveResponse);
+      // console.log('Firebase save response:', saveResponse);
       
       if (saveResponse) {
         // Remove password from response
         const { password: _, ...userWithoutPassword } = newUser;
-        console.log('Registration successful for user:', userWithoutPassword.email);
+        // console.log('Registration successful for user:', userWithoutPassword.email);
         return {
           success: true,
           user: userWithoutPassword,
           token: `token_${newUser.id}_${Date.now()}`,
         };
       } else {
-        console.log('Failed to save user to Firebase');
+        // console.log('Failed to save user to Firebase');
         return {
           success: false,
           message: 'Failed to create account',
@@ -412,6 +412,69 @@ class ApiService {
         success: false,
         message: error.message || 'Profile update failed',
       };
+    }
+  }
+
+  // Check if email already exists (excluding current user)
+  async checkEmailExists(email, excludeUserId = null) {
+    try {
+      const response = await this.request('/users');
+      let users = [];
+      
+      // Handle Firebase response format
+      if (Array.isArray(response)) {
+        users = response;
+      } else if (response && typeof response === 'object' && response !== null) {
+        users = Object.keys(response).map(key => ({
+          firebaseKey: key,
+          ...response[key]
+        }));
+      }
+      
+      // Find user with the same email (excluding current user)
+      const existingUser = users.find(u => 
+        u.email && u.email.toLowerCase() === email.toLowerCase() && 
+        (u.id || u.firebaseKey) !== excludeUserId
+      );
+      
+      return existingUser ? true : false;
+    } catch (error) {
+      console.error('Error checking email exists:', error);
+      return false; // Return false on error to not block valid updates
+    }
+  }
+
+  // Check if phone number already exists (excluding current user)
+  async checkPhoneExists(phone, excludeUserId = null) {
+    try {
+      const response = await this.request('/users');
+      let users = [];
+      
+      // Handle Firebase response format
+      if (Array.isArray(response)) {
+        users = response;
+      } else if (response && typeof response === 'object' && response !== null) {
+        users = Object.keys(response).map(key => ({
+          firebaseKey: key,
+          ...response[key]
+        }));
+      }
+      
+      // Clean and normalize phone numbers for comparison
+      const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+      
+      // Find user with the same phone number (excluding current user)
+      const existingUser = users.find(u => {
+        if (!u.phone) return false;
+        const cleanExistingPhone = u.phone.replace(/[\s\-\(\)\+]/g, '');
+        return cleanExistingPhone === cleanPhone && 
+               (u.id || u.firebaseKey) !== excludeUserId;
+      });
+      
+      return existingUser ? true : false;
+    } catch (error) {
+      console.error('Error checking phone exists:', error);
+      return false; // Return false on error to not block valid updates
     }
   }
 }

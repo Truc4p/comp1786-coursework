@@ -13,11 +13,13 @@ import {
 } from 'react-native';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../context/AuthContext';
+import ApiService from '../services/api';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, updateProfile, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [validating, setValidating] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -43,7 +45,7 @@ const ProfileScreen = ({ navigation }) => {
     }));
   };
 
-  const validateForm = () => {
+  const validateForm = async () => {
     const { firstName, lastName, email, phone } = formData;
 
     if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim()) {
@@ -61,6 +63,36 @@ const ProfileScreen = ({ navigation }) => {
       return false;
     }
 
+    // Check if email or phone changed from original values
+    const emailChanged = user.email !== email;
+    const phoneChanged = user.phone !== phone;
+
+    if (emailChanged || phoneChanged) {
+      try {
+        // Check if email already exists (excluding current user)
+        if (emailChanged) {
+          const emailExists = await ApiService.checkEmailExists(email, user.id || user.firebaseKey);
+          if (emailExists) {
+            Alert.alert('Error', 'This email address is already registered by another user');
+            return false;
+          }
+        }
+
+        // Check if phone already exists (excluding current user)
+        if (phoneChanged) {
+          const phoneExists = await ApiService.checkPhoneExists(phone, user.id || user.firebaseKey);
+          if (phoneExists) {
+            Alert.alert('Error', 'This phone number is already registered by another user');
+            return false;
+          }
+        }
+      } catch (error) {
+        console.error('Validation error:', error);
+        Alert.alert('Error', 'Unable to validate email/phone. Please try again.');
+        return false;
+      }
+    }
+
     return true;
   };
 
@@ -70,12 +102,22 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const isValidPhone = (phone) => {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+    // Remove all spaces, dashes, parentheses, and other formatting
+    const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+    
+    // Check if it's between 7 and 15 digits (international standard)
+    const phoneRegex = /^\d{7,15}$/;
+    return phoneRegex.test(cleanPhone);
   };
 
   const handleSaveProfile = async () => {
-    if (!validateForm()) {
+    // Show loading for validation
+    setValidating(true);
+    
+    const isValid = await validateForm();
+    setValidating(false);
+    
+    if (!isValid) {
       return;
     }
 
@@ -98,7 +140,15 @@ const ProfileScreen = ({ navigation }) => {
       'Are you sure you want to sign out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', style: 'destructive', onPress: logout },
+        { 
+          text: 'Sign Out', 
+          style: 'destructive', 
+          onPress: async () => {
+            await logout();
+            // Navigate to home immediately after logout
+            navigation.navigate('ClassList');
+          }
+        },
       ]
     );
   };
@@ -118,6 +168,10 @@ const ProfileScreen = ({ navigation }) => {
 
   if (loading) {
     return <LoadingSpinner message="Updating profile..." />;
+  }
+
+  if (validating) {
+    return <LoadingSpinner message="Validating email and phone..." />;
   }
 
   if (!user) {
@@ -220,10 +274,13 @@ const ProfileScreen = ({ navigation }) => {
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.button, styles.saveButton]}
+                  style={[styles.button, styles.saveButton, (loading || validating) && styles.saveButtonDisabled]}
                   onPress={handleSaveProfile}
+                  disabled={loading || validating}
                 >
-                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                  <Text style={styles.saveButtonText}>
+                    {validating ? 'Validating...' : loading ? 'Saving...' : 'Save Changes'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -361,6 +418,10 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: '#def4f7',
     marginLeft: 10,
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#e0e0e0',
+    opacity: 0.6,
   },
   saveButtonText: {
     color: '#661a72',
