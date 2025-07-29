@@ -70,8 +70,12 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   const isValidPhone = (phone) => {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+    // Remove all spaces, dashes, parentheses, and other formatting
+    const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+    
+    // Check if it's between 7 and 15 digits (international standard)
+    const phoneRegex = /^\d{7,15}$/;
+    return phoneRegex.test(cleanPhone);
   };
 
   const handleRegister = async () => {
