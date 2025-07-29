@@ -10,11 +10,12 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 8; // Added sync fields for cloud synchronization
+    private static final int DATABASE_VERSION = 9; // Added pending deletions table for sync
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
     private static final String TABLE_CLASS_INSTANCES = "class_instances";
+    private static final String TABLE_PENDING_DELETIONS = "pending_deletions";
     
     // Column names for yoga_classes table
     private static final String KEY_ID = "id";
@@ -48,6 +49,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Sync columns for class_instances
     private static final String KEY_INSTANCE_LAST_MODIFIED = "last_modified";
     private static final String KEY_INSTANCE_NEEDS_SYNC = "needs_sync";
+    
+    // Column names for pending_deletions table
+    private static final String KEY_DELETION_ID = "id";
+    private static final String KEY_DELETION_ITEM_TYPE = "item_type"; // "class" or "instance"
+    private static final String KEY_DELETION_ITEM_ID = "item_id";
+    private static final String KEY_DELETION_CLOUD_ID = "cloud_id";
+    private static final String KEY_DELETION_TIMESTAMP = "deletion_timestamp";
     private static final String KEY_INSTANCE_CLOUD_ID = "cloud_id";
 
     public DatabaseHelper(Context context) {
@@ -99,6 +107,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_INSTANCE_CLOUD_ID + " TEXT,"
                 + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
         db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
+        
+        // Create pending deletions table
+        String CREATE_PENDING_DELETIONS_TABLE = "CREATE TABLE " + TABLE_PENDING_DELETIONS + "("
+                + KEY_DELETION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_DELETION_ITEM_TYPE + " TEXT NOT NULL,"
+                + KEY_DELETION_ITEM_ID + " INTEGER NOT NULL,"
+                + KEY_DELETION_CLOUD_ID + " TEXT,"
+                + KEY_DELETION_TIMESTAMP + " INTEGER DEFAULT 0)";
+        db.execSQL(CREATE_PENDING_DELETIONS_TABLE);
     }
 
     @Override
@@ -144,8 +161,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
         }
         
+        // Add pending deletions table for version 9
+        if (oldVersion < 9) {
+            String CREATE_PENDING_DELETIONS_TABLE = "CREATE TABLE " + TABLE_PENDING_DELETIONS + "("
+                    + KEY_DELETION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + KEY_DELETION_ITEM_TYPE + " TEXT NOT NULL,"
+                    + KEY_DELETION_ITEM_ID + " INTEGER NOT NULL,"
+                    + KEY_DELETION_CLOUD_ID + " TEXT,"
+                    + KEY_DELETION_TIMESTAMP + " INTEGER DEFAULT 0)";
+            db.execSQL(CREATE_PENDING_DELETIONS_TABLE);
+        }
+        
         // Future upgrade logic can be added here
-        // if (oldVersion < 9) {
+        // if (oldVersion < 10) {
         //     // Add future schema changes here
         // }
     }
@@ -156,6 +184,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // This is typically used during development when you need to go back to an earlier version
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PENDING_DELETIONS);
         onCreate(db);
     }
 
@@ -302,19 +331,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Delete a yoga class
     public void deleteYogaClass(long id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        // First delete all associated class instances
-        deleteAllInstancesForYogaClass(id);
-        // Then delete the yoga class
-        db.delete(TABLE_YOGA_CLASSES, KEY_ID + " = ?", new String[]{String.valueOf(id)});
-        db.close();
+        try {
+            // First, get the class info to check if it has a cloud ID (using same connection)
+            String cloudId = null;
+            Cursor cursor = db.query(TABLE_YOGA_CLASSES, new String[]{KEY_CLOUD_ID}, 
+                                   KEY_ID + "=?", new String[]{String.valueOf(id)}, 
+                                   null, null, null, null);
+            
+            if (cursor != null && cursor.moveToFirst()) {
+                cloudId = cursor.getString(cursor.getColumnIndexOrThrow(KEY_CLOUD_ID));
+                cursor.close();
+            }
+            
+            // Record the deletion for cloud sync if it has a cloud ID
+            if (cloudId != null && !cloudId.isEmpty()) {
+                ContentValues deletionValues = new ContentValues();
+                deletionValues.put(KEY_DELETION_ITEM_TYPE, "class");
+                deletionValues.put(KEY_DELETION_ITEM_ID, id);
+                deletionValues.put(KEY_DELETION_CLOUD_ID, cloudId);
+                deletionValues.put(KEY_DELETION_TIMESTAMP, System.currentTimeMillis());
+                db.insert(TABLE_PENDING_DELETIONS, null, deletionValues);
+            }
+            
+            // Delete associated instances using the same connection
+            db.delete(TABLE_CLASS_INSTANCES, KEY_YOGA_CLASS_ID + " = ?", new String[]{String.valueOf(id)});
+            // Delete the yoga class
+            db.delete(TABLE_YOGA_CLASSES, KEY_ID + " = ?", new String[]{String.valueOf(id)});
+        } finally {
+            db.close();
+        }
     }
 
     // Reset database (delete all data)
     public void resetDatabase() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_CLASS_INSTANCES);
-        db.execSQL("DELETE FROM " + TABLE_YOGA_CLASSES);
-        db.close();
+        try {
+            db.execSQL("DELETE FROM " + TABLE_CLASS_INSTANCES);
+            db.execSQL("DELETE FROM " + TABLE_YOGA_CLASSES);
+        } finally {
+            db.close();
+        }
     }
 
     // Get count of yoga classes
@@ -424,15 +480,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Delete a class instance
     public void deleteClassInstance(long id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CLASS_INSTANCES, KEY_INSTANCE_ID + " = ?", new String[]{String.valueOf(id)});
-        db.close();
+        try {
+            db.delete(TABLE_CLASS_INSTANCES, KEY_INSTANCE_ID + " = ?", new String[]{String.valueOf(id)});
+        } finally {
+            db.close();
+        }
     }
     
     // Delete all instances for a yoga class
     public void deleteAllInstancesForYogaClass(long yogaClassId) {
         SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            db.delete(TABLE_CLASS_INSTANCES, KEY_YOGA_CLASS_ID + " = ?", new String[]{String.valueOf(yogaClassId)});
+        } finally {
+            db.close();
+        }
+    }
+    
+    // Delete all instances for a yoga class using existing database connection
+    private void deleteAllInstancesForYogaClass(SQLiteDatabase db, long yogaClassId) {
         db.delete(TABLE_CLASS_INSTANCES, KEY_YOGA_CLASS_ID + " = ?", new String[]{String.valueOf(yogaClassId)});
-        db.close();
     }
     
     // Get count of class instances for a yoga class
@@ -801,5 +868,57 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.update(TABLE_CLASS_INSTANCES, values, KEY_INSTANCE_ID + " = ?",
                 new String[]{String.valueOf(instanceId)});
         db.close();
+    }
+    
+    /**
+     * Get all pending deletions that need to be synced to cloud
+     */
+    public List<PendingDeletion> getPendingDeletions() {
+        List<PendingDeletion> deletions = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_PENDING_DELETIONS;
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        
+        if (cursor.moveToFirst()) {
+            do {
+                PendingDeletion deletion = new PendingDeletion();
+                deletion.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_DELETION_ID)));
+                deletion.setItemType(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DELETION_ITEM_TYPE)));
+                deletion.setItemId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_DELETION_ITEM_ID)));
+                deletion.setCloudId(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DELETION_CLOUD_ID)));
+                deletion.setTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_DELETION_TIMESTAMP)));
+                
+                deletions.add(deletion);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return deletions;
+    }
+    
+    /**
+     * Remove a pending deletion after successful cloud sync
+     */
+    public void removePendingDeletion(long deletionId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            db.delete(TABLE_PENDING_DELETIONS, KEY_DELETION_ID + " = ?", 
+                     new String[]{String.valueOf(deletionId)});
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Clear all pending deletions (use with caution)
+     */
+    public void clearAllPendingDeletions() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            db.delete(TABLE_PENDING_DELETIONS, null, null);
+        } finally {
+            db.close();
+        }
     }
 }
