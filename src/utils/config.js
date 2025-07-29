@@ -2,10 +2,7 @@
 export const CONFIG = {
   // Replace this with your actual cloud service URL
   API_BASE_URL: "https://yogaapp-12d2b-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  
-  // Alternative local development URL
-  // API_BASE_URL: 'http://localhost:3000/api',
-  
+
   // App settings
   APP_NAME: 'Yoga Studio',
   VERSION: '1.0.0',

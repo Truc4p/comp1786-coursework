@@ -31,137 +31,31 @@ const ClassListScreen = ({ navigation }) => {
   const loadClasses = useCallback(async () => {
     try {
       setLoading(true);
-      // console.log('Loading classes from Firebase...');
+      console.log('Loading classes from Firebase...');
       const response = await ApiService.getYogaClasses();
-    //   console.log('API response received:', response);
+      console.log('API response received:', response);
+      console.log('Response type:', typeof response, 'Length:', response?.length);
       
-      // Handle Firebase response format
-      let classData = [];
-      if (Array.isArray(response)) {
-        classData = response;
-        // console.log('Response is array, using directly:', classData);
-      } else if (response && typeof response === 'object') {
-        // If response has a data property
-        classData = response.data || response || [];
-        // console.log('Response is object, extracted data:', classData);
-      }
-      
-    //   console.log('Final class data length:', classData.length);
-      
-      // If we get data from Firebase, use it
-      if (classData.length > 0) {
-        // console.log('Using Firebase data:', classData);
-        setClasses(classData);
+      // Handle the response
+      if (response && Array.isArray(response) && response.length > 0) {
+        console.log('Using Firebase data with', response.length, 'classes');
+        setClasses(response);
       } else {
-        // console.log('No classes found in Firebase, using demo data');
-        // Use mock data if no data in Firebase yet
-        const mockClasses = [
-          {
-            id: 'demo-1',
-            name: 'Hatha Yoga Fundamentals',
-            instructor: 'Sarah Johnson',
-            date: '2025-07-22',
-            time: '09:00',
-            duration: 60,
-            capacity: 15,
-            availableSpots: 8,
-            price: 25,
-            level: 'Beginner',
-            dayOfWeek: 'Monday',
-            description: 'A gentle introduction to basic yoga postures and breathing techniques.',
-            image: null,
-          },
-          {
-            id: 'demo-2',
-            name: 'Vinyasa Flow',
-            instructor: 'Mike Chen',
-            date: '2025-07-22',
-            time: '18:30',
-            duration: 75,
-            capacity: 20,
-            availableSpots: 12,
-            price: 30,
-            level: 'Intermediate',
-            dayOfWeek: 'Monday',
-            description: 'Dynamic flowing sequences that link movement with breath.',
-            image: null,
-          },
-          {
-            id: 'demo-3',
-            name: 'Restorative Yoga',
-            instructor: 'Emma Davis',
-            date: '2025-07-23',
-            time: '19:00',
-            duration: 90,
-            capacity: 12,
-            availableSpots: 5,
-            price: 35,
-            level: 'All Levels',
-            dayOfWeek: 'Tuesday',
-            description: 'Relaxing poses held for longer periods to promote deep relaxation.',
-            image: null,
-          },
-          {
-            id: 'demo-4',
-            name: 'Power Yoga',
-            instructor: 'Jake Wilson',
-            date: '2025-07-24',
-            time: '07:00',
-            duration: 60,
-            capacity: 18,
-            availableSpots: 0,
-            price: 28,
-            level: 'Advanced',
-            dayOfWeek: 'Wednesday',
-            description: 'High-intensity yoga workout that builds strength and flexibility.',
-            image: null,
-          },
-          {
-            id: 'demo-5',
-            name: 'Yin Yoga',
-            instructor: 'Lisa Park',
-            date: '2025-07-25',
-            time: '10:30',
-            duration: 75,
-            capacity: 15,
-            availableSpots: 10,
-            price: 32,
-            level: 'All Levels',
-            dayOfWeek: 'Thursday',
-            description: 'Passive, meditative practice targeting deep connective tissues.',
-            image: null,
-          },
-        ];
-        setClasses(mockClasses);
+        console.log('No classes found in Firebase response');
+        // Show empty state instead of mock data
+        setClasses([]);
         Alert.alert(
-          'Demo Mode',
-          'Connected to Firebase but no classes found. Using demo data. Check console logs for debugging info.'
+          'No Classes Available',
+          'No yoga classes found in the database. Please check back later or contact support.'
         );
       }
     } catch (error) {
       console.error('Error loading classes:', error);
-      // Use mock data as fallback
-      const mockClasses = [
-        {
-          id: 'demo-1',
-          name: 'Hatha Yoga Fundamentals',
-          instructor: 'Sarah Johnson',
-          date: '2025-07-22',
-          time: '09:00',
-          duration: 60,
-          capacity: 15,
-          availableSpots: 8,
-          price: 25,
-          level: 'Beginner',
-          dayOfWeek: 'Monday',
-          description: 'A gentle introduction to basic yoga postures and breathing techniques.',
-          image: null,
-        },
-      ];
-      setClasses(mockClasses);
+      // Show empty state with error message
+      setClasses([]);
       Alert.alert(
         'Connection Error',
-        `Failed to connect to Firebase: ${error.message}. Using demo data. Check console logs for more details.`
+        `Failed to connect to Firebase: ${error.message}. Please check your internet connection and try again.`
       );
     } finally {
       setLoading(false);
@@ -312,7 +206,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#fce4c9',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',

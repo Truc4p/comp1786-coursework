@@ -91,8 +91,10 @@ const ClassDetailsScreen = ({ route, navigation }) => {
             
             <View style={styles.detailGrid}>
               <View style={styles.detailItem}>
-                <Text style={styles.detailLabel}>Date</Text>
-                <Text style={styles.detailValue}>{formatDate(date)}</Text>
+                <View style={styles.detailContent}>
+                  <Text style={styles.detailLabel}>Date</Text>
+                  <Text style={styles.detailValue}>{formatDate(date)}</Text>
+                </View>
               </View>
 
               <View style={styles.detailItem}>

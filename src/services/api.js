@@ -44,6 +44,13 @@ class ApiService {
         return data;
       }
       
+      // If data is an array, filter out null values and ensure proper structure
+      if (Array.isArray(data)) {
+        const filteredData = data.filter(item => item !== null && item !== undefined);
+        // console.log('Filtered Firebase array data:', filteredData);
+        return filteredData;
+      }
+      
       // If data is an object (Firebase format) and NOT a POST response, convert to array
       if (typeof data === 'object' && !Array.isArray(data) && options.method !== 'POST') {
         const arrayData = Object.keys(data).map(key => ({ 
@@ -105,21 +112,51 @@ class ApiService {
   // Get all yoga classes
   async getYogaClasses() {
     try {
-      // First try the nested structure from your admin app
-      const response = await this.request('/sync/yogaClasses');
+      // Try the direct yoga-classes path first (this matches your Firebase structure)
+      const response = await this.request('/yoga-classes');
+      
       if (response && response.length > 0) {
-        // console.log('Found admin app data:', response);
-        // Map the admin app data structure to customer app format
-        const mappedData = this.mapAdminDataToCustomerFormat(response);
+        // console.log('Found Firebase data:', response);
+        
+        // Map the Firebase data structure to customer app format
+        const mappedData = response.map(yogaClass => {
+          // Handle the date - if it doesn't exist, use today's date
+          let classDate = new Date().toISOString().split('T')[0];
+          if (yogaClass.date) {
+            classDate = yogaClass.date;
+          }
+          
+          return {
+            id: yogaClass.id || Math.random().toString(),
+            name: yogaClass.classType || 'Yoga Class',
+            instructor: yogaClass.instructor || 'Instructor',
+            date: classDate,
+            time: yogaClass.time || '09:00',
+            duration: yogaClass.duration || 60,
+            capacity: yogaClass.capacity || 10,
+            availableSpots: Math.max(0, (yogaClass.capacity || 10) - Math.floor(Math.random() * 5)), // Random available spots
+            price: yogaClass.price || 25,
+            level: yogaClass.difficulty || 'All Levels',
+            dayOfWeek: yogaClass.dayOfWeek || 'Monday',
+            description: yogaClass.description || 'A wonderful yoga class experience.',
+            image: null,
+            locationAddress: yogaClass.locationAddress,
+            latitude: yogaClass.latitude,
+            longitude: yogaClass.longitude
+          };
+        });
+        
         // console.log('Mapped data for customer app:', mappedData);
         return mappedData;
       }
+      
+      // If no data found, return empty array (don't show demo mode)
+      return [];
+      
     } catch (error) {
-      // console.log('Trying sync/yogaClasses path failed, trying direct yogaClasses path');
+      console.error('Error fetching yoga classes:', error);
+      throw error; // Let the calling code handle the error
     }
-    
-    // Fallback to direct yogaClasses path
-    return this.request('/yogaClasses');
   }
 
   // Get yoga classes by day of the week
