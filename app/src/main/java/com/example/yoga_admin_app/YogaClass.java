@@ -29,46 +29,6 @@ public class YogaClass {
     // Constructor
     public YogaClass() {}
 
-    public YogaClass(String dayOfWeek, String time, int capacity, int duration, 
-                     double price, String classType, String description, 
-                     String instructor, String difficulty) {
-        this.dayOfWeek = dayOfWeek;
-        this.time = time;
-        this.capacity = capacity;
-        this.duration = duration;
-        this.price = price;
-        this.classType = classType;
-        this.description = description;
-        this.instructor = instructor;
-        this.difficulty = difficulty;
-        this.latitude = 0.0;
-        this.longitude = 0.0;
-        this.locationAddress = "";
-        this.lastModified = System.currentTimeMillis();
-        this.needsSync = true;
-    }
-
-    // Full constructor with location
-    public YogaClass(String dayOfWeek, String time, int capacity, int duration, 
-                     double price, String classType, String description, 
-                     String instructor, String difficulty, double latitude, 
-                     double longitude, String locationAddress) {
-        this.dayOfWeek = dayOfWeek;
-        this.time = time;
-        this.capacity = capacity;
-        this.duration = duration;
-        this.price = price;
-        this.classType = classType;
-        this.description = description;
-        this.instructor = instructor;
-        this.difficulty = difficulty;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.locationAddress = locationAddress;
-        this.lastModified = System.currentTimeMillis();
-        this.needsSync = true;
-    }
-
     // Getters and setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
