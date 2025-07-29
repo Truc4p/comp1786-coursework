@@ -12,6 +12,7 @@ import {
 import YogaClassCard from '../components/YogaClassCard';
 import SearchFilter from '../components/SearchFilter';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PasswordMigrationDebug from '../components/PasswordMigrationDebug';
 import ApiService from '../services/api';
 import { filterClassesBySearchCriteria } from '../utils/helpers';
 import { useCart } from '../context/CartContext';
@@ -33,7 +34,7 @@ const ClassListScreen = ({ navigation }) => {
       setLoading(true);
       console.log('Loading classes from Firebase...');
       const response = await ApiService.getYogaClasses();
-      console.log('API response received:', response);
+      // console.log('API response received:', response);
       console.log('Response type:', typeof response, 'Length:', response?.length);
       
       // Handle the response
@@ -131,6 +132,7 @@ const ClassListScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <>
+      <PasswordMigrationDebug />
       <View style={styles.filterInfo}>
         <Text style={styles.filterInfoText}>
           Showing: {getActiveFilterText()} ({filteredClasses.length} classes)
