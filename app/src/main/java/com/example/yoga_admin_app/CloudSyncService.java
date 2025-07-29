@@ -926,6 +926,256 @@ public class CloudSyncService {
                class1.getDifficulty().equals(class2.getDifficulty());
     }
     
+    // ==================== BOOKING SYNCHRONIZATION METHODS ====================
+    
+    /**
+     * Sync bookings from Firebase (read-only for admin app)
+     * Admin app only reads bookings created by customer app
+     */
+    public void syncBookingsFromFirebase(SyncCallback callback) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            callback.onError("No internet connection available");
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                callback.onProgress("Downloading bookings from cloud...");
+                
+                // Get bookings from Firebase
+                String bookingsUrl = BASE_URL + "bookings.json";
+                String response = makeGetRequest(bookingsUrl);
+                
+                if (response == null || response.equals("null") || response.trim().isEmpty()) {
+                    callback.onSuccess("No bookings found in cloud");
+                    return;
+                }
+                
+                JSONObject bookingsJson = new JSONObject(response);
+                int syncedCount = 0;
+                int newCount = 0;
+                
+                Iterator<String> keys = bookingsJson.keys();
+                while (keys.hasNext()) {
+                    String firebaseKey = keys.next();
+                    JSONObject bookingJson = bookingsJson.getJSONObject(firebaseKey);
+                    
+                    // Convert JSON to Booking object
+                    Booking booking = jsonToBooking(bookingJson);
+                    if (booking != null) {
+                        // Check if booking already exists
+                        List<Booking> existingBookings = databaseHelper.getAllBookings();
+                        boolean exists = false;
+                        
+                        for (Booking existingBooking : existingBookings) {
+                            if (existingBooking.getBookingId().equals(booking.getBookingId())) {
+                                exists = true;
+                                // Update if cloud version is newer
+                                if (booking.getLastModified() > existingBooking.getLastModified()) {
+                                    updateBookingInDatabase(booking);
+                                    syncedCount++;
+                                }
+                                break;
+                            }
+                        }
+                        
+                        if (!exists) {
+                            // Add new booking
+                            long result = databaseHelper.addBooking(booking);
+                            if (result != -1) {
+                                newCount++;
+                            }
+                        }
+                    }
+                }
+                
+                String message = String.format("Bookings sync completed. %d new, %d updated", newCount, syncedCount);
+                callback.onSuccess(message);
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error syncing bookings from Firebase", e);
+                callback.onError("Failed to sync bookings: " + e.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Update booking status in Firebase (admin can update booking status)
+     */
+    public void updateBookingStatusInFirebase(String bookingId, String newStatus, SyncCallback callback) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            callback.onError("No internet connection available");
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                callback.onProgress("Updating booking status in cloud...");
+                
+                // First find the booking in Firebase
+                String bookingsUrl = BASE_URL + "bookings.json";
+                String response = makeGetRequest(bookingsUrl);
+                
+                if (response == null || response.equals("null")) {
+                    callback.onError("Booking not found in cloud");
+                    return;
+                }
+                
+                JSONObject bookingsJson = new JSONObject(response);
+                String firebaseKey = null;
+                
+                // Find the booking by bookingId
+                Iterator<String> keys = bookingsJson.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    JSONObject bookingJson = bookingsJson.getJSONObject(key);
+                    if (bookingJson.getString("bookingId").equals(bookingId)) {
+                        firebaseKey = key;
+                        break;
+                    }
+                }
+                
+                if (firebaseKey == null) {
+                    callback.onError("Booking not found in cloud");
+                    return;
+                }
+                
+                // Update the booking status
+                String updateUrl = BASE_URL + "bookings/" + firebaseKey + ".json";
+                JSONObject updateData = new JSONObject();
+                updateData.put("status", newStatus);
+                updateData.put("updatedAt", System.currentTimeMillis());
+                updateData.put("lastModified", System.currentTimeMillis());
+                
+                String updateResponse = makePatchRequest(updateUrl, updateData.toString());
+                
+                if (updateResponse != null) {
+                    // Update local database
+                    databaseHelper.updateBookingStatus(bookingId, newStatus);
+                    callback.onSuccess("Booking status updated successfully");
+                } else {
+                    callback.onError("Failed to update booking status in cloud");
+                }
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating booking status", e);
+                callback.onError("Failed to update booking status: " + e.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Convert JSON object to Booking
+     */
+    private Booking jsonToBooking(JSONObject json) {
+        try {
+            Booking booking = new Booking();
+            
+            booking.setBookingId(json.optString("bookingId", ""));
+            booking.setCustomerName(json.optString("customerName", ""));
+            booking.setCustomerEmail(json.optString("customerEmail", ""));
+            booking.setCustomerPhone(json.optString("customerPhone", ""));
+            booking.setClassInstanceId(json.optString("classInstanceId", ""));
+            booking.setClassName(json.optString("className", ""));
+            booking.setBookingDate(json.optString("bookingDate", ""));
+            booking.setBookingTime(json.optString("bookingTime", ""));
+            booking.setStatus(json.optString("status", "confirmed"));
+            booking.setPaymentStatus(json.optString("paymentStatus", "pending"));
+            booking.setPaymentAmount(json.optDouble("paymentAmount", 0.0));
+            booking.setPaymentMethod(json.optString("paymentMethod", ""));
+            booking.setNotes(json.optString("notes", ""));
+            booking.setCreatedAt(json.optString("createdAt", ""));
+            booking.setUpdatedAt(json.optString("updatedAt", ""));
+            booking.setSynced(true); // Coming from Firebase, so it's synced
+            booking.setLastModified(json.optLong("lastModified", System.currentTimeMillis()));
+            
+            return booking;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting JSON to Booking", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Update booking in database
+     */
+    private void updateBookingInDatabase(Booking booking) {
+        // Delete and re-add (simpler than complex update logic)
+        databaseHelper.deleteBooking(booking.getBookingId());
+        databaseHelper.addBooking(booking);
+    }
+    
+    /**
+     * Make PATCH request for partial updates
+     */
+    private String makePatchRequest(String urlString, String data) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PATCH");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+            
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = data.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String responseLine;
+                    while ((responseLine = br.readLine()) != null) {
+                        response.append(responseLine.trim());
+                    }
+                    return response.toString();
+                }
+            } else {
+                Log.e(TAG, "PATCH request failed with response code: " + responseCode);
+                return null;
+            }
+            
+        } catch (IOException e) {
+            Log.e(TAG, "Error making PATCH request", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Make GET request
+     */
+    private String makeGetRequest(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(15000);
+            
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String responseLine;
+                    while ((responseLine = br.readLine()) != null) {
+                        response.append(responseLine.trim());
+                    }
+                    return response.toString();
+                }
+            } else {
+                Log.e(TAG, "GET request failed with response code: " + responseCode);
+                return null;
+            }
+            
+        } catch (IOException e) {
+            Log.e(TAG, "Error making GET request", e);
+            return null;
+        }
+    }
+    
     public void shutdown() {
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdown();

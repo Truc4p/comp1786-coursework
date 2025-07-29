@@ -10,12 +10,13 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 9; // Added pending deletions table for sync
+    private static final int DATABASE_VERSION = 11; // Fixed bookings table schema
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
     private static final String TABLE_CLASS_INSTANCES = "class_instances";
     private static final String TABLE_PENDING_DELETIONS = "pending_deletions";
+    private static final String TABLE_BOOKINGS = "bookings";
     
     // Column names for yoga_classes table
     private static final String KEY_ID = "id";
@@ -49,6 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Sync columns for class_instances
     private static final String KEY_INSTANCE_LAST_MODIFIED = "last_modified";
     private static final String KEY_INSTANCE_NEEDS_SYNC = "needs_sync";
+    private static final String KEY_INSTANCE_CLOUD_ID = "cloud_id";
     
     // Column names for pending_deletions table
     private static final String KEY_DELETION_ID = "id";
@@ -56,7 +58,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_DELETION_ITEM_ID = "item_id";
     private static final String KEY_DELETION_CLOUD_ID = "cloud_id";
     private static final String KEY_DELETION_TIMESTAMP = "deletion_timestamp";
-    private static final String KEY_INSTANCE_CLOUD_ID = "cloud_id";
+    
+    // Column names for bookings table
+    private static final String KEY_BOOKING_ID = "id";
+    private static final String KEY_BOOKING_CLASS_INSTANCE_ID = "class_instance_id";
+    private static final String KEY_BOOKING_CUSTOMER_NAME = "customer_name";
+    private static final String KEY_BOOKING_CUSTOMER_EMAIL = "customer_email";
+    private static final String KEY_BOOKING_CUSTOMER_PHONE = "customer_phone";
+    private static final String KEY_BOOKING_DATE = "booking_date";
+    private static final String KEY_BOOKING_CLASS_DATE = "class_date";
+    private static final String KEY_BOOKING_CLASS_TIME = "class_time";
+    private static final String KEY_BOOKING_CLASS_NAME = "class_name";
+    private static final String KEY_BOOKING_INSTRUCTOR = "instructor";
+    private static final String KEY_BOOKING_STATUS = "status";
+    private static final String KEY_BOOKING_PRICE_PAID = "price_paid";
+    private static final String KEY_BOOKING_PAYMENT_METHOD = "payment_method";
+    private static final String KEY_BOOKING_REFERENCE = "booking_reference";
+    private static final String KEY_BOOKING_LAST_MODIFIED = "last_modified";
+    private static final String KEY_BOOKING_NEEDS_SYNC = "needs_sync";
+    private static final String KEY_BOOKING_CLOUD_ID = "cloud_id";
+
+    // Column names for bookings table (new structure)
+    private static final String COLUMN_BOOKING_TABLE_ID = "id";
+    private static final String COLUMN_BOOKING_ID = "booking_id";
+    private static final String COLUMN_BOOKING_CUSTOMER_NAME = "customer_name";
+    private static final String COLUMN_BOOKING_CUSTOMER_EMAIL = "customer_email";
+    private static final String COLUMN_BOOKING_CUSTOMER_PHONE = "customer_phone";
+    private static final String COLUMN_BOOKING_CLASS_INSTANCE_ID = "class_instance_id";
+    private static final String COLUMN_BOOKING_CLASS_NAME = "class_name";
+    private static final String COLUMN_BOOKING_DATE = "booking_date";
+    private static final String COLUMN_BOOKING_TIME = "booking_time";
+    private static final String COLUMN_BOOKING_STATUS = "status";
+    private static final String COLUMN_BOOKING_PAYMENT_STATUS = "payment_status";
+    private static final String COLUMN_BOOKING_PAYMENT_AMOUNT = "payment_amount";
+    private static final String COLUMN_BOOKING_PAYMENT_METHOD = "payment_method";
+    private static final String COLUMN_BOOKING_NOTES = "notes";
+    private static final String COLUMN_BOOKING_CREATED_AT = "created_at";
+    private static final String COLUMN_BOOKING_UPDATED_AT = "updated_at";
+    private static final String COLUMN_BOOKING_IS_SYNCED = "is_synced";
+    private static final String COLUMN_BOOKING_LAST_MODIFIED = "last_modified";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -116,6 +156,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_DELETION_CLOUD_ID + " TEXT,"
                 + KEY_DELETION_TIMESTAMP + " INTEGER DEFAULT 0)";
         db.execSQL(CREATE_PENDING_DELETIONS_TABLE);
+        
+        // Create bookings table
+        String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
+                + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_BOOKING_ID + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
+                + COLUMN_BOOKING_CLASS_INSTANCE_ID + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_CLASS_NAME + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_DATE + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_TIME + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_STATUS + " TEXT DEFAULT 'confirmed',"
+                + COLUMN_BOOKING_PAYMENT_STATUS + " TEXT DEFAULT 'pending',"
+                + COLUMN_BOOKING_PAYMENT_AMOUNT + " REAL DEFAULT 0.0,"
+                + COLUMN_BOOKING_PAYMENT_METHOD + " TEXT,"
+                + COLUMN_BOOKING_NOTES + " TEXT,"
+                + COLUMN_BOOKING_CREATED_AT + " TEXT,"
+                + COLUMN_BOOKING_UPDATED_AT + " TEXT,"
+                + COLUMN_BOOKING_IS_SYNCED + " INTEGER DEFAULT 0,"
+                + COLUMN_BOOKING_LAST_MODIFIED + " INTEGER DEFAULT 0)";
+        db.execSQL(CREATE_BOOKINGS_TABLE);
     }
 
     @Override
@@ -172,8 +234,57 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL(CREATE_PENDING_DELETIONS_TABLE);
         }
         
+        // Add bookings table for version 10
+        if (oldVersion < 10) {
+            String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
+                    + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + COLUMN_BOOKING_ID + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
+                    + COLUMN_BOOKING_CLASS_INSTANCE_ID + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CLASS_NAME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_DATE + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_TIME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_STATUS + " TEXT DEFAULT 'confirmed',"
+                    + COLUMN_BOOKING_PAYMENT_STATUS + " TEXT DEFAULT 'pending',"
+                    + COLUMN_BOOKING_PAYMENT_AMOUNT + " REAL DEFAULT 0.0,"
+                    + COLUMN_BOOKING_PAYMENT_METHOD + " TEXT,"
+                    + COLUMN_BOOKING_NOTES + " TEXT,"
+                    + COLUMN_BOOKING_CREATED_AT + " TEXT,"
+                    + COLUMN_BOOKING_UPDATED_AT + " TEXT,"
+                    + COLUMN_BOOKING_IS_SYNCED + " INTEGER DEFAULT 0,"
+                    + COLUMN_BOOKING_LAST_MODIFIED + " INTEGER DEFAULT 0)";
+            db.execSQL(CREATE_BOOKINGS_TABLE);
+        }
+        
+        // Fix bookings table schema for version 11
+        if (oldVersion < 11) {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
+            String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
+                    + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + COLUMN_BOOKING_ID + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
+                    + COLUMN_BOOKING_CLASS_INSTANCE_ID + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CLASS_NAME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_DATE + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_TIME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_STATUS + " TEXT DEFAULT 'confirmed',"
+                    + COLUMN_BOOKING_PAYMENT_STATUS + " TEXT DEFAULT 'pending',"
+                    + COLUMN_BOOKING_PAYMENT_AMOUNT + " REAL DEFAULT 0.0,"
+                    + COLUMN_BOOKING_PAYMENT_METHOD + " TEXT,"
+                    + COLUMN_BOOKING_NOTES + " TEXT,"
+                    + COLUMN_BOOKING_CREATED_AT + " TEXT,"
+                    + COLUMN_BOOKING_UPDATED_AT + " TEXT,"
+                    + COLUMN_BOOKING_IS_SYNCED + " INTEGER DEFAULT 0,"
+                    + COLUMN_BOOKING_LAST_MODIFIED + " INTEGER DEFAULT 0)";
+            db.execSQL(CREATE_BOOKINGS_TABLE);
+        }
+        
         // Future upgrade logic can be added here
-        // if (oldVersion < 10) {
+        // if (oldVersion < 11) {
         //     // Add future schema changes here
         // }
     }
@@ -185,6 +296,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PENDING_DELETIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
         onCreate(db);
     }
 
@@ -917,6 +1029,245 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         try {
             db.delete(TABLE_PENDING_DELETIONS, null, null);
+        } finally {
+            db.close();
+        }
+    }
+    
+    // ==================== BOOKING MANAGEMENT METHODS ====================
+    
+    /**
+     * Add a new booking
+     */
+    public long addBooking(Booking booking) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_BOOKING_ID, booking.getBookingId());
+            values.put(COLUMN_BOOKING_CUSTOMER_NAME, booking.getCustomerName());
+            values.put(COLUMN_BOOKING_CUSTOMER_EMAIL, booking.getCustomerEmail());
+            values.put(COLUMN_BOOKING_CUSTOMER_PHONE, booking.getCustomerPhone());
+            values.put(COLUMN_BOOKING_CLASS_INSTANCE_ID, booking.getClassInstanceId());
+            values.put(COLUMN_BOOKING_CLASS_NAME, booking.getClassName());
+            values.put(COLUMN_BOOKING_DATE, booking.getBookingDate());
+            values.put(COLUMN_BOOKING_TIME, booking.getBookingTime());
+            values.put(COLUMN_BOOKING_STATUS, booking.getStatus());
+            values.put(COLUMN_BOOKING_PAYMENT_STATUS, booking.getPaymentStatus());
+            values.put(COLUMN_BOOKING_PAYMENT_AMOUNT, booking.getPaymentAmount());
+            values.put(COLUMN_BOOKING_PAYMENT_METHOD, booking.getPaymentMethod());
+            values.put(COLUMN_BOOKING_NOTES, booking.getNotes());
+            values.put(COLUMN_BOOKING_CREATED_AT, booking.getCreatedAt());
+            values.put(COLUMN_BOOKING_UPDATED_AT, booking.getUpdatedAt());
+            values.put(COLUMN_BOOKING_IS_SYNCED, booking.isSynced() ? 1 : 0);
+            values.put(COLUMN_BOOKING_LAST_MODIFIED, booking.getLastModified());
+            
+            return db.insert(TABLE_BOOKINGS, null, values);
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Get all bookings
+     */
+    public List<Booking> getAllBookings() {
+        List<Booking> bookingList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        
+        try {
+            String selectQuery = "SELECT * FROM " + TABLE_BOOKINGS + " ORDER BY " + COLUMN_BOOKING_DATE + " DESC, " + COLUMN_BOOKING_TIME + " DESC";
+            cursor = db.rawQuery(selectQuery, null);
+            
+            if (cursor.moveToFirst()) {
+                do {
+                    Booking booking = new Booking();
+                    booking.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_ID)));
+                    booking.setBookingId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID)));
+                    booking.setCustomerName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_NAME)));
+                    booking.setCustomerEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_EMAIL)));
+                    booking.setCustomerPhone(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_PHONE)));
+                    booking.setClassInstanceId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_INSTANCE_ID)));
+                    booking.setClassName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_NAME)));
+                    booking.setBookingDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE)));
+                    booking.setBookingTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME)));
+                    booking.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_STATUS)));
+                    booking.setPaymentStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_STATUS)));
+                    booking.setPaymentAmount(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_AMOUNT)));
+                    booking.setPaymentMethod(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_METHOD)));
+                    booking.setNotes(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_NOTES)));
+                    booking.setCreatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CREATED_AT)));
+                    booking.setUpdatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_UPDATED_AT)));
+                    booking.setSynced(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_IS_SYNCED)) == 1);
+                    booking.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_LAST_MODIFIED)));
+                    
+                    bookingList.add(booking);
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        
+        return bookingList;
+    }
+    
+    /**
+     * Get bookings for a specific class instance
+     */
+    public List<Booking> getBookingsForClassInstance(String classInstanceId) {
+        List<Booking> bookingList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        
+        try {
+            String selectQuery = "SELECT * FROM " + TABLE_BOOKINGS + 
+                               " WHERE " + COLUMN_BOOKING_CLASS_INSTANCE_ID + " = ?" +
+                               " ORDER BY " + COLUMN_BOOKING_CREATED_AT + " ASC";
+            cursor = db.rawQuery(selectQuery, new String[]{classInstanceId});
+            
+            if (cursor.moveToFirst()) {
+                do {
+                    Booking booking = new Booking();
+                    booking.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_ID)));
+                    booking.setBookingId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID)));
+                    booking.setCustomerName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_NAME)));
+                    booking.setCustomerEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_EMAIL)));
+                    booking.setCustomerPhone(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_PHONE)));
+                    booking.setClassInstanceId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_INSTANCE_ID)));
+                    booking.setClassName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_NAME)));
+                    booking.setBookingDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE)));
+                    booking.setBookingTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME)));
+                    booking.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_STATUS)));
+                    booking.setPaymentStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_STATUS)));
+                    booking.setPaymentAmount(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_AMOUNT)));
+                    booking.setPaymentMethod(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_METHOD)));
+                    booking.setNotes(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_NOTES)));
+                    booking.setCreatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CREATED_AT)));
+                    booking.setUpdatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_UPDATED_AT)));
+                    booking.setSynced(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_IS_SYNCED)) == 1);
+                    booking.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_LAST_MODIFIED)));
+                    
+                    bookingList.add(booking);
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        
+        return bookingList;
+    }
+    
+    /**
+     * Update booking status
+     */
+    public int updateBookingStatus(String bookingId, String newStatus) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_BOOKING_STATUS, newStatus);
+            values.put(COLUMN_BOOKING_UPDATED_AT, System.currentTimeMillis());
+            values.put(COLUMN_BOOKING_IS_SYNCED, 0); // Mark as not synced
+            values.put(COLUMN_BOOKING_LAST_MODIFIED, System.currentTimeMillis());
+            
+            return db.update(TABLE_BOOKINGS, values, COLUMN_BOOKING_ID + " = ?", new String[]{bookingId});
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Update booking payment status
+     */
+    public int updateBookingPaymentStatus(String bookingId, String paymentStatus) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_BOOKING_PAYMENT_STATUS, paymentStatus);
+            values.put(COLUMN_BOOKING_UPDATED_AT, System.currentTimeMillis());
+            values.put(COLUMN_BOOKING_IS_SYNCED, 0); // Mark as not synced
+            values.put(COLUMN_BOOKING_LAST_MODIFIED, System.currentTimeMillis());
+            
+            return db.update(TABLE_BOOKINGS, values, COLUMN_BOOKING_ID + " = ?", new String[]{bookingId});
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Get bookings that need to be synced
+     */
+    public List<Booking> getUnsyncedBookings() {
+        List<Booking> bookingList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        
+        try {
+            String selectQuery = "SELECT * FROM " + TABLE_BOOKINGS + " WHERE " + COLUMN_BOOKING_IS_SYNCED + " = 0";
+            cursor = db.rawQuery(selectQuery, null);
+            
+            if (cursor.moveToFirst()) {
+                do {
+                    Booking booking = new Booking();
+                    booking.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_ID)));
+                    booking.setBookingId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID)));
+                    booking.setCustomerName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_NAME)));
+                    booking.setCustomerEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_EMAIL)));
+                    booking.setCustomerPhone(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_PHONE)));
+                    booking.setClassInstanceId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_INSTANCE_ID)));
+                    booking.setClassName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_NAME)));
+                    booking.setBookingDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE)));
+                    booking.setBookingTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME)));
+                    booking.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_STATUS)));
+                    booking.setPaymentStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_STATUS)));
+                    booking.setPaymentAmount(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_AMOUNT)));
+                    booking.setPaymentMethod(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_METHOD)));
+                    booking.setNotes(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_NOTES)));
+                    booking.setCreatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CREATED_AT)));
+                    booking.setUpdatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_UPDATED_AT)));
+                    booking.setSynced(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_IS_SYNCED)) == 1);
+                    booking.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_LAST_MODIFIED)));
+                    
+                    bookingList.add(booking);
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        
+        return bookingList;
+    }
+    
+    /**
+     * Mark booking as synced
+     */
+    public void markBookingAsSynced(String bookingId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_BOOKING_IS_SYNCED, 1);
+            
+            db.update(TABLE_BOOKINGS, values, COLUMN_BOOKING_ID + " = ?", new String[]{bookingId});
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Delete a booking
+     */
+    public void deleteBooking(String bookingId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            db.delete(TABLE_BOOKINGS, COLUMN_BOOKING_ID + " = ?", new String[]{bookingId});
         } finally {
             db.close();
         }

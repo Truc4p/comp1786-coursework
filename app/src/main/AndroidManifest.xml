@@ -78,6 +78,12 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
         
+        <!-- Booking Activity -->
+        <activity
+            android:name=".BookingActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        
     </application>
 
 </manifest>
