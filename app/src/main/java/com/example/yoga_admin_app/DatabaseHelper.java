@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 12; // Added unique constraint for booking_id
+    private static final int DATABASE_VERSION = 13; // Simplified database schema - fresh start
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
@@ -60,25 +60,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_DELETION_TIMESTAMP = "deletion_timestamp";
     
     // Column names for bookings table
-    private static final String KEY_BOOKING_ID = "id";
-    private static final String KEY_BOOKING_CLASS_INSTANCE_ID = "class_instance_id";
-    private static final String KEY_BOOKING_CUSTOMER_NAME = "customer_name";
-    private static final String KEY_BOOKING_CUSTOMER_EMAIL = "customer_email";
-    private static final String KEY_BOOKING_CUSTOMER_PHONE = "customer_phone";
-    private static final String KEY_BOOKING_DATE = "booking_date";
-    private static final String KEY_BOOKING_CLASS_DATE = "class_date";
-    private static final String KEY_BOOKING_CLASS_TIME = "class_time";
-    private static final String KEY_BOOKING_CLASS_NAME = "class_name";
-    private static final String KEY_BOOKING_INSTRUCTOR = "instructor";
-    private static final String KEY_BOOKING_STATUS = "status";
-    private static final String KEY_BOOKING_PRICE_PAID = "price_paid";
-    private static final String KEY_BOOKING_PAYMENT_METHOD = "payment_method";
-    private static final String KEY_BOOKING_REFERENCE = "booking_reference";
-    private static final String KEY_BOOKING_LAST_MODIFIED = "last_modified";
-    private static final String KEY_BOOKING_NEEDS_SYNC = "needs_sync";
-    private static final String KEY_BOOKING_CLOUD_ID = "cloud_id";
-
-    // Column names for bookings table (new structure)
     private static final String COLUMN_BOOKING_TABLE_ID = "id";
     private static final String COLUMN_BOOKING_ID = "booking_id";
     private static final String COLUMN_BOOKING_CUSTOMER_NAME = "customer_name";
@@ -182,138 +163,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Fresh start approach - drop all existing tables and recreate
+        // This ensures a clean, consistent database schema for all users
+        // Note: This will cause data loss for existing users
+        
         // Enable foreign key constraints
         db.execSQL("PRAGMA foreign_keys=ON");
         
-        // For any version before 8, do a complete recreation to add sync fields
-        if (oldVersion < 8) {
-            // Drop all tables and recreate from scratch
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
-            
-            // Recreate tables with correct schema including sync fields
-            String CREATE_YOGA_CLASSES_TABLE = "CREATE TABLE " + TABLE_YOGA_CLASSES + "("
-                    + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + KEY_DAY_OF_WEEK + " TEXT NOT NULL,"
-                    + KEY_TIME + " TEXT NOT NULL,"
-                    + KEY_CAPACITY + " INTEGER NOT NULL,"
-                    + KEY_DURATION + " INTEGER NOT NULL,"
-                    + KEY_PRICE + " REAL NOT NULL,"
-                    + KEY_CLASS_TYPE + " TEXT NOT NULL,"
-                    + KEY_DESCRIPTION + " TEXT,"
-                    + KEY_DIFFICULTY + " TEXT,"
-                    + KEY_LATITUDE + " REAL DEFAULT 0.0,"
-                    + KEY_LONGITUDE + " REAL DEFAULT 0.0,"
-                    + KEY_LOCATION_ADDRESS + " TEXT,"
-                    + KEY_LAST_MODIFIED + " INTEGER DEFAULT 0,"
-                    + KEY_NEEDS_SYNC + " INTEGER DEFAULT 1,"
-                    + KEY_CLOUD_ID + " TEXT" + ")";
-            db.execSQL(CREATE_YOGA_CLASSES_TABLE);
-            
-            String CREATE_CLASS_INSTANCES_TABLE = "CREATE TABLE " + TABLE_CLASS_INSTANCES + "("
-                    + KEY_INSTANCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + KEY_YOGA_CLASS_ID + " INTEGER NOT NULL,"
-                    + KEY_DATE + " TEXT NOT NULL,"
-                    + KEY_INSTANCE_INSTRUCTOR + " TEXT NOT NULL,"
-                    + KEY_ADDITIONAL_COMMENTS + " TEXT,"
-                    + KEY_INSTANCE_LAST_MODIFIED + " INTEGER DEFAULT 0,"
-                    + KEY_INSTANCE_NEEDS_SYNC + " INTEGER DEFAULT 1,"
-                    + KEY_INSTANCE_CLOUD_ID + " TEXT,"
-                    + "FOREIGN KEY(" + KEY_YOGA_CLASS_ID + ") REFERENCES " + TABLE_YOGA_CLASSES + "(" + KEY_ID + ") ON DELETE CASCADE)";
-            db.execSQL(CREATE_CLASS_INSTANCES_TABLE);
-        }
+        // Drop all existing tables
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_INSTANCES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PENDING_DELETIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
         
-        // Add pending deletions table for version 9
-        if (oldVersion < 9) {
-            String CREATE_PENDING_DELETIONS_TABLE = "CREATE TABLE " + TABLE_PENDING_DELETIONS + "("
-                    + KEY_DELETION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + KEY_DELETION_ITEM_TYPE + " TEXT NOT NULL,"
-                    + KEY_DELETION_ITEM_ID + " INTEGER NOT NULL,"
-                    + KEY_DELETION_CLOUD_ID + " TEXT,"
-                    + KEY_DELETION_TIMESTAMP + " INTEGER DEFAULT 0)";
-            db.execSQL(CREATE_PENDING_DELETIONS_TABLE);
-        }
-        
-        // Add bookings table for version 10
-        if (oldVersion < 10) {
-            String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
-                    + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + COLUMN_BOOKING_ID + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
-                    + COLUMN_BOOKING_CLASS_INSTANCE_ID + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CLASS_NAME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_DATE + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_TIME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_STATUS + " TEXT DEFAULT 'confirmed',"
-                    + COLUMN_BOOKING_PAYMENT_STATUS + " TEXT DEFAULT 'pending',"
-                    + COLUMN_BOOKING_PAYMENT_AMOUNT + " REAL DEFAULT 0.0,"
-                    + COLUMN_BOOKING_PAYMENT_METHOD + " TEXT,"
-                    + COLUMN_BOOKING_NOTES + " TEXT,"
-                    + COLUMN_BOOKING_CREATED_AT + " TEXT,"
-                    + COLUMN_BOOKING_UPDATED_AT + " TEXT,"
-                    + COLUMN_BOOKING_IS_SYNCED + " INTEGER DEFAULT 0,"
-                    + COLUMN_BOOKING_LAST_MODIFIED + " INTEGER DEFAULT 0)";
-            db.execSQL(CREATE_BOOKINGS_TABLE);
-        }
-        
-        // Fix bookings table schema for version 11
-        if (oldVersion < 11) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
-            String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
-                    + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + COLUMN_BOOKING_ID + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
-                    + COLUMN_BOOKING_CLASS_INSTANCE_ID + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CLASS_NAME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_DATE + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_TIME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_STATUS + " TEXT DEFAULT 'confirmed',"
-                    + COLUMN_BOOKING_PAYMENT_STATUS + " TEXT DEFAULT 'pending',"
-                    + COLUMN_BOOKING_PAYMENT_AMOUNT + " REAL DEFAULT 0.0,"
-                    + COLUMN_BOOKING_PAYMENT_METHOD + " TEXT,"
-                    + COLUMN_BOOKING_NOTES + " TEXT,"
-                    + COLUMN_BOOKING_CREATED_AT + " TEXT,"
-                    + COLUMN_BOOKING_UPDATED_AT + " TEXT,"
-                    + COLUMN_BOOKING_IS_SYNCED + " INTEGER DEFAULT 0,"
-                    + COLUMN_BOOKING_LAST_MODIFIED + " INTEGER DEFAULT 0)";
-            db.execSQL(CREATE_BOOKINGS_TABLE);
-        }
-        
-        // Add unique constraint to booking_id for version 12
-        if (oldVersion < 12) {
-            // Drop and recreate bookings table to ensure clean state
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
-            
-            String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
-                    + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + COLUMN_BOOKING_ID + " TEXT NOT NULL UNIQUE,"
-                    + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
-                    + COLUMN_BOOKING_CLASS_INSTANCE_ID + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_CLASS_NAME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_DATE + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_TIME + " TEXT NOT NULL,"
-                    + COLUMN_BOOKING_STATUS + " TEXT DEFAULT 'confirmed',"
-                    + COLUMN_BOOKING_PAYMENT_STATUS + " TEXT DEFAULT 'pending',"
-                    + COLUMN_BOOKING_PAYMENT_AMOUNT + " REAL DEFAULT 0.0,"
-                    + COLUMN_BOOKING_PAYMENT_METHOD + " TEXT,"
-                    + COLUMN_BOOKING_NOTES + " TEXT,"
-                    + COLUMN_BOOKING_CREATED_AT + " TEXT,"
-                    + COLUMN_BOOKING_UPDATED_AT + " TEXT,"
-                    + COLUMN_BOOKING_IS_SYNCED + " INTEGER DEFAULT 0,"
-                    + COLUMN_BOOKING_LAST_MODIFIED + " INTEGER DEFAULT 0)";
-            db.execSQL(CREATE_BOOKINGS_TABLE);
-        }
-        
-        // Future upgrade logic can be added here
-        // if (oldVersion < 11) {
-        //     // Add future schema changes here
-        // }
+        // Recreate all tables with the current schema
+        onCreate(db);
     }
 
     @Override
