@@ -944,7 +944,10 @@ public class CloudSyncService {
                 
                 // Get bookings from Firebase
                 String bookingsUrl = BASE_URL + "bookings.json";
+                Log.d(TAG, "Requesting bookings from URL: " + bookingsUrl);
                 String response = makeGetRequest(bookingsUrl);
+                
+                Log.d(TAG, "Raw Firebase response: " + response);
                 
                 if (response == null || response.equals("null") || response.trim().isEmpty()) {
                     callback.onSuccess("No bookings found in cloud");
@@ -1080,7 +1083,10 @@ public class CloudSyncService {
     private Booking jsonToBooking(JSONObject json, String firebaseKey) {
         try {
             // Log the raw JSON to see what fields are available
+            Log.d(TAG, "=== PARSING BOOKING ===");
+            Log.d(TAG, "Firebase key: " + firebaseKey);
             Log.d(TAG, "Raw Firebase booking JSON: " + json.toString());
+            Log.d(TAG, "JSON keys: " + json.keys().toString());
             
             Booking booking = new Booking();
             
@@ -1096,21 +1102,146 @@ public class CloudSyncService {
             }
             Log.d(TAG, "Final bookingId: '" + bookingId + "'");
             
-            String customerName = json.optString("customerName", "");
-            // Try alternative field name if empty
-            if (customerName.isEmpty()) {
-                customerName = json.optString("name", "");
+            // Extract customer information from nested customerInfo object
+            String customerName = "";
+            String customerEmail = "";
+            String customerPhone = "";
+            
+            if (json.has("customerInfo")) {
+                JSONObject customerInfo = json.optJSONObject("customerInfo");
+                if (customerInfo != null) {
+                    customerName = customerInfo.optString("name", "");
+                    customerEmail = customerInfo.optString("email", "");
+                    customerPhone = customerInfo.optString("phone", "");
+                    Log.d(TAG, "Extracted customer info from nested object:");
+                    Log.d(TAG, "  name: '" + customerName + "'");
+                    Log.d(TAG, "  email: '" + customerEmail + "'");
+                    Log.d(TAG, "  phone: '" + customerPhone + "'");
+                }
             }
-            Log.d(TAG, "Extracted customerName: '" + customerName + "'");
+            
+            // Try direct fields as fallback
+            if (customerName.isEmpty()) {
+                customerName = json.optString("customerName", json.optString("name", ""));
+            }
+            if (customerEmail.isEmpty()) {
+                customerEmail = json.optString("customerEmail", json.optString("email", ""));
+            }
+            if (customerPhone.isEmpty()) {
+                customerPhone = json.optString("customerPhone", json.optString("phone", ""));
+            }
+            
+            // Extract booking-level information
+            String bookingDate = json.optString("bookingDate", json.optString("date", ""));
+            String bookingTime = json.optString("bookingTime", json.optString("time", ""));
+            
+            // Try to extract class information from structure
+            String className = "";
+            String classTime = "";
+            String instructor = "";
+            
+            // Check if there's a "classes" array (not object)
+            if (json.has("classes")) {
+                JSONArray classesArray = json.optJSONArray("classes");
+                if (classesArray != null && classesArray.length() > 0) {
+                    // Get the first class from the array
+                    JSONObject classInfo = classesArray.optJSONObject(0);
+                    if (classInfo != null) {
+                        // Extract class details
+                        String classType = classInfo.optString("name", classInfo.optString("type", classInfo.optString("classType", "")));
+                        String level = classInfo.optString("level", classInfo.optString("difficulty", ""));
+                        instructor = classInfo.optString("instructor", "");
+                        String time = classInfo.optString("time", "");
+                        
+                        // Build class name from available info
+                        if (!classType.isEmpty() && !level.isEmpty()) {
+                            className = classType + " (" + level + ")";
+                        } else if (!classType.isEmpty()) {
+                            className = classType;
+                        } else if (!level.isEmpty()) {
+                            className = level + " Yoga";
+                        } else {
+                            className = "Yoga Class";
+                        }
+                        
+                        // Use class time if booking time is empty
+                        if (bookingTime.isEmpty() && !time.isEmpty()) {
+                            bookingTime = time;
+                        }
+                        
+                        Log.d(TAG, "Extracted from classes array:");
+                        Log.d(TAG, "  classType: '" + classType + "'");
+                        Log.d(TAG, "  level: '" + level + "'");
+                        Log.d(TAG, "  className: '" + className + "'");
+                        Log.d(TAG, "  instructor: '" + instructor + "'");
+                        Log.d(TAG, "  time: '" + time + "'");
+                    }
+                }
+            }
+            
+            // If still no class name, check for nested "classes" object (fallback)
+            if (className.isEmpty() && json.has("classes")) {
+                JSONObject classesObj = json.optJSONObject("classes");
+                if (classesObj != null) {
+                    // Get the first class (assuming single class booking)
+                    String firstKey = classesObj.keys().hasNext() ? classesObj.keys().next() : null;
+                    if (firstKey != null) {
+                        JSONObject classInfo = classesObj.optJSONObject(firstKey);
+                        if (classInfo != null) {
+                            // Extract class details
+                            String classType = classInfo.optString("type", classInfo.optString("classType", ""));
+                            String level = classInfo.optString("level", classInfo.optString("difficulty", ""));
+                            instructor = classInfo.optString("instructor", "");
+                            String time = classInfo.optString("time", "");
+                            
+                            // Build class name from available info
+                            if (!classType.isEmpty() && !level.isEmpty()) {
+                                className = classType + " (" + level + ")";
+                            } else if (!classType.isEmpty()) {
+                                className = classType;
+                            } else if (!level.isEmpty()) {
+                                className = level + " Yoga";
+                            } else {
+                                className = "Yoga Class";
+                            }
+                            
+                            // Use class time if booking time is empty
+                            if (bookingTime.isEmpty() && !time.isEmpty()) {
+                                bookingTime = time;
+                            }
+                            
+                            Log.d(TAG, "Extracted from nested classes object:");
+                            Log.d(TAG, "  className: '" + className + "'");
+                            Log.d(TAG, "  instructor: '" + instructor + "'");
+                            Log.d(TAG, "  time: '" + time + "'");
+                        }
+                    }
+                }
+            }
+            
+            // If still no class name, try direct fields
+            if (className.isEmpty()) {
+                className = json.optString("className", "");
+            }
+            
+            // Extract all other fields with detailed logging
+            Log.d(TAG, "Final extracted values:");
+            Log.d(TAG, "  customerName: '" + customerName + "'");
+            Log.d(TAG, "  customerEmail: '" + customerEmail + "'");
+            Log.d(TAG, "  customerPhone: '" + customerPhone + "'");
+            Log.d(TAG, "  className: '" + className + "'");
+            Log.d(TAG, "  bookingDate: '" + bookingDate + "'");
+            Log.d(TAG, "  bookingTime: '" + bookingTime + "'");
+            Log.d(TAG, "  instructor: '" + instructor + "'");
             
             booking.setBookingId(bookingId);
             booking.setCustomerName(customerName);
-            booking.setCustomerEmail(json.optString("customerEmail", json.optString("email", "")));
-            booking.setCustomerPhone(json.optString("customerPhone", json.optString("phone", "")));
-            booking.setClassInstanceId(json.optString("classInstanceId", ""));
-            booking.setClassName(json.optString("className", ""));
-            booking.setBookingDate(json.optString("bookingDate", json.optString("date", "")));
-            booking.setBookingTime(json.optString("bookingTime", json.optString("time", "")));
+            booking.setCustomerEmail(customerEmail);
+            booking.setCustomerPhone(customerPhone);
+            booking.setClassInstanceId(json.optString("classInstanceId", firebaseKey));
+            booking.setClassName(className);
+            booking.setBookingDate(bookingDate);
+            booking.setBookingTime(bookingTime);
             booking.setStatus(json.optString("status", "confirmed"));
             booking.setPaymentStatus(json.optString("paymentStatus", "pending"));
             booking.setPaymentAmount(json.optDouble("paymentAmount", 0.0));

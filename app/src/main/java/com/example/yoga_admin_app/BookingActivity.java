@@ -160,14 +160,21 @@ public class BookingActivity extends AppCompatActivity {
         filteredBookingList.clear();
 
         for (Booking booking : bookingList) {
+            // Helper method to safely get string values for searching
+            String customerName = booking.getCustomerName() != null ? booking.getCustomerName() : "";
+            String customerEmail = booking.getCustomerEmail() != null ? booking.getCustomerEmail() : "";
+            String className = booking.getClassName() != null ? booking.getClassName() : "";
+            String bookingDate = booking.getBookingDate() != null ? booking.getBookingDate() : "";
+            String status = booking.getStatus() != null ? booking.getStatus() : "";
+            
             boolean matchesSearch = searchText.isEmpty() || 
-                booking.getCustomerName().toLowerCase().contains(searchText) ||
-                booking.getCustomerEmail().toLowerCase().contains(searchText) ||
-                booking.getClassName().toLowerCase().contains(searchText) ||
-                booking.getBookingDate().toLowerCase().contains(searchText);
+                customerName.toLowerCase().contains(searchText) ||
+                customerEmail.toLowerCase().contains(searchText) ||
+                className.toLowerCase().contains(searchText) ||
+                bookingDate.toLowerCase().contains(searchText);
 
             boolean matchesStatus = selectedStatus.equals("All Bookings") || 
-                booking.getStatus().equalsIgnoreCase(selectedStatus);
+                status.equalsIgnoreCase(selectedStatus);
 
             if (matchesSearch && matchesStatus) {
                 filteredBookingList.add(booking);
@@ -233,6 +240,18 @@ public class BookingActivity extends AppCompatActivity {
     }
 
     private void showBookingDetailsDialog(Booking booking) {
+        // Debug logging to see what data we have
+        android.util.Log.d("BookingActivity", "Showing booking details:");
+        android.util.Log.d("BookingActivity", "  Booking ID: " + booking.getBookingId());
+        android.util.Log.d("BookingActivity", "  Customer Name: " + booking.getCustomerName());
+        android.util.Log.d("BookingActivity", "  Customer Email: " + booking.getCustomerEmail());
+        android.util.Log.d("BookingActivity", "  Customer Phone: " + booking.getCustomerPhone());
+        android.util.Log.d("BookingActivity", "  Class Name: " + booking.getClassName());
+        android.util.Log.d("BookingActivity", "  Booking Date: " + booking.getBookingDate());
+        android.util.Log.d("BookingActivity", "  Booking Time: " + booking.getBookingTime());
+        android.util.Log.d("BookingActivity", "  Status: " + booking.getStatus());
+        android.util.Log.d("BookingActivity", "  Payment Status: " + booking.getPaymentStatus());
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Booking Details");
 
@@ -246,16 +265,16 @@ public class BookingActivity extends AppCompatActivity {
             "Status: %s\n" +
             "Payment: %s (%.2f)\n" +
             "Notes: %s",
-            booking.getCustomerName(),
-            booking.getCustomerEmail(),
-            booking.getCustomerPhone(),
-            booking.getClassName(),
-            booking.getBookingDate(),
-            booking.getBookingTime(),
-            booking.getStatus(),
-            booking.getPaymentStatus(),
+            (booking.getCustomerName() != null && !booking.getCustomerName().trim().isEmpty()) ? booking.getCustomerName() : "Not provided",
+            (booking.getCustomerEmail() != null && !booking.getCustomerEmail().trim().isEmpty()) ? booking.getCustomerEmail() : "Not provided",
+            (booking.getCustomerPhone() != null && !booking.getCustomerPhone().trim().isEmpty()) ? booking.getCustomerPhone() : "Not provided",
+            (booking.getClassName() != null && !booking.getClassName().trim().isEmpty()) ? booking.getClassName() : "Not provided",
+            (booking.getBookingDate() != null && !booking.getBookingDate().trim().isEmpty()) ? booking.getBookingDate() : "Not provided",
+            (booking.getBookingTime() != null && !booking.getBookingTime().trim().isEmpty()) ? booking.getBookingTime() : "Not provided",
+            (booking.getStatus() != null && !booking.getStatus().trim().isEmpty()) ? booking.getStatus() : "Not provided",
+            (booking.getPaymentStatus() != null && !booking.getPaymentStatus().trim().isEmpty()) ? booking.getPaymentStatus() : "Not provided",
             booking.getPaymentAmount(),
-            booking.getNotes().isEmpty() ? "None" : booking.getNotes()
+            (booking.getNotes() != null && !booking.getNotes().trim().isEmpty()) ? booking.getNotes() : "None"
         );
 
         builder.setMessage(details);
