@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 11; // Fixed bookings table schema
+    private static final int DATABASE_VERSION = 12; // Added unique constraint for booking_id
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
@@ -160,7 +160,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Create bookings table
         String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
                 + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + COLUMN_BOOKING_ID + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_ID + " TEXT NOT NULL UNIQUE,"
                 + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
                 + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
                 + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
@@ -264,6 +264,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
                     + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + COLUMN_BOOKING_ID + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
+                    + COLUMN_BOOKING_CLASS_INSTANCE_ID + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_CLASS_NAME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_DATE + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_TIME + " TEXT NOT NULL,"
+                    + COLUMN_BOOKING_STATUS + " TEXT DEFAULT 'confirmed',"
+                    + COLUMN_BOOKING_PAYMENT_STATUS + " TEXT DEFAULT 'pending',"
+                    + COLUMN_BOOKING_PAYMENT_AMOUNT + " REAL DEFAULT 0.0,"
+                    + COLUMN_BOOKING_PAYMENT_METHOD + " TEXT,"
+                    + COLUMN_BOOKING_NOTES + " TEXT,"
+                    + COLUMN_BOOKING_CREATED_AT + " TEXT,"
+                    + COLUMN_BOOKING_UPDATED_AT + " TEXT,"
+                    + COLUMN_BOOKING_IS_SYNCED + " INTEGER DEFAULT 0,"
+                    + COLUMN_BOOKING_LAST_MODIFIED + " INTEGER DEFAULT 0)";
+            db.execSQL(CREATE_BOOKINGS_TABLE);
+        }
+        
+        // Add unique constraint to booking_id for version 12
+        if (oldVersion < 12) {
+            // Drop and recreate bookings table to ensure clean state
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
+            
+            String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
+                    + COLUMN_BOOKING_TABLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + COLUMN_BOOKING_ID + " TEXT NOT NULL UNIQUE,"
                     + COLUMN_BOOKING_CUSTOMER_NAME + " TEXT NOT NULL,"
                     + COLUMN_BOOKING_CUSTOMER_EMAIL + " TEXT NOT NULL,"
                     + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
@@ -1062,11 +1089,78 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_BOOKING_LAST_MODIFIED, booking.getLastModified());
             
             return db.insert(TABLE_BOOKINGS, null, values);
+        } catch (Exception e) {
+            // Handle unique constraint violation
+            android.util.Log.e("DatabaseHelper", "Error adding booking: " + booking.getBookingId(), e);
+            return -1;
         } finally {
             db.close();
         }
     }
     
+    /**
+     * Check if booking exists by booking ID
+     */
+    public boolean bookingExists(String bookingId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        
+        try {
+            String selectQuery = "SELECT 1 FROM " + TABLE_BOOKINGS + " WHERE " + COLUMN_BOOKING_ID + " = ?";
+            cursor = db.rawQuery(selectQuery, new String[]{bookingId});
+            return cursor.moveToFirst();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+    }
+    
+    /**
+     * Get booking by booking ID
+     */
+    public Booking getBookingByBookingId(String bookingId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        
+        try {
+            String selectQuery = "SELECT * FROM " + TABLE_BOOKINGS + " WHERE " + COLUMN_BOOKING_ID + " = ?";
+            cursor = db.rawQuery(selectQuery, new String[]{bookingId});
+            
+            if (cursor.moveToFirst()) {
+                Booking booking = new Booking();
+                booking.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_ID)));
+                booking.setBookingId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID)));
+                booking.setCustomerName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_NAME)));
+                booking.setCustomerEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_EMAIL)));
+                booking.setCustomerPhone(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_PHONE)));
+                booking.setClassInstanceId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_INSTANCE_ID)));
+                booking.setClassName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_NAME)));
+                booking.setBookingDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE)));
+                booking.setBookingTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME)));
+                booking.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_STATUS)));
+                booking.setPaymentStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_STATUS)));
+                booking.setPaymentAmount(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_AMOUNT)));
+                booking.setPaymentMethod(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_PAYMENT_METHOD)));
+                booking.setNotes(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_NOTES)));
+                booking.setCreatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CREATED_AT)));
+                booking.setUpdatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_UPDATED_AT)));
+                booking.setSynced(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_IS_SYNCED)) == 1);
+                booking.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_LAST_MODIFIED)));
+                
+                return booking;
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        
+        return null;
+    }
+
     /**
      * Get all bookings
      */
@@ -1163,6 +1257,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return bookingList;
     }
     
+    /**
+     * Update a booking by booking ID
+     */
+    public int updateBooking(Booking booking) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_BOOKING_CUSTOMER_NAME, booking.getCustomerName());
+            values.put(COLUMN_BOOKING_CUSTOMER_EMAIL, booking.getCustomerEmail());
+            values.put(COLUMN_BOOKING_CUSTOMER_PHONE, booking.getCustomerPhone());
+            values.put(COLUMN_BOOKING_CLASS_INSTANCE_ID, booking.getClassInstanceId());
+            values.put(COLUMN_BOOKING_CLASS_NAME, booking.getClassName());
+            values.put(COLUMN_BOOKING_DATE, booking.getBookingDate());
+            values.put(COLUMN_BOOKING_TIME, booking.getBookingTime());
+            values.put(COLUMN_BOOKING_STATUS, booking.getStatus());
+            values.put(COLUMN_BOOKING_PAYMENT_STATUS, booking.getPaymentStatus());
+            values.put(COLUMN_BOOKING_PAYMENT_AMOUNT, booking.getPaymentAmount());
+            values.put(COLUMN_BOOKING_PAYMENT_METHOD, booking.getPaymentMethod());
+            values.put(COLUMN_BOOKING_NOTES, booking.getNotes());
+            values.put(COLUMN_BOOKING_CREATED_AT, booking.getCreatedAt());
+            values.put(COLUMN_BOOKING_UPDATED_AT, booking.getUpdatedAt());
+            values.put(COLUMN_BOOKING_IS_SYNCED, booking.isSynced() ? 1 : 0);
+            values.put(COLUMN_BOOKING_LAST_MODIFIED, booking.getLastModified());
+            
+            return db.update(TABLE_BOOKINGS, values, COLUMN_BOOKING_ID + " = ?", new String[]{booking.getBookingId()});
+        } finally {
+            db.close();
+        }
+    }
+
     /**
      * Update booking status
      */
@@ -1268,6 +1392,70 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         try {
             db.delete(TABLE_BOOKINGS, COLUMN_BOOKING_ID + " = ?", new String[]{bookingId});
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Get count of bookings
+     */
+    public int getBookingCount() {
+        String countQuery = "SELECT COUNT(*) FROM " + TABLE_BOOKINGS;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        db.close();
+        return count;
+    }
+    
+    /**
+     * Debug method to log all booking IDs
+     */
+    public void logAllBookingIds() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        
+        try {
+            String selectQuery = "SELECT " + COLUMN_BOOKING_ID + ", " + COLUMN_BOOKING_CUSTOMER_NAME + " FROM " + TABLE_BOOKINGS;
+            cursor = db.rawQuery(selectQuery, null);
+            
+            android.util.Log.d("DatabaseHelper", "Total bookings in database: " + cursor.getCount());
+            
+            if (cursor.moveToFirst()) {
+                do {
+                    String bookingId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
+                    String customerName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_NAME));
+                    android.util.Log.d("DatabaseHelper", "Booking ID: " + bookingId + ", Customer: " + customerName);
+                } while (cursor.moveToNext());
+            } else {
+                android.util.Log.d("DatabaseHelper", "No bookings found in database");
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+    }
+    
+    /**
+     * Clean up bookings with empty or null booking IDs
+     */
+    public int cleanupEmptyBookingIds() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            // Delete bookings where booking_id is empty or null
+            int deletedCount = db.delete(TABLE_BOOKINGS, 
+                COLUMN_BOOKING_ID + " IS NULL OR " + COLUMN_BOOKING_ID + " = ''", 
+                null);
+            
+            android.util.Log.d("DatabaseHelper", "Cleaned up " + deletedCount + " bookings with empty booking IDs");
+            return deletedCount;
         } finally {
             db.close();
         }

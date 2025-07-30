@@ -129,8 +129,15 @@ public class BookingActivity extends AppCompatActivity {
     }
 
     private void loadBookings() {
+        // Debug: Log database state
+        int bookingCount = databaseHelper.getBookingCount();
+        android.util.Log.d("BookingActivity", "Database booking count: " + bookingCount);
+        databaseHelper.logAllBookingIds();
+        
         bookingList = databaseHelper.getAllBookings();
         filteredBookingList = new ArrayList<>(bookingList);
+        
+        android.util.Log.d("BookingActivity", "Loaded " + bookingList.size() + " bookings from database");
 
         if (bookingList.isEmpty()) {
             listViewBookings.setVisibility(View.GONE);
@@ -191,7 +198,18 @@ public class BookingActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     btnSyncBookings.setEnabled(true);
                     btnSyncBookings.setText("Sync Bookings");
-                    Toast.makeText(BookingActivity.this, message, Toast.LENGTH_LONG).show();
+                    
+                    // Clean up any bookings with empty IDs
+                    int cleanedUp = databaseHelper.cleanupEmptyBookingIds();
+                    final String finalMessage = cleanedUp > 0 ? 
+                        message + ". Cleaned up " + cleanedUp + " invalid bookings." : message;
+                    
+                    Toast.makeText(BookingActivity.this, finalMessage, Toast.LENGTH_LONG).show();
+                    
+                    // Debug: Check database state after sync
+                    android.util.Log.d("BookingActivity", "After sync - Database booking count: " + databaseHelper.getBookingCount());
+                    databaseHelper.logAllBookingIds();
+                    
                     loadBookings(); // Refresh the list
                 });
             }

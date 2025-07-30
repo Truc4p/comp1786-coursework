@@ -955,37 +955,47 @@ public class CloudSyncService {
                 int syncedCount = 0;
                 int newCount = 0;
                 
+                Log.d(TAG, "Processing " + bookingsJson.length() + " bookings from Firebase");
+                
                 Iterator<String> keys = bookingsJson.keys();
                 while (keys.hasNext()) {
                     String firebaseKey = keys.next();
                     JSONObject bookingJson = bookingsJson.getJSONObject(firebaseKey);
                     
-                    // Convert JSON to Booking object
-                    Booking booking = jsonToBooking(bookingJson);
+                    // Convert JSON to Booking object, using Firebase key as fallback ID
+                    Booking booking = jsonToBooking(bookingJson, firebaseKey);
                     if (booking != null) {
-                        // Check if booking already exists
-                        List<Booking> existingBookings = databaseHelper.getAllBookings();
-                        boolean exists = false;
+                        Log.d(TAG, "Processing booking: " + booking.getBookingId());
                         
-                        for (Booking existingBooking : existingBookings) {
-                            if (existingBooking.getBookingId().equals(booking.getBookingId())) {
-                                exists = true;
-                                // Update if cloud version is newer
-                                if (booking.getLastModified() > existingBooking.getLastModified()) {
-                                    updateBookingInDatabase(booking);
-                                    syncedCount++;
-                                }
-                                break;
-                            }
+                        // Skip bookings with empty or null booking IDs
+                        if (booking.getBookingId() == null || booking.getBookingId().trim().isEmpty()) {
+                            Log.w(TAG, "Skipping booking with empty booking ID. Customer: " + booking.getCustomerName());
+                            continue;
                         }
                         
-                        if (!exists) {
+                        // Check if booking already exists using efficient method
+                        if (databaseHelper.bookingExists(booking.getBookingId())) {
+                            // Get existing booking to compare timestamps
+                            Booking existingBooking = databaseHelper.getBookingByBookingId(booking.getBookingId());
+                            if (existingBooking != null && booking.getLastModified() > existingBooking.getLastModified()) {
+                                updateBookingInDatabase(booking);
+                                syncedCount++;
+                                Log.d(TAG, "Updated existing booking: " + booking.getBookingId());
+                            } else {
+                                Log.d(TAG, "Booking already up to date: " + booking.getBookingId());
+                            }
+                        } else {
                             // Add new booking
                             long result = databaseHelper.addBooking(booking);
                             if (result != -1) {
                                 newCount++;
+                                Log.d(TAG, "Added new booking: " + booking.getBookingId() + " with DB id: " + result);
+                            } else {
+                                Log.e(TAG, "Failed to add booking: " + booking.getBookingId());
                             }
                         }
+                    } else {
+                        Log.e(TAG, "Failed to convert JSON to booking for key: " + firebaseKey);
                     }
                 }
                 
@@ -1067,18 +1077,40 @@ public class CloudSyncService {
     /**
      * Convert JSON object to Booking
      */
-    private Booking jsonToBooking(JSONObject json) {
+    private Booking jsonToBooking(JSONObject json, String firebaseKey) {
         try {
+            // Log the raw JSON to see what fields are available
+            Log.d(TAG, "Raw Firebase booking JSON: " + json.toString());
+            
             Booking booking = new Booking();
             
-            booking.setBookingId(json.optString("bookingId", ""));
-            booking.setCustomerName(json.optString("customerName", ""));
-            booking.setCustomerEmail(json.optString("customerEmail", ""));
-            booking.setCustomerPhone(json.optString("customerPhone", ""));
+            // Extract booking ID, use Firebase key as fallback
+            String bookingId = json.optString("bookingId", "");
+            if (bookingId.isEmpty()) {
+                // Try alternative field names
+                bookingId = json.optString("id", "");
+                if (bookingId.isEmpty()) {
+                    bookingId = firebaseKey; // Use Firebase key as fallback
+                    Log.d(TAG, "Using Firebase key as booking ID: " + firebaseKey);
+                }
+            }
+            Log.d(TAG, "Final bookingId: '" + bookingId + "'");
+            
+            String customerName = json.optString("customerName", "");
+            // Try alternative field name if empty
+            if (customerName.isEmpty()) {
+                customerName = json.optString("name", "");
+            }
+            Log.d(TAG, "Extracted customerName: '" + customerName + "'");
+            
+            booking.setBookingId(bookingId);
+            booking.setCustomerName(customerName);
+            booking.setCustomerEmail(json.optString("customerEmail", json.optString("email", "")));
+            booking.setCustomerPhone(json.optString("customerPhone", json.optString("phone", "")));
             booking.setClassInstanceId(json.optString("classInstanceId", ""));
             booking.setClassName(json.optString("className", ""));
-            booking.setBookingDate(json.optString("bookingDate", ""));
-            booking.setBookingTime(json.optString("bookingTime", ""));
+            booking.setBookingDate(json.optString("bookingDate", json.optString("date", "")));
+            booking.setBookingTime(json.optString("bookingTime", json.optString("time", "")));
             booking.setStatus(json.optString("status", "confirmed"));
             booking.setPaymentStatus(json.optString("paymentStatus", "pending"));
             booking.setPaymentAmount(json.optDouble("paymentAmount", 0.0));
@@ -1101,9 +1133,11 @@ public class CloudSyncService {
      * Update booking in database
      */
     private void updateBookingInDatabase(Booking booking) {
-        // Delete and re-add (simpler than complex update logic)
-        databaseHelper.deleteBooking(booking.getBookingId());
-        databaseHelper.addBooking(booking);
+        // Use update method instead of delete and re-add
+        int result = databaseHelper.updateBooking(booking);
+        if (result == 0) {
+            Log.w(TAG, "No booking found to update with ID: " + booking.getBookingId());
+        }
     }
     
     /**
