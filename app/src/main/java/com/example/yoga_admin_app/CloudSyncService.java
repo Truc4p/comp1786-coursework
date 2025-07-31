@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -1002,7 +1003,12 @@ public class CloudSyncService {
                     }
                 }
                 
-                String message = String.format("Bookings sync completed. %d new, %d updated", newCount, syncedCount);
+                // HANDLE DELETIONS: Remove local bookings that no longer exist in Firebase
+                callback.onProgress("Checking for deleted bookings...");
+                int deletedCount = syncBookingDeletions(bookingsJson);
+                
+                String message = String.format("Bookings sync completed. %d new, %d updated, %d deleted", 
+                    newCount, syncedCount, deletedCount);
                 callback.onSuccess(message);
                 
             } catch (Exception e) {
@@ -1010,6 +1016,70 @@ public class CloudSyncService {
                 callback.onError("Failed to sync bookings: " + e.getMessage());
             }
         });
+    }
+    
+    /**
+     * Sync booking deletions: Remove local bookings that no longer exist in Firebase
+     */
+    private int syncBookingDeletions(JSONObject firebaseBookings) {
+        try {
+            Log.d(TAG, "=== CHECKING FOR DELETED BOOKINGS ===");
+            
+            // Get all booking IDs currently in Firebase
+            List<String> firebaseBookingIds = new ArrayList<>();
+            Iterator<String> firebaseKeys = firebaseBookings.keys();
+            while (firebaseKeys.hasNext()) {
+                String firebaseKey = firebaseKeys.next();
+                JSONObject bookingJson = firebaseBookings.getJSONObject(firebaseKey);
+                
+                // Extract booking ID from the booking data
+                String bookingId = bookingJson.optString("bookingId", "");
+                if (bookingId.isEmpty()) {
+                    bookingId = bookingJson.optString("id", "");
+                    if (bookingId.isEmpty()) {
+                        bookingId = firebaseKey; // Use Firebase key as fallback
+                    }
+                }
+                
+                if (!bookingId.trim().isEmpty()) {
+                    firebaseBookingIds.add(bookingId);
+                }
+            }
+            
+            Log.d(TAG, "Firebase has " + firebaseBookingIds.size() + " bookings");
+            
+            // Get all booking IDs from local database
+            List<String> localBookingIds = databaseHelper.getAllBookingIds();
+            Log.d(TAG, "Local database has " + localBookingIds.size() + " bookings");
+            
+            // Find bookings that exist locally but not in Firebase (deleted bookings)
+            List<String> bookingsToDelete = new ArrayList<>();
+            for (String localId : localBookingIds) {
+                if (!firebaseBookingIds.contains(localId)) {
+                    bookingsToDelete.add(localId);
+                    Log.d(TAG, "Booking marked for deletion: " + localId);
+                }
+            }
+            
+            // Delete the bookings that no longer exist in Firebase
+            int deletedCount = 0;
+            for (String bookingIdToDelete : bookingsToDelete) {
+                int result = databaseHelper.deleteBookingByBookingId(bookingIdToDelete);
+                if (result > 0) {
+                    deletedCount++;
+                    Log.d(TAG, "Successfully deleted booking: " + bookingIdToDelete);
+                } else {
+                    Log.w(TAG, "Failed to delete booking: " + bookingIdToDelete);
+                }
+            }
+            
+            Log.d(TAG, "=== DELETION SYNC COMPLETE: " + deletedCount + " bookings deleted ===");
+            return deletedCount;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error during booking deletion sync", e);
+            return 0;
+        }
     }
     
     /**
@@ -1042,8 +1112,20 @@ public class CloudSyncService {
                 while (keys.hasNext()) {
                     String key = keys.next();
                     JSONObject bookingJson = bookingsJson.getJSONObject(key);
-                    if (bookingJson.getString("bookingId").equals(bookingId)) {
+                    
+                    // Try multiple field names for booking ID
+                    String currentBookingId = "";
+                    if (bookingJson.has("id")) {
+                        currentBookingId = bookingJson.getString("id");
+                    } else if (bookingJson.has("bookingId")) {
+                        currentBookingId = bookingJson.getString("bookingId");
+                    }
+                    
+                    Log.d(TAG, "Checking Firebase booking with key: " + key + ", id: " + currentBookingId);
+                    
+                    if (currentBookingId.equals(bookingId)) {
                         firebaseKey = key;
+                        Log.d(TAG, "Found matching booking with Firebase key: " + firebaseKey);
                         break;
                     }
                 }
@@ -1135,47 +1217,71 @@ public class CloudSyncService {
             String bookingDate = json.optString("bookingDate", json.optString("date", ""));
             String bookingTime = json.optString("bookingTime", json.optString("time", ""));
             
+            // Format the booking date if it's in ISO format
+            if (!bookingDate.isEmpty() && bookingDate.contains("T")) {
+                bookingDate = formatISODate(bookingDate);
+            }
+            
+            // Extract payment information
+            double totalAmount = json.optDouble("totalAmount", 0.0);
+            if (totalAmount == 0.0) {
+                // Try alternative field names
+                totalAmount = json.optDouble("paymentAmount", json.optDouble("amount", 0.0));
+            }
+            
             // Try to extract class information from structure
             String className = "";
             String classTime = "";
             String instructor = "";
+            List<String> allClassNames = new ArrayList<>();
             
             // Check if there's a "classes" array (not object)
             if (json.has("classes")) {
                 JSONArray classesArray = json.optJSONArray("classes");
                 if (classesArray != null && classesArray.length() > 0) {
-                    // Get the first class from the array
-                    JSONObject classInfo = classesArray.optJSONObject(0);
-                    if (classInfo != null) {
-                        // Extract class details
-                        String classType = classInfo.optString("name", classInfo.optString("type", classInfo.optString("classType", "")));
-                        String level = classInfo.optString("level", classInfo.optString("difficulty", ""));
-                        instructor = classInfo.optString("instructor", "");
-                        String time = classInfo.optString("time", "");
-                        
-                        // Build class name from available info
-                        if (!classType.isEmpty() && !level.isEmpty()) {
-                            className = classType + " (" + level + ")";
-                        } else if (!classType.isEmpty()) {
-                            className = classType;
-                        } else if (!level.isEmpty()) {
-                            className = level + " Yoga";
-                        } else {
-                            className = "Yoga Class";
+                    // Extract all classes from the array
+                    for (int i = 0; i < classesArray.length(); i++) {
+                        JSONObject classInfo = classesArray.optJSONObject(i);
+                        if (classInfo != null) {
+                            // Extract class details
+                            String classType = classInfo.optString("name", classInfo.optString("type", classInfo.optString("classType", "")));
+                            String level = classInfo.optString("level", classInfo.optString("difficulty", ""));
+                            
+                            // Build class name from available info
+                            String currentClassName = "";
+                            if (!classType.isEmpty() && !level.isEmpty()) {
+                                currentClassName = classType + " (" + level + ")";
+                            } else if (!classType.isEmpty()) {
+                                currentClassName = classType;
+                            } else if (!level.isEmpty()) {
+                                currentClassName = level + " Yoga";
+                            } else {
+                                currentClassName = "Yoga Class";
+                            }
+                            
+                            // Add to all classes list
+                            allClassNames.add(currentClassName);
+                            
+                            // Use first class as primary class name
+                            if (i == 0) {
+                                className = currentClassName;
+                                instructor = classInfo.optString("instructor", "");
+                                String time = classInfo.optString("time", "");
+                                
+                                // Use class time if booking time is empty
+                                if (bookingTime.isEmpty() && !time.isEmpty()) {
+                                    bookingTime = time;
+                                }
+                            }
                         }
-                        
-                        // Use class time if booking time is empty
-                        if (bookingTime.isEmpty() && !time.isEmpty()) {
-                            bookingTime = time;
-                        }
-                        
-                        Log.d(TAG, "Extracted from classes array:");
-                        Log.d(TAG, "  classType: '" + classType + "'");
-                        Log.d(TAG, "  level: '" + level + "'");
-                        Log.d(TAG, "  className: '" + className + "'");
-                        Log.d(TAG, "  instructor: '" + instructor + "'");
-                        Log.d(TAG, "  time: '" + time + "'");
                     }
+                    
+                    Log.d(TAG, "Extracted " + allClassNames.size() + " classes from array:");
+                    for (int i = 0; i < allClassNames.size(); i++) {
+                        Log.d(TAG, "  Class " + (i + 1) + ": '" + allClassNames.get(i) + "'");
+                    }
+                    Log.d(TAG, "  Primary className: '" + className + "'");
+                    Log.d(TAG, "  instructor: '" + instructor + "'");
                 }
             }
             
@@ -1233,6 +1339,7 @@ public class CloudSyncService {
             Log.d(TAG, "  bookingDate: '" + bookingDate + "'");
             Log.d(TAG, "  bookingTime: '" + bookingTime + "'");
             Log.d(TAG, "  instructor: '" + instructor + "'");
+            Log.d(TAG, "  totalAmount: " + totalAmount);
             
             booking.setBookingId(bookingId);
             booking.setCustomerName(customerName);
@@ -1240,11 +1347,22 @@ public class CloudSyncService {
             booking.setCustomerPhone(customerPhone);
             booking.setClassInstanceId(json.optString("classInstanceId", firebaseKey));
             booking.setClassName(className);
+            booking.setAllClassNames(allClassNames); // Set all class names
+            
+            // Debug logging for multiple classes
+            Log.d(TAG, "=== FINAL BOOKING CLASS INFO ===");
+            Log.d(TAG, "Primary className: '" + className + "'");
+            Log.d(TAG, "All classes count: " + allClassNames.size());
+            for (int i = 0; i < allClassNames.size(); i++) {
+                Log.d(TAG, "  Class " + (i + 1) + ": '" + allClassNames.get(i) + "'");
+            }
+            Log.d(TAG, "=== END CLASS INFO ===");
+            
             booking.setBookingDate(bookingDate);
             booking.setBookingTime(bookingTime);
             booking.setStatus(json.optString("status", "confirmed"));
             booking.setPaymentStatus(json.optString("paymentStatus", "pending"));
-            booking.setPaymentAmount(json.optDouble("paymentAmount", 0.0));
+            booking.setPaymentAmount(totalAmount); // Use the extracted totalAmount
             booking.setPaymentMethod(json.optString("paymentMethod", ""));
             booking.setNotes(json.optString("notes", ""));
             booking.setCreatedAt(json.optString("createdAt", ""));
@@ -1338,6 +1456,28 @@ public class CloudSyncService {
         } catch (IOException e) {
             Log.e(TAG, "Error making GET request", e);
             return null;
+        }
+    }
+    
+    /**
+     * Format ISO date string to readable format
+     * Converts "2025-07-30T05:51:56.479Z" to "July 30, 2025 at 05:51"
+     */
+    private String formatISODate(String isoDate) {
+        try {
+            // Parse the ISO date
+            java.text.SimpleDateFormat isoFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            isoFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Date date = isoFormat.parse(isoDate);
+            
+            // Format to readable string
+            java.text.SimpleDateFormat readableFormat = new java.text.SimpleDateFormat("MMMM dd, yyyy 'at' HH:mm");
+            return readableFormat.format(date);
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error formatting date: " + isoDate, e);
+            // Return original if parsing fails
+            return isoDate;
         }
     }
     

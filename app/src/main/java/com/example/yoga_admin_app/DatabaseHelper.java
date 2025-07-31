@@ -5,12 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import org.json.JSONArray;
+import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 13; // Simplified database schema - fresh start
+    private static final int DATABASE_VERSION = 14; // Added all_classes column for multiple class support
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
@@ -67,6 +69,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_BOOKING_CUSTOMER_PHONE = "customer_phone";
     private static final String COLUMN_BOOKING_CLASS_INSTANCE_ID = "class_instance_id";
     private static final String COLUMN_BOOKING_CLASS_NAME = "class_name";
+    private static final String COLUMN_BOOKING_ALL_CLASSES = "all_classes"; // JSON string of all class names
     private static final String COLUMN_BOOKING_DATE = "booking_date";
     private static final String COLUMN_BOOKING_TIME = "booking_time";
     private static final String COLUMN_BOOKING_STATUS = "status";
@@ -147,6 +150,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_BOOKING_CUSTOMER_PHONE + " TEXT,"
                 + COLUMN_BOOKING_CLASS_INSTANCE_ID + " TEXT NOT NULL,"
                 + COLUMN_BOOKING_CLASS_NAME + " TEXT NOT NULL,"
+                + COLUMN_BOOKING_ALL_CLASSES + " TEXT," // JSON string of all class names
                 + COLUMN_BOOKING_DATE + " TEXT NOT NULL,"
                 + COLUMN_BOOKING_TIME + " TEXT NOT NULL,"
                 + COLUMN_BOOKING_STATUS + " TEXT DEFAULT 'confirmed',"
@@ -940,6 +944,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_BOOKING_CUSTOMER_PHONE, booking.getCustomerPhone());
             values.put(COLUMN_BOOKING_CLASS_INSTANCE_ID, booking.getClassInstanceId());
             values.put(COLUMN_BOOKING_CLASS_NAME, booking.getClassName());
+            values.put(COLUMN_BOOKING_ALL_CLASSES, classListToJson(booking.getAllClassNames()));
             values.put(COLUMN_BOOKING_DATE, booking.getBookingDate());
             values.put(COLUMN_BOOKING_TIME, booking.getBookingTime());
             values.put(COLUMN_BOOKING_STATUS, booking.getStatus());
@@ -1054,6 +1059,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     booking.setCustomerPhone(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_PHONE)));
                     booking.setClassInstanceId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_INSTANCE_ID)));
                     booking.setClassName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CLASS_NAME)));
+                    
+                    // Load all class names from JSON
+                    String allClassesJson = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ALL_CLASSES));
+                    List<String> allClasses = jsonToClassList(allClassesJson);
+                    booking.setAllClassNames(allClasses);
+                    
                     booking.setBookingDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE)));
                     booking.setBookingTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME)));
                     booking.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_STATUS)));
@@ -1140,6 +1151,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_BOOKING_CUSTOMER_PHONE, booking.getCustomerPhone());
             values.put(COLUMN_BOOKING_CLASS_INSTANCE_ID, booking.getClassInstanceId());
             values.put(COLUMN_BOOKING_CLASS_NAME, booking.getClassName());
+            values.put(COLUMN_BOOKING_ALL_CLASSES, classListToJson(booking.getAllClassNames()));
             values.put(COLUMN_BOOKING_DATE, booking.getBookingDate());
             values.put(COLUMN_BOOKING_TIME, booking.getBookingTime());
             values.put(COLUMN_BOOKING_STATUS, booking.getStatus());
@@ -1330,5 +1342,97 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             db.close();
         }
+    }
+    
+    /**
+     * Get all booking IDs from the database (for deletion sync)
+     */
+    public List<String> getAllBookingIds() {
+        List<String> bookingIds = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        
+        try {
+            String selectQuery = "SELECT " + COLUMN_BOOKING_ID + " FROM " + TABLE_BOOKINGS + 
+                " WHERE " + COLUMN_BOOKING_ID + " IS NOT NULL AND " + COLUMN_BOOKING_ID + " != ''";
+            cursor = db.rawQuery(selectQuery, null);
+            
+            if (cursor.moveToFirst()) {
+                do {
+                    String bookingId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
+                    if (bookingId != null && !bookingId.trim().isEmpty()) {
+                        bookingIds.add(bookingId);
+                    }
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        
+        android.util.Log.d("DatabaseHelper", "Found " + bookingIds.size() + " booking IDs in database");
+        return bookingIds;
+    }
+    
+    /**
+     * Delete a booking by booking ID (for deletion sync)
+     */
+    public int deleteBookingByBookingId(String bookingId) {
+        if (bookingId == null || bookingId.trim().isEmpty()) {
+            android.util.Log.w("DatabaseHelper", "Cannot delete booking with empty ID");
+            return 0;
+        }
+        
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            int deletedRows = db.delete(TABLE_BOOKINGS, 
+                COLUMN_BOOKING_ID + " = ?", 
+                new String[]{bookingId});
+            
+            android.util.Log.d("DatabaseHelper", "Deleted " + deletedRows + " booking(s) with ID: " + bookingId);
+            return deletedRows;
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Convert list of class names to JSON string for database storage
+     */
+    private String classListToJson(List<String> classList) {
+        if (classList == null || classList.isEmpty()) {
+            return null;
+        }
+        try {
+            JSONArray jsonArray = new JSONArray();
+            for (String className : classList) {
+                jsonArray.put(className);
+            }
+            return jsonArray.toString();
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error converting class list to JSON", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Convert JSON string from database to list of class names
+     */
+    private List<String> jsonToClassList(String json) {
+        List<String> classList = new ArrayList<>();
+        if (json == null || json.trim().isEmpty()) {
+            return classList;
+        }
+        try {
+            JSONArray jsonArray = new JSONArray(json);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                classList.add(jsonArray.getString(i));
+            }
+        } catch (JSONException e) {
+            android.util.Log.e("DatabaseHelper", "Error parsing class list JSON: " + json, e);
+        }
+        return classList;
     }
 }

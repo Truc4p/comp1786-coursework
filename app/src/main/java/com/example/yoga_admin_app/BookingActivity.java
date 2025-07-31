@@ -255,20 +255,40 @@ public class BookingActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Booking Details");
 
+        // Build classes information
+        String classesInfo;
+        List<String> allClasses = booking.getAllClassNames();
+        if (allClasses != null && !allClasses.isEmpty()) {
+            if (allClasses.size() == 1) {
+                classesInfo = allClasses.get(0);
+            } else {
+                classesInfo = "Multiple Classes (" + allClasses.size() + "):\n";
+                for (int i = 0; i < allClasses.size(); i++) {
+                    classesInfo += "  " + (i + 1) + ". " + allClasses.get(i) + "\n";
+                }
+                classesInfo = classesInfo.trim(); // Remove trailing newline
+            }
+        } else {
+            classesInfo = (booking.getClassName() != null && !booking.getClassName().trim().isEmpty()) ? 
+                booking.getClassName() : "Not provided";
+        }
+
         String details = String.format(
+            "Booking ID: %s\n" +
             "Customer: %s\n" +
             "Email: %s\n" +
             "Phone: %s\n" +
-            "Class: %s\n" +
+            "Classes: %s\n" +
             "Date: %s\n" +
             "Time: %s\n" +
             "Status: %s\n" +
             "Payment: %s (%.2f)\n" +
             "Notes: %s",
+            (booking.getBookingId() != null && !booking.getBookingId().trim().isEmpty()) ? booking.getBookingId() : "Not provided",
             (booking.getCustomerName() != null && !booking.getCustomerName().trim().isEmpty()) ? booking.getCustomerName() : "Not provided",
             (booking.getCustomerEmail() != null && !booking.getCustomerEmail().trim().isEmpty()) ? booking.getCustomerEmail() : "Not provided",
             (booking.getCustomerPhone() != null && !booking.getCustomerPhone().trim().isEmpty()) ? booking.getCustomerPhone() : "Not provided",
-            (booking.getClassName() != null && !booking.getClassName().trim().isEmpty()) ? booking.getClassName() : "Not provided",
+            classesInfo,
             (booking.getBookingDate() != null && !booking.getBookingDate().trim().isEmpty()) ? booking.getBookingDate() : "Not provided",
             (booking.getBookingTime() != null && !booking.getBookingTime().trim().isEmpty()) ? booking.getBookingTime() : "Not provided",
             (booking.getStatus() != null && !booking.getStatus().trim().isEmpty()) ? booking.getStatus() : "Not provided",

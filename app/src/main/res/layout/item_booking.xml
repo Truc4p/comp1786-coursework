@@ -17,6 +17,28 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
+    <!-- Booking ID -->
+    <TextView
+        android:id="@+id/tv_booking_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="ID: booking_1234567890"
+        android:textColor="@color/medium_purple"
+        android:textSize="11sp"
+        android:alpha="0.8" />
+
+    <!-- Contact Information -->
+    <TextView
+        android:id="@+id/tv_contact_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="john.doe@email.com • +44 7123 456789"
+        android:textColor="@color/medium_purple"
+        android:textSize="12sp"
+        android:textStyle="italic" />
+
     <!-- Class Name -->
     <TextView
         android:id="@+id/tv_class_name"
@@ -69,16 +91,5 @@
             android:gravity="end" />
 
     </LinearLayout>
-
-    <!-- Contact Information -->
-    <TextView
-        android:id="@+id/tv_contact_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="john.doe@email.com • +44 7123 456789"
-        android:textColor="@color/medium_purple"
-        android:textSize="12sp"
-        android:textStyle="italic" />
 
 </LinearLayout>

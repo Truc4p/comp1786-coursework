@@ -45,6 +45,7 @@ public class BookingAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.item_booking, parent, false);
             holder = new ViewHolder();
             holder.tvCustomerName = convertView.findViewById(R.id.tv_customer_name);
+            holder.tvBookingId = convertView.findViewById(R.id.tv_booking_id);
             holder.tvClassName = convertView.findViewById(R.id.tv_class_name);
             holder.tvBookingDateTime = convertView.findViewById(R.id.tv_booking_datetime);
             holder.tvStatus = convertView.findViewById(R.id.tv_status);
@@ -60,8 +61,20 @@ public class BookingAdapter extends BaseAdapter {
         // Set customer name
         holder.tvCustomerName.setText(booking.getCustomerName());
 
-        // Set class name
-        holder.tvClassName.setText(booking.getClassName());
+        // Set booking ID
+        holder.tvBookingId.setText("ID: " + booking.getBookingId());
+
+        // Set class name - show count if multiple classes
+        String classDisplay;
+        List<String> allClasses = booking.getAllClassNames();
+        if (allClasses != null && allClasses.size() > 1) {
+            classDisplay = allClasses.get(0) + " (+" + (allClasses.size() - 1) + " more)";
+        } else if (allClasses != null && allClasses.size() == 1) {
+            classDisplay = allClasses.get(0);
+        } else {
+            classDisplay = booking.getClassName() != null ? booking.getClassName() : "No class";
+        }
+        holder.tvClassName.setText(classDisplay);
 
         // Set booking date and time
         String dateTime = booking.getBookingDate() + " at " + booking.getBookingTime();
@@ -77,9 +90,9 @@ public class BookingAdapter extends BaseAdapter {
             booking.getPaymentStatus().toUpperCase());
         holder.tvPaymentInfo.setText(paymentInfo);
 
-        // Set contact information
+        // Set contact information (email and phone only, not name)
         String contactInfo = booking.getCustomerEmail();
-        if (!booking.getCustomerPhone().isEmpty()) {
+        if (booking.getCustomerPhone() != null && !booking.getCustomerPhone().trim().isEmpty()) {
             contactInfo += " • " + booking.getCustomerPhone();
         }
         holder.tvContactInfo.setText(contactInfo);
@@ -109,6 +122,7 @@ public class BookingAdapter extends BaseAdapter {
 
     static class ViewHolder {
         TextView tvCustomerName;
+        TextView tvBookingId;
         TextView tvClassName;
         TextView tvBookingDateTime;
         TextView tvStatus;
