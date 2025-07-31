@@ -202,11 +202,7 @@ const ProfileScreen = ({ navigation }) => {
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.header}>
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>
-                {(formData.firstName.charAt(0) + formData.lastName.charAt(0)).toUpperCase()}
-              </Text>
-            </View>
+            <View style={styles.avatarContainer}></View>
             <Text style={styles.nameText}>
               {formData.firstName} {formData.lastName}
             </Text>
@@ -350,11 +346,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  avatarText: {
-    color: '#661a72',
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
   nameText: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -392,7 +383,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   inputDisabled: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#fff',
     color: '#666',
   },
   buttonRow: {
@@ -407,11 +398,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#def4f7',
     marginRight: 10,
   },
   cancelButtonText: {
-    color: '#666',
+    color: '#661a72',
     fontSize: 16,
     fontWeight: '600',
   },

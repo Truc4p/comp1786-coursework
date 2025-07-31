@@ -9,20 +9,21 @@ import {
   SafeAreaView,
   RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useBooking } from '../context/BookingContext';
 import { useAuth } from '../context/AuthContext';
 import { formatTime, formatDate } from '../utils/helpers';
 
 const MyBookingsScreen = ({ route, navigation }) => {
-  const { bookings, getBookingsByUserId, cancelBooking, loading } = useBooking();
+  const { bookings, getBookingsByUserId, cancelBooking, loading, refreshBookingsFromFirebase } = useBooking();
   const { user } = useAuth();
   const [userBookings, setUserBookings] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (user && (user.id || user.email)) {
-      // Automatically load bookings for the logged-in user
-      loadUserBookings();
+      // Load bookings with Firebase refresh on initial mount
+      loadUserBookings(true);
     } else {
       // Clear bookings immediately when user logs out
       setUserBookings([]);
@@ -34,34 +35,62 @@ const MyBookingsScreen = ({ route, navigation }) => {
         }, 100);
       }
     }
-  }, [bookings, user, navigation]);
+  }, [user]); // Remove 'bookings' from dependencies to prevent infinite loop
 
-  const loadUserBookings = () => {
-    // Security check: Only load bookings if user is actually logged in
-    if (!user) {
-      setUserBookings([]);
-      return;
-    }
-    
-    if (user) {
-      // Use userId (which is either user.id or user.email as fallback from CartScreen)
-      const userId = user.id || user.email;
-      const userBookingsList = getBookingsByUserId(userId);
+  // Refresh bookings when screen comes into focus (force refresh to get latest data)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user && (user.id || user.email)) {
+        loadUserBookings(true); // Force refresh from Firebase when screen comes into focus
+      }
+    }, [user])
+  );
+
+  const loadUserBookings = async (forceRefresh = false) => {
+    try {
+      // Security check: Only load bookings if user is actually logged in
+      if (!user) {
+        setUserBookings([]);
+        return;
+      }
       
-      // Sort bookings by booking date in descending order (latest first)
-      const sortedBookings = userBookingsList.sort((a, b) => {
-        const dateA = new Date(a.bookingDate);
-        const dateB = new Date(b.bookingDate);
-        return dateB - dateA; // Latest bookings first
-      });
-      setUserBookings(sortedBookings);
+      console.log('🔄 loadUserBookings called with forceRefresh:', forceRefresh);
+      console.log('👤 Current user:', { id: user.id, email: user.email });
+      
+      // Only refresh from Firebase when explicitly requested (initial load, pull-to-refresh, or after actions)
+      if (forceRefresh) {
+        await refreshBookingsFromFirebase();
+      }
+      
+      if (user) {
+        // Use userId (which is either user.id or user.email as fallback from CartScreen)
+        const userId = user.id || user.email;
+        console.log('🔍 Using userId for filtering:', userId);
+        
+        const userBookingsList = getBookingsByUserId(userId);
+        console.log('📋 Raw user bookings:', userBookingsList);
+        
+        // Sort bookings by booking date in descending order (latest first)
+        const sortedBookings = userBookingsList.sort((a, b) => {
+          const dateA = new Date(a.bookingDate || new Date());
+          const dateB = new Date(b.bookingDate || new Date());
+          return dateB - dateA; // Latest bookings first
+        });
+        
+        console.log('📋 Sorted bookings:', sortedBookings.length, 'items');
+        setUserBookings(sortedBookings);
+      }
+    } catch (error) {
+      console.error('❌ Error loading user bookings:', error);
+      // Don't crash the app, just show empty state
+      setUserBookings([]);
     }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
     if (user && user.id) {
-      loadUserBookings();
+      await loadUserBookings(true); // Force refresh from Firebase when pull-to-refresh
     }
     setRefreshing(false);
   };
@@ -69,19 +98,34 @@ const MyBookingsScreen = ({ route, navigation }) => {
   const handleCancelBooking = (booking) => {
     Alert.alert(
       'Cancel Booking',
-      `Are you sure you want to cancel this booking?\n\nBooking ID: ${booking.id}`,
+      `Are you sure you want to cancel this booking?\n\nBooking ID: ${booking.id}\n\nThis action will notify the admin immediately.`,
       [
         { text: 'No', style: 'cancel' },
         {
           text: 'Yes, Cancel',
           style: 'destructive',
           onPress: async () => {
+            console.log('🔄 Cancelling booking:', booking.id);
+            console.log('📋 Booking before cancel:', booking);
             const result = await cancelBooking(booking.id);
+            console.log('📄 Cancel result:', result);
+            
             if (result.success) {
-              Alert.alert('Success', 'Booking cancelled successfully');
-              loadUserBookings(); // Refresh the list
+              console.log('✅ Booking cancelled successfully and synced to Firebase');
+              Alert.alert(
+                'Success', 
+                'Booking cancelled successfully!\n\nThe admin has been notified automatically.'
+              );
+              
+              // Don't force Firebase refresh immediately - local state is already updated
+              // Just refresh the local user bookings display without hitting Firebase
+              await loadUserBookings(false);
             } else {
-              Alert.alert('Error', result.error || 'Failed to cancel booking');
+              console.error('❌ Failed to cancel booking:', result.error);
+              Alert.alert(
+                'Error', 
+                `Failed to cancel booking: ${result.error || 'Unknown error'}\n\nPlease try again or contact support.`
+              );
             }
           },
         },
@@ -93,6 +137,8 @@ const MyBookingsScreen = ({ route, navigation }) => {
     switch (status) {
       case 'confirmed':
         return '#4caf4f';
+      case 'pending':
+        return '#ffa726';
       case 'cancelled':
         return '#fa7575ff';
       case 'completed':
@@ -115,42 +161,52 @@ const MyBookingsScreen = ({ route, navigation }) => {
     }
   };
 
-  const renderBookingItem = ({ item: booking }) => (
+  const renderBookingItem = ({ item: booking }) => {
+    // Debug log to see booking status
+    console.log('📋 Booking status for ID', booking.id?.slice(-8), ':', booking.status);
+    
+    // Safety checks to prevent crashes
+    if (!booking || !booking.id || !booking.customerInfo) {
+      console.error('⚠️ Invalid booking data:', booking);
+      return null;
+    }
+    
+    return (
     <View style={styles.bookingCard}>
       <View style={styles.bookingHeader}>
         <View>
           <Text style={styles.bookingId}>Booking #{booking.id.slice(-8)}</Text>
           <Text style={styles.bookingDate}>
-            Booked on {formatDate(booking.bookingDate.split('T')[0])}
+            Booked on {formatDate(booking.bookingDate?.split('T')[0] || new Date().toISOString().split('T')[0])}
           </Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) }]}>
-          <Text style={styles.statusText}>{getStatusText(booking.status)}</Text>
+        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status || 'pending') }]}>
+          <Text style={styles.statusText}>{getStatusText(booking.status || 'pending')}</Text>
         </View>
       </View>
 
       <View style={styles.customerInfo}>
-        <Text style={styles.customerName}>{booking.customerInfo.name}</Text>
-        <Text style={styles.customerEmail}>{booking.customerInfo.email}</Text>
+        <Text style={styles.customerName}>{booking.customerInfo.name || 'Unknown'}</Text>
+        <Text style={styles.customerEmail}>{booking.customerInfo.email || 'No email'}</Text>
         {booking.customerInfo.phone && (
           <Text style={styles.customerPhone}>{booking.customerInfo.phone}</Text>
         )}
       </View>
 
       <View style={styles.classesSection}>
-        <Text style={styles.sectionTitle}>Classes ({booking.classes.length})</Text>
-        {booking.classes.map((classItem, index) => (
+        <Text style={styles.sectionTitle}>Classes ({booking.classes?.length || 0})</Text>
+        {(booking.classes || []).map((classItem, index) => (
           <View key={index} style={styles.classItem}>
             <View style={styles.classInfo}>
-              <Text style={styles.className}>{classItem.name}</Text>
+              <Text style={styles.className}>{classItem.name || 'Unknown Class'}</Text>
               <Text style={styles.classDetails}>
-                with {classItem.instructor} • {formatDate(classItem.date)} at {formatTime(classItem.time)}
+                with {classItem.instructor || 'TBA'} • {formatDate(classItem.date)} at {formatTime(classItem.time)}
               </Text>
               <Text style={styles.classDetails}>
-                Duration: {classItem.duration} min • Qty: {classItem.quantity}
+                Duration: {classItem.duration || 0} min • Qty: {classItem.quantity || 1}
               </Text>
             </View>
-            <Text style={styles.classPrice}>${(classItem.price * classItem.quantity).toFixed(2)}</Text>
+            <Text style={styles.classPrice}>${((classItem.price || 0) * (classItem.quantity || 1)).toFixed(2)}</Text>
           </View>
         ))}
       </View>
@@ -158,20 +214,23 @@ const MyBookingsScreen = ({ route, navigation }) => {
       <View style={styles.bookingFooter}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>Total Amount:</Text>
-          <Text style={styles.totalAmount}>${booking.totalAmount.toFixed(2)}</Text>
+          <Text style={styles.totalAmount}>${(booking.totalAmount || 0).toFixed(2)}</Text>
         </View>
         
-        {booking.status === 'confirmed' && (
+        {/* Show cancel button for confirmed bookings, and temporarily for debugging */}
+        {(booking.status === 'confirmed' || booking.status === 'pending') && (
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={() => handleCancelBooking(booking)}
           >
-            <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         )}
+        
       </View>
     </View>
-  );
+    );
+  };
 
   const renderEmptyState = () => {
     if (!user) {
@@ -361,16 +420,18 @@ const styles = StyleSheet.create({
     color: '#4caf4f',
   },
   cancelButton: {
-    backgroundColor: '#fa7575ff',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    backgroundColor: '#ffebee',
+    borderWidth: 1,
+    borderColor: '#fa7575ff',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 8,
     alignSelf: 'flex-start',
   },
   cancelButtonText: {
-    color: '#fff',
+    color: '#fa7575ff',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   emptyContainer: {
     flex: 1,

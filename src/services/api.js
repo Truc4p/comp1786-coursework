@@ -1,7 +1,6 @@
 // API service for connecting to the yoga class cloud service
 import { CONFIG } from '../utils/config';
 import { hashPassword, verifyPassword } from '../utils/password';
-import { migrateUserPasswords } from '../utils/passwordMigration';
 
 const API_BASE_URL = CONFIG.API_BASE_URL;
 
@@ -56,7 +55,7 @@ class ApiService {
       // If data is an object (Firebase format) and NOT a POST response, convert to array
       if (typeof data === 'object' && !Array.isArray(data) && options.method !== 'POST') {
         const arrayData = Object.keys(data).map(key => ({ 
-          id: key, 
+          firebaseKey: key, // Store Firebase key separately to avoid conflicts with internal id
           ...data[key] 
         }));
         // console.log('Converted Firebase object to array:', arrayData);
@@ -254,18 +253,75 @@ class ApiService {
   // Update booking status
   async updateBookingStatus(bookingId, status) {
     try {
+      console.log('🔄 Updating booking status in Firebase:', bookingId, 'to', status);
+      
+      // First, get all bookings and find the one we need to update
+      console.log('📥 Fetching all bookings to find the target booking...');
+      const allBookings = await this.request('/bookings');
+      
+      if (!allBookings || !Array.isArray(allBookings)) {
+        throw new Error('Failed to fetch bookings from Firebase');
+      }
+      
+      // Find the booking by our internal ID
+      const currentBooking = allBookings.find(booking => booking.id === bookingId);
+      
+      if (!currentBooking) {
+        throw new Error(`Booking with ID ${bookingId} not found in Firebase`);
+      }
+      
+      console.log('📋 Current booking data found:', currentBooking);
+      
+      // Get the Firebase key for this booking
+      const firebaseKey = currentBooking.firebaseKey || currentBooking.id;
+      console.log('🔑 Using Firebase key:', firebaseKey);
+      
+      // Preserve all existing data and only update status and timestamp
       const updateData = {
+        ...currentBooking,
         status,
-        updatedDate: new Date().toISOString()
+        updatedDate: new Date().toISOString(),
+        // Add cancellation timestamp if status is cancelled
+        ...(status === 'cancelled' && { cancelledDate: new Date().toISOString() })
       };
       
-      return this.request(`/bookings/${bookingId}`, {
-        method: 'PATCH',
+      // Remove firebaseKey from the data we send (it's just metadata)
+      if (updateData.firebaseKey) {
+        delete updateData.firebaseKey;
+      }
+      
+      console.log('📤 Sending complete update data to preserve all fields');
+      
+      const response = await this.request(`/bookings/${firebaseKey}`, {
+        method: 'PUT', // Use PUT to replace entire object
         body: JSON.stringify(updateData),
       });
+      
+      console.log('📥 Firebase update response:', response);
+      
+      // Check if response indicates success
+      if (response !== null) {
+        console.log('✅ Firebase booking status update successful with all data preserved');
+        return { success: true, response };
+      } else {
+        console.log('❌ Firebase update failed - null response');
+        return { success: false, error: 'Firebase returned null response' };
+      }
+      
     } catch (error) {
-      console.error('Error updating booking status:', error);
+      console.error('❌ Error updating booking status:', error);
       return { success: false, error: error.message };
+    }
+  }
+
+  // Get all bookings from Firebase
+  async getAllBookings() {
+    try {
+      const response = await this.request('/bookings');
+      return response || [];
+    } catch (error) {
+      console.error('Error fetching all bookings:', error);
+      return [];
     }
   }
 
@@ -530,86 +586,6 @@ class ApiService {
       console.error('Error checking phone exists:', error);
       return false; // Return false on error to not block valid updates
     }
-  }
-
-  // Migrate existing plain text passwords to hashed passwords
-  async migratePasswords() {
-    try {
-      console.log('Starting password migration...');
-      
-      // Get all users from the database
-      const response = await this.request('/users');
-      let users = [];
-      
-      // Handle Firebase response format
-      if (Array.isArray(response)) {
-        users = response;
-      } else if (response && typeof response === 'object' && response !== null) {
-        // Convert Firebase object format to array
-        users = Object.keys(response).map(key => ({
-          firebaseKey: key,
-          ...response[key]
-        }));
-      }
-      
-      console.log(`Found ${users.length} users to potentially migrate`);
-      
-      let migratedCount = 0;
-      
-      for (const user of users) {
-        // Check if user already has a salt (indicating hashed password)
-        if (!user.salt) {
-          console.log(`Migrating user: ${user.email}`);
-          
-          // Hash the existing plain text password
-          const { hashedPassword, salt } = hashPassword(user.password);
-          
-          // Update the user in the database
-          const updateData = {
-            password: hashedPassword,
-            salt: salt,
-            updatedAt: new Date().toISOString(),
-          };
-          
-          // Use the Firebase key if available, otherwise use the user ID
-          const userId = user.firebaseKey || user.id;
-          
-          const updateResponse = await this.request(`/users/${userId}`, {
-            method: 'PATCH',
-            body: JSON.stringify(updateData),
-          });
-          
-          if (updateResponse !== null) {
-            migratedCount++;
-            console.log(`Successfully migrated user: ${user.email}`);
-          } else {
-            console.error(`Failed to migrate user: ${user.email}`);
-          }
-        } else {
-          console.log(`User ${user.email} already has hashed password, skipping`);
-        }
-      }
-      
-      console.log(`Migration completed. ${migratedCount} users migrated.`);
-      return {
-        success: true,
-        message: `Successfully migrated ${migratedCount} users`,
-        migratedCount
-      };
-      
-    } catch (error) {
-      console.error('Migration failed:', error);
-      return {
-        success: false,
-        message: error.message || 'Migration failed',
-        migratedCount: 0
-      };
-    }
-  }
-
-  // Migration method to hash existing plain text passwords
-  async migratePasswords() {
-    return await migrateUserPasswords(this);
   }
 }
 

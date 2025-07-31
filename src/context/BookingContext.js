@@ -95,9 +95,30 @@ export const BookingProvider = ({ children }) => {
   };
 
   const getBookingsByUserId = (userId) => {
-    return bookings.filter(booking => 
-      booking.customerInfo.userId === userId
-    );
+    console.log('🔍 Looking for bookings for userId:', userId);
+    console.log('📊 Total bookings in context:', bookings.length);
+    
+    const userBookings = bookings.filter(booking => {
+      console.log('🔍 Checking booking:', booking.id, 'Customer info:', booking.customerInfo);
+      
+      // Safety check: Skip bookings with corrupted customerInfo
+      if (!booking.customerInfo) {
+        console.log('⚠️ Skipping booking with undefined customerInfo:', booking.id);
+        return false;
+      }
+      
+      // Check multiple possible userId fields
+      const matchesUserId = booking.customerInfo.userId === userId;
+      const matchesEmail = booking.customerInfo.email === userId;
+      const matchesId = booking.customerInfo.id === userId;
+      
+      console.log('Match checks - userId:', matchesUserId, 'email:', matchesEmail, 'id:', matchesId);
+      
+      return matchesUserId || matchesEmail || matchesId;
+    });
+    
+    console.log('✅ Found', userBookings.length, 'bookings for user');
+    return userBookings;
   };
 
   const getBookingById = (bookingId) => {
@@ -107,25 +128,95 @@ export const BookingProvider = ({ children }) => {
   const cancelBooking = async (bookingId) => {
     setLoading(true);
     try {
-      // Update booking status
+      console.log('🔄 Starting booking cancellation process for ID:', bookingId);
+      
+      // Find the booking to get current data
+      const currentBooking = bookings.find(b => b.id === bookingId);
+      if (!currentBooking) {
+        throw new Error('Booking not found in local state');
+      }
+      
+      console.log('📋 Current booking data:', currentBooking);
+      
+      // First update in Firebase
+      console.log('📤 Updating booking status in Firebase...');
+      const firebaseResult = await ApiService.updateBookingStatus(bookingId, 'cancelled');
+      
+      console.log('📥 Firebase result:', firebaseResult);
+      
+      if (firebaseResult && firebaseResult.success === false) {
+        throw new Error(firebaseResult.error || 'Failed to update Firebase');
+      }
+      
+      console.log('✅ Firebase update successful');
+      
+      // Then update local state - preserve all original booking data
       const updatedBookings = bookings.map(booking =>
         booking.id === bookingId
-          ? { ...booking, status: 'cancelled', cancelledDate: new Date().toISOString() }
+          ? { 
+              ...booking, // Preserve all original data including customerInfo
+              status: 'cancelled', 
+              cancelledDate: new Date().toISOString() 
+            }
           : booking
+      );
+      
+      console.log('📋 Updated booking in local state:', 
+        updatedBookings.find(b => b.id === bookingId)
       );
       
       setBookings(updatedBookings);
       await saveBookingsToStorage(updatedBookings);
       
-      // Optionally update in Firebase
-      await ApiService.updateBookingStatus(bookingId, 'cancelled');
+      console.log('✅ Local state and storage updated');
       
       setLoading(false);
       return { success: true };
     } catch (error) {
-      console.error('Error cancelling booking:', error);
+      console.error('❌ Error cancelling booking:', error);
       setLoading(false);
       return { success: false, error: error.message };
+    }
+  };
+
+  const refreshBookingsFromFirebase = async () => {
+    try {
+      setLoading(true);
+      console.log('🔄 Refreshing bookings from Firebase...');
+      
+      // Add small delay to ensure Firebase has propagated any recent updates
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const firebaseBookings = await ApiService.getAllBookings();
+      
+      if (firebaseBookings && Array.isArray(firebaseBookings)) {
+        // Clean up duplicates and invalid bookings
+        const cleanBookings = firebaseBookings.filter((booking, index, self) => {
+          // Remove bookings without customerInfo
+          if (!booking.customerInfo) {
+            console.log('⚠️ Removing booking with no customerInfo:', booking.id);
+            return false;
+          }
+          
+          // Remove duplicates (keep first occurrence)
+          const firstIndex = self.findIndex(b => b.id === booking.id);
+          if (firstIndex !== index) {
+            console.log('⚠️ Removing duplicate booking:', booking.id);
+            return false;
+          }
+          
+          return true;
+        });
+        
+        console.log('🧹 Cleaned bookings:', cleanBookings.length, 'from', firebaseBookings.length, 'raw bookings');
+        setBookings(cleanBookings);
+        await saveBookingsToStorage(cleanBookings);
+        console.log('✅ Bookings refreshed from Firebase');
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing bookings from Firebase:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,6 +228,7 @@ export const BookingProvider = ({ children }) => {
     getBookingById,
     cancelBooking,
     clearAllBookings,
+    refreshBookingsFromFirebase,
   };
 
   return (

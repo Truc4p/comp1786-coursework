@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,9 @@ import {
 import YogaClassCard from '../components/YogaClassCard';
 import SearchFilter from '../components/SearchFilter';
 import LoadingSpinner from '../components/LoadingSpinner';
-import PasswordMigrationDebug from '../components/PasswordMigrationDebug';
 import ApiService from '../services/api';
 import { filterClassesBySearchCriteria } from '../utils/helpers';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 
 const ClassListScreen = ({ navigation }) => {
   const [classes, setClasses] = useState([]);
@@ -24,10 +22,8 @@ const ClassListScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const [filters, setFilters] = useState({ dayOfWeek: 'All', timeOfDay: 'All' });
   const { getCartItemCount } = useCart();
-  const { user } = useAuth();
 
   const loadClasses = useCallback(async () => {
     try {
@@ -132,7 +128,6 @@ const ClassListScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <>
-      <PasswordMigrationDebug />
       <View style={styles.filterInfo}>
         <Text style={styles.filterInfoText}>
           Showing: {getActiveFilterText()} ({filteredClasses.length} classes)
