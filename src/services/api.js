@@ -70,42 +70,25 @@ class ApiService {
     }
   }
 
-    // Map admin app data structure to customer format
-  mapAdminDataToCustomerFormat(adminClasses) {
-    return adminClasses.map(adminClass => {
-      // Get the first instance date if available, otherwise use a default
-      let classDate = new Date().toISOString().split('T')[0]; // Default to today
-      let instructor = 'Instructor'; // Default instructor
-      
-      // If there are instances, use the first one's date and instructor
-      if (adminClass.instances && adminClass.instances.length > 0) {
-        const firstInstance = adminClass.instances[0];
-        if (firstInstance.date) {
-          classDate = firstInstance.date; // Keep the DD/MM/YYYY format from admin
-        }
-        if (firstInstance.instructor) {
-          instructor = firstInstance.instructor;
-        }
-      }
-      
+    // Map yoga class data to customer format (simplified - no instances)
+  mapAdminDataToCustomerFormat(yogaClasses) {
+    return yogaClasses.map(yogaClass => {
       return {
-        id: adminClass.id,
-        name: adminClass.classType || 'Yoga Class',
-        instructor: instructor,
-        date: classDate, // Use the actual date from instance
-        time: adminClass.time || '09:00',
-        duration: adminClass.duration || 60,
-        capacity: adminClass.capacity || 10,
-        availableSpots: Math.max(0, (adminClass.capacity || 10) - 2), // Assume some bookings
-        price: adminClass.price || 25,
-        level: adminClass.difficulty || 'All Levels',
-        dayOfWeek: adminClass.dayOfWeek || 'Monday',
-        description: adminClass.description || 'A wonderful yoga class experience.',
+        id: yogaClass.id || Math.random().toString(),
+        name: yogaClass.classType || 'Yoga Class',
+        date: yogaClass.dayOfWeek || 'Monday', // Show day of week
+        time: yogaClass.time || '09:00',
+        duration: yogaClass.duration || 60,
+        capacity: yogaClass.capacity || 10,
+        availableSpots: Math.max(0, (yogaClass.capacity || 10) - Math.floor(Math.random() * 5)),
+        price: yogaClass.price || 25,
+        level: yogaClass.difficulty || 'All Levels',
+        dayOfWeek: yogaClass.dayOfWeek || 'Monday',
+        description: yogaClass.description || 'A wonderful yoga class experience.',
         image: null,
-        locationAddress: adminClass.locationAddress,
-        latitude: adminClass.latitude,
-        longitude: adminClass.longitude,
-        instances: adminClass.instances || []
+        locationAddress: yogaClass.locationAddress,
+        latitude: yogaClass.latitude,
+        longitude: yogaClass.longitude
       };
     });
   }
@@ -113,25 +96,29 @@ class ApiService {
   // Get all yoga classes
   async getYogaClasses() {
     try {
-      // Try the direct yoga-classes path first (this matches your Firebase structure)
-      const response = await this.request('/yoga-classes');
+      // Fetch only yoga classes (not class instances)
+      const yogaClassesResponse = await this.request('/yoga-classes');
       
-      if (response && response.length > 0) {
-        // console.log('Found Firebase data:', response);
+      if (yogaClassesResponse && yogaClassesResponse.length > 0) {
+        console.log('Found Firebase yoga classes:', yogaClassesResponse);
+        
+        // Remove duplicates based on ID before mapping
+        const uniqueYogaClasses = yogaClassesResponse.filter((yogaClass, index, self) => {
+          const firstIndex = self.findIndex(c => c.id === yogaClass.id);
+          if (firstIndex !== index) {
+            console.log('🔄 Removing duplicate yoga class with ID:', yogaClass.id);
+          }
+          return firstIndex === index;
+        });
+        
+        console.log('📊 Original classes:', yogaClassesResponse.length, 'Unique classes:', uniqueYogaClasses.length);
         
         // Map the Firebase data structure to customer app format
-        const mappedData = response.map(yogaClass => {
-          // Handle the date - if it doesn't exist, use today's date
-          let classDate = new Date().toISOString().split('T')[0];
-          if (yogaClass.date) {
-            classDate = yogaClass.date;
-          }
-          
+        const mappedData = uniqueYogaClasses.map(yogaClass => {
           return {
             id: yogaClass.id || Math.random().toString(),
             name: yogaClass.classType || 'Yoga Class',
-            instructor: yogaClass.instructor || 'Instructor',
-            date: classDate,
+            date: yogaClass.dayOfWeek || 'Monday', // Show day of week instead of date
             time: yogaClass.time || '09:00',
             duration: yogaClass.duration || 60,
             capacity: yogaClass.capacity || 10,
@@ -147,8 +134,18 @@ class ApiService {
           };
         });
         
-        // console.log('Mapped data for customer app:', mappedData);
-        return mappedData;
+        // Final deduplication check based on mapped data
+        const finalUniqueData = mappedData.filter((item, index, self) => {
+          const firstIndex = self.findIndex(c => c.id === item.id);
+          if (firstIndex !== index) {
+            console.log('🔄 Removing duplicate mapped class with ID:', item.id, item.name);
+          }
+          return firstIndex === index;
+        });
+        
+        console.log('📊 Mapped classes:', mappedData.length, 'Final unique classes:', finalUniqueData.length);
+        console.log('🎯 Final mapped data for customer app:', finalUniqueData);
+        return finalUniqueData;
       }
       
       // If no data found, return empty array (don't show demo mode)
@@ -205,6 +202,62 @@ class ApiService {
   // Get specific yoga class details
   async getYogaClassDetails(classId) {
     return this.request(`/yogaClasses/${classId}`);
+  }
+
+  // Get class instances for a specific yoga class
+  async getClassInstances(classId) {
+    try {
+      console.log('🔍 Fetching class instances for classId:', classId);
+      const classInstancesResponse = await this.request('/class-instances');
+      
+      console.log('📊 Raw class instances response:', classInstancesResponse);
+      console.log('📊 Number of total instances:', classInstancesResponse?.length || 0);
+      
+      if (classInstancesResponse && classInstancesResponse.length > 0) {
+        // Log all instance data for debugging
+        console.log('🔍 All instances:', classInstancesResponse.map(instance => ({
+          instanceId: instance.id,
+          yogaClassId: instance.yogaClassId,
+          classId: instance.classId,
+          date: instance.date,
+          instructor: instance.instructor
+        })));
+        
+        // Filter instances that belong to this specific class
+        const classInstances = classInstancesResponse.filter(instance => {
+          // Firebase uses 'yogaClassId' field, not 'classId'
+          // Convert both to strings for comparison to handle type mismatches
+          const instanceYogaClassId = String(instance.yogaClassId || '');
+          const instanceClassId = String(instance.classId || '');
+          const targetClassId = String(classId || '');
+          
+          const matches = instanceYogaClassId === targetClassId || instanceClassId === targetClassId;
+          console.log(`🔍 Instance ${instance.id}: yogaClassId=${instance.yogaClassId}, classId=${instance.classId}, target=${classId}, matches=${matches}`);
+          return matches;
+        });
+        
+        console.log(`✅ Found ${classInstances.length} instances for class ${classId}`);
+        console.log('📋 Matching instances:', classInstances);
+        
+        if (classInstances.length > 0) {
+          // Sort instances by date
+          const sortedInstances = classInstances.sort((a, b) => {
+            const dateA = new Date(a.date.split('/').reverse().join('-')); // Convert DD/MM/YYYY to YYYY-MM-DD
+            const dateB = new Date(b.date.split('/').reverse().join('-'));
+            return dateA - dateB;
+          });
+          
+          console.log('📅 Sorted instances:', sortedInstances);
+          return sortedInstances;
+        }
+      }
+      
+      console.log('❌ No instances found or no data returned');
+      return [];
+    } catch (error) {
+      console.error('❌ Error fetching class instances:', error);
+      return [];
+    }
   }
 
   // Book a yoga class

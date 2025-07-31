@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,14 +12,33 @@ import {
 import { formatTime, formatDate } from '../utils/helpers';
 import { getYogaClassImage } from '../utils/imageMapping';
 import { useCart } from '../context/CartContext';
+import ApiService from '../services/api';
 
 const ClassDetailsScreen = ({ route, navigation }) => {
   const { yogaClass } = route.params;
   const { addToCart } = useCart();
+  const [classInstances, setClassInstances] = useState([]);
+  const [loadingInstances, setLoadingInstances] = useState(true);
+
+  // Fetch class instances on component mount
+  useEffect(() => {
+    const fetchClassInstances = async () => {
+      try {
+        setLoadingInstances(true);
+        const instances = await ApiService.getClassInstances(yogaClass.id);
+        setClassInstances(instances);
+      } catch (error) {
+        setClassInstances([]);
+      } finally {
+        setLoadingInstances(false);
+      }
+    };
+
+    fetchClassInstances();
+  }, [yogaClass.id]);
 
   const {
     name,
-    instructor,
     date,
     time,
     duration,
@@ -81,38 +100,35 @@ const ClassDetailsScreen = ({ route, navigation }) => {
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.className}>{name}</Text>
-            <Text style={styles.price}>${price}</Text>
+            <View style={styles.priceContainer}>
+              <Text style={styles.price}>${price}</Text>
+              <Text style={styles.priceSubtext}>per session</Text>
+            </View>
           </View>
-
-          <Text style={styles.instructor}>with {instructor}</Text>
 
           <View style={styles.detailsSection}>
             <Text style={styles.sectionTitle}>Class Details</Text>
             
-            <View style={styles.detailGrid}>
-              <View style={styles.detailItem}>
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>Date</Text>
-                  <Text style={styles.detailValue}>{formatDate(date)}</Text>
+            <View style={styles.detailsCard}>
+              <View style={styles.detailRow}>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>Day</Text>
+                  <Text style={styles.detailValue}>{date}</Text>
                 </View>
-              </View>
-
-              <View style={styles.detailItem}>
-                <View style={styles.detailContent}>
+                <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Time</Text>
                   <Text style={styles.detailValue}>{formatTime(time)}</Text>
                 </View>
               </View>
-
-              <View style={styles.detailItem}>
-                <View style={styles.detailContent}>
+              
+              <View style={styles.detailDivider} />
+              
+              <View style={styles.detailRow}>
+                <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Duration</Text>
                   <Text style={styles.detailValue}>{duration} minutes</Text>
                 </View>
-              </View>
-
-              <View style={styles.detailItem}>
-                <View style={styles.detailContent}>
+                <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Available Spots</Text>
                   <Text style={[
                     styles.detailValue,
@@ -128,24 +144,32 @@ const ClassDetailsScreen = ({ route, navigation }) => {
           {description && (
             <View style={styles.descriptionSection}>
               <Text style={styles.sectionTitle}>About This Class</Text>
-              <Text style={styles.description}>{description}</Text>
+              <View style={styles.descriptionCard}>
+                <Text style={styles.description}>{description}</Text>
+              </View>
             </View>
           )}
 
-          <View style={styles.instructorSection}>
-            <Text style={styles.sectionTitle}>Instructor</Text>
-            <View style={styles.instructorInfo}>
-              <View style={styles.instructorAvatar}>
-                <Text style={styles.instructorInitial}>
-                  {instructor.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <View style={styles.instructorDetails}>
-                <Text style={styles.instructorName}>{instructor}</Text>
-                <Text style={styles.instructorTitle}>Certified Yoga Instructor</Text>
+          {/* Class Instances Section */}
+          {!loadingInstances && classInstances.length > 0 && (
+            <View style={styles.instancesSection}>
+              <Text style={styles.sectionTitle}>Upcoming Sessions</Text>
+              <View style={styles.instancesCard}>
+                {classInstances.map((instance, index) => (
+                  <View key={instance.id || index} style={styles.instanceItem}>
+                    <View style={styles.instanceLeft}>
+                      <Text style={styles.instanceDate}>{instance.date}</Text>
+                      <Text style={styles.instanceInstructor}>with {instance.instructor}</Text>
+                    </View>
+                    <View style={styles.instanceRight}>
+                      <Text style={styles.instanceTime}>{formatTime(instance.time || time)}</Text>
+                      <Text style={styles.instanceDuration}>{instance.duration || duration} min</Text>
+                    </View>
+                  </View>
+                ))}
               </View>
             </View>
-          </View>
+          )}
         </View>
       </ScrollView>
 
@@ -230,10 +254,18 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 15,
   },
+  priceContainer: {
+    alignItems: 'flex-end',
+  },
   price: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#4caf4f',
+  },
+  priceSubtext: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
   },
   instructor: {
     fontSize: 16,
@@ -250,31 +282,46 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 15,
   },
-  detailGrid: {
-    gap: 15,
+  detailsCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 20,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   detailItem: {
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
   },
-  detailContent: {
-    flex: 1,
+  detailDivider: {
+    height: 1,
+    backgroundColor: '#e9ecef',
+    marginVertical: 15,
   },
   detailLabel: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 2,
+    marginBottom: 4,
+    textAlign: 'center',
   },
   detailValue: {
     fontSize: 16,
     color: '#333',
-    fontWeight: '500',
+    fontWeight: '600',
+    textAlign: 'center',
   },
   fullyBookedText: {
     color: '#fa7575ff',
   },
   descriptionSection: {
     marginBottom: 25,
+  },
+  descriptionCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 20,
   },
   description: {
     fontSize: 16,
@@ -284,14 +331,19 @@ const styles = StyleSheet.create({
   instructorSection: {
     marginBottom: 20,
   },
+  instructorCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 20,
+  },
   instructorInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   instructorAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#def4f7',
     justifyContent: 'center',
     alignItems: 'center',
@@ -299,31 +351,37 @@ const styles = StyleSheet.create({
   },
   instructorInitial: {
     color: '#661a72',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   instructorDetails: {
     flex: 1,
   },
   instructorName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   instructorTitle: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 2,
+  },
+  instructorExperience: {
+    fontSize: 12,
+    color: '#999',
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 15,
     backgroundColor: '#fff',
   },
   priceContainer: {
-    flex: 1,
+    flex: 0,
   },
   footerPrice: {
     fontSize: 20,
@@ -351,6 +409,55 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   addToCartButtonTextDisabled: {
+    color: '#666',
+  },
+  // Class instances section styles
+  instancesSection: {
+    marginBottom: 25,
+  },
+  instancesCard: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+  },
+  instanceItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  instanceLeft: {
+    flex: 1,
+  },
+  instanceRight: {
+    alignItems: 'flex-end',
+  },
+  instanceDate: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  instanceInstructor: {
+    fontSize: 14,
+    color: '#666',
+  },
+  instanceTime: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#4caf4f',
+    marginBottom: 4,
+  },
+  instanceDuration: {
+    fontSize: 14,
     color: '#666',
   },
 });

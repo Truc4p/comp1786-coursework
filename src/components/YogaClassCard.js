@@ -13,7 +13,6 @@ import { useCart } from '../context/CartContext';
 const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
   const {
     name,
-    instructor,
     date,
     time,
     duration,
@@ -63,12 +62,10 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
           <Text style={styles.price}>${price}</Text>
         </View>
 
-        <Text style={styles.instructor}>with {instructor}</Text>
-
         <View style={styles.details}>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Date:</Text>
-            <Text style={styles.detailValue}>{formatDate(date)}</Text>
+            <Text style={styles.detailLabel}>Day:</Text>
+            <Text style={styles.detailValue}>{date}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Time:</Text>
