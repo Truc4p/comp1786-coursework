@@ -138,6 +138,15 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             android:text="Test Cloud Connection" />
+
+        <!-- Reset Database Button -->
+        <Button
+            android:id="@+id/btn_reset_database"
+            style="@style/ButtonStyleDanger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Reset Local Database" />
     </LinearLayout>
 
     <!-- Information Card -->

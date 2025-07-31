@@ -17,9 +17,11 @@ public class CloudSyncActivity extends AppCompatActivity {
     private Button btnUploadData;
     private Button btnDownloadSync;
     private Button btnCheckConnection;
+    private Button btnResetDatabase;
     private Button btnBack;
     
     private CloudSyncService cloudSyncService;
+    private DatabaseHelper databaseHelper;
     private ProgressDialog progressDialog;
     
     @Override
@@ -29,6 +31,7 @@ public class CloudSyncActivity extends AppCompatActivity {
         
         // Initialize cloud sync service
         cloudSyncService = new CloudSyncService(this);
+        databaseHelper = new DatabaseHelper(this);
         
         // Initialize views
         initializeViews();
@@ -46,6 +49,7 @@ public class CloudSyncActivity extends AppCompatActivity {
         btnUploadData = findViewById(R.id.btn_upload_data);
         btnDownloadSync = findViewById(R.id.btn_download_sync);
         btnCheckConnection = findViewById(R.id.btn_check_connection);
+        btnResetDatabase = findViewById(R.id.btn_reset_database);
         btnBack = findViewById(R.id.btn_back);
         
         // Initialize progress dialog
@@ -59,6 +63,8 @@ public class CloudSyncActivity extends AppCompatActivity {
         btnDownloadSync.setOnClickListener(v -> showDownloadConfirmation());
         
         btnCheckConnection.setOnClickListener(v -> checkCloudConnection());
+        
+        btnResetDatabase.setOnClickListener(v -> showResetConfirmation());
         
         btnBack.setOnClickListener(v -> finish());
     }
@@ -211,6 +217,52 @@ public class CloudSyncActivity extends AppCompatActivity {
     private void updateLastSyncTime() {
         String currentTime = java.text.DateFormat.getDateTimeInstance().format(new java.util.Date());
         tvLastSync.setText("Last sync: " + currentTime);
+    }
+    
+    private void showResetConfirmation() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Reset Local Database");
+        builder.setMessage("Are you sure you want to delete all local data? This will remove:\n\n" +
+                "• All yoga classes\n" +
+                "• All class instances\n" +
+                "• All booking data\n\n" +
+                "This action cannot be undone. You can re-sync from cloud after reset.");
+        
+        builder.setPositiveButton("Yes, Reset", (dialog, which) -> {
+            progressDialog.setMessage("Resetting database...");
+            progressDialog.show();
+            
+            // Run database reset in background
+            new Thread(() -> {
+                try {
+                    databaseHelper.resetDatabase();
+                    
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(CloudSyncActivity.this, 
+                            "Database reset successfully. You can now sync from cloud.", 
+                            Toast.LENGTH_LONG).show();
+                    });
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(CloudSyncActivity.this, 
+                            "Error resetting database: " + e.getMessage(), 
+                            Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
+        });
+        
+        builder.setNegativeButton("Cancel", null);
+        
+        // Make the dialog more prominent for this destructive action
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        
+        // Make the positive button red to indicate it's destructive
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(getResources().getColor(android.R.color.holo_red_dark));
     }
     
     @Override

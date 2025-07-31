@@ -48,6 +48,12 @@
         <item name="android:backgroundTint">@color/accent_yellow</item>
     </style>
 
+    <style name="ButtonStyleDanger" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/accent_red</item>
+    </style>
+    
     <style name="ButtonStyleOutline" parent="ButtonStyle">
         <item name="android:textColor">@color/dark_purple</item>
         <item name="android:background">@drawable/input_background</item>

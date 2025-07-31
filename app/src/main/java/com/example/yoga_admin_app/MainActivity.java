@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         Button btnSearchClasses = findViewById(R.id.btn_search_classes);
         Button btnCloudSync = findViewById(R.id.btn_cloud_sync);
         Button btnViewBookings = findViewById(R.id.btn_view_bookings);
-        Button btnResetDatabase = findViewById(R.id.btn_reset_database);
         tvClassCount = findViewById(R.id.tv_class_count);
 
         btnAddClass.setOnClickListener(new View.OnClickListener() {
@@ -88,26 +87,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        btnResetDatabase.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showResetConfirmation();
-            }
-        });
-    }
-
-    private void showResetConfirmation() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Reset Database");
-        builder.setMessage("Are you sure you want to delete all yoga classes? This action cannot be undone.");
-        builder.setPositiveButton("Yes", (dialog, which) -> {
-            databaseHelper.resetDatabase();
-            updateClassCount();
-            Toast.makeText(MainActivity.this, "Database reset successfully", Toast.LENGTH_SHORT).show();
-        });
-        builder.setNegativeButton("No", null);
-        builder.show();
     }
 
     private void updateClassCount() {

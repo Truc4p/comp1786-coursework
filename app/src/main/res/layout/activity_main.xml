@@ -104,16 +104,6 @@
             android:drawableStart="@android:drawable/ic_menu_agenda"
             android:drawablePadding="8dp" />
 
-        <Button
-            android:id="@+id/btn_reset_database"
-            style="@style/ButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="Reset Database"
-            android:drawableStart="@android:drawable/ic_menu_delete"
-            android:drawablePadding="8dp" />
-
     </LinearLayout>
 
     <!-- Footer -->
