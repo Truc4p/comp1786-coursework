@@ -58,20 +58,43 @@ public class CloudSyncService {
                 // Get only classes that need syncing
                 List<YogaClass> changedClasses = databaseHelper.getClassesNeedingSync();
                 
+                // Get class instances that need syncing
+                List<ClassInstance> changedInstances = databaseHelper.getInstancesNeedingSync();
+                
                 // Get pending deletions that need to be synced
                 List<PendingDeletion> pendingDeletions = databaseHelper.getPendingDeletions();
                 
-                if (changedClasses.isEmpty() && pendingDeletions.isEmpty()) {
-                    callback.onSuccess("No changes to upload");
+                // Enhanced logging for debugging
+                Log.d(TAG, "Found " + changedClasses.size() + " classes needing sync");
+                Log.d(TAG, "Found " + changedInstances.size() + " class instances needing sync");
+                Log.d(TAG, "Found " + pendingDeletions.size() + " pending deletions");
+                
+                for (YogaClass cls : changedClasses) {
+                    Log.d(TAG, "Class needing sync: ID=" + cls.getId() + ", Type=" + cls.getClassType() + ", NeedsSync=" + cls.needsSync());
+                }
+                
+                for (ClassInstance inst : changedInstances) {
+                    Log.d(TAG, "Instance needing sync: ID=" + inst.getId() + ", ClassID=" + inst.getYogaClassId() + ", Date=" + inst.getDate());
+                }
+                
+                if (changedClasses.isEmpty() && changedInstances.isEmpty() && pendingDeletions.isEmpty()) {
+                    // Let's also check total classes in database for debugging
+                    List<YogaClass> allClasses = databaseHelper.getAllYogaClasses();
+                    Log.d(TAG, "Total classes in database: " + allClasses.size());
+                    
+                    callback.onSuccess("No changes to upload. Total classes: " + allClasses.size() + ", Total instances: " + 
+                                     databaseHelper.getAllClassInstances().size());
                     return;
                 }
                 
-                callback.onProgress("Uploading " + changedClasses.size() + " changed classes and " + 
+                callback.onProgress("Uploading " + changedClasses.size() + " changed classes, " + 
+                                  changedInstances.size() + " class instances, and " + 
                                   pendingDeletions.size() + " deletions...");
                 
                 int successCount = 0;
                 int errorCount = 0;
                 int deletedCount = 0;
+                int instanceSuccessCount = 0;
                 
                 // First, process deletions
                 for (PendingDeletion deletion : pendingDeletions) {
@@ -94,7 +117,7 @@ public class CloudSyncService {
                     }
                 }
                 
-                // Then, process uploads
+                // Then, process class uploads
                 for (YogaClass yogaClass : changedClasses) {
                     try {
                         // Upload individual class
@@ -120,15 +143,43 @@ public class CloudSyncService {
                     }
                 }
                 
+                // Finally, process standalone class instance uploads
+                for (ClassInstance instance : changedInstances) {
+                    try {
+                        boolean success = uploadSingleClassInstance(instance);
+                        
+                        if (success) {
+                            databaseHelper.markInstanceAsSynced(instance.getId());
+                            instanceSuccessCount++;
+                            
+                            callback.onProgress("Uploaded instance " + instanceSuccessCount + "/" + changedInstances.size());
+                        } else {
+                            errorCount++;
+                            Log.e(TAG, "Failed to upload class instance: " + instance.getId());
+                        }
+                        
+                    } catch (Exception e) {
+                        errorCount++;
+                        Log.e(TAG, "Error uploading class instance: " + instance.getId(), e);
+                    }
+                }
+                
                 if (errorCount == 0) {
                     String message = "Successfully uploaded " + successCount + " classes";
+                    if (instanceSuccessCount > 0) {
+                        message += " and " + instanceSuccessCount + " class instances";
+                    }
                     if (deletedCount > 0) {
                         message += " and deleted " + deletedCount + " classes from cloud";
                     }
                     callback.onSuccess(message);
                 } else {
                     String message = "Upload completed with " + errorCount + " errors. " + 
-                                   successCount + " classes uploaded";
+                                   successCount + " classes";
+                    if (instanceSuccessCount > 0) {
+                        message += " and " + instanceSuccessCount + " instances";
+                    }
+                    message += " uploaded";
                     if (deletedCount > 0) {
                         message += " and " + deletedCount + " classes deleted";
                     }
@@ -192,6 +243,24 @@ public class CloudSyncService {
             
         } catch (Exception e) {
             Log.e(TAG, "Error uploading class instances", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Upload a single class instance
+     */
+    private boolean uploadSingleClassInstance(ClassInstance instance) {
+        try {
+            String instanceEndpoint = CLASS_INSTANCES_ENDPOINT + "/" + instance.getId() + ".json";
+            JSONObject instanceData = createInstanceJson(instance);
+            
+            String response = sendDataToFirebase(instanceEndpoint, instanceData, "PUT");
+            
+            return response != null;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error uploading single class instance", e);
             return false;
         }
     }

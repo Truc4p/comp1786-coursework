@@ -440,6 +440,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return instanceList;
     }
     
+    // Get all class instances
+    public List<ClassInstance> getAllClassInstances() {
+        List<ClassInstance> instanceList = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_CLASS_INSTANCES + " ORDER BY " + KEY_DATE;
+        
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        
+        if (cursor.moveToFirst()) {
+            do {
+                ClassInstance instance = new ClassInstance();
+                instance.setId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_INSTANCE_ID)));
+                instance.setYogaClassId(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_YOGA_CLASS_ID)));
+                instance.setDate(cursor.getString(cursor.getColumnIndexOrThrow(KEY_DATE)));
+                instance.setInstructor(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_INSTRUCTOR)));
+                instance.setAdditionalComments(cursor.getString(cursor.getColumnIndexOrThrow(KEY_ADDITIONAL_COMMENTS)));
+                instance.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_INSTANCE_LAST_MODIFIED)));
+                instance.setNeedsSync(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_INSTANCE_NEEDS_SYNC)) == 1);
+                instance.setCloudId(cursor.getString(cursor.getColumnIndexOrThrow(KEY_INSTANCE_CLOUD_ID)));
+                
+                instanceList.add(instance);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return instanceList;
+    }
+    
     // Get a single class instance
     public ClassInstance getClassInstance(long id) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -1434,5 +1462,58 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             android.util.Log.e("DatabaseHelper", "Error parsing class list JSON: " + json, e);
         }
         return classList;
+    }
+    
+    /**
+     * Debug method to log all classes and their sync status
+     */
+    public void logAllClassesSyncStatus() {
+        List<YogaClass> allClasses = getAllYogaClasses();
+        List<ClassInstance> allInstances = getAllClassInstances();
+        
+        android.util.Log.d("DatabaseHelper", "=== ALL CLASSES SYNC STATUS ===");
+        android.util.Log.d("DatabaseHelper", "Total classes in database: " + allClasses.size());
+        android.util.Log.d("DatabaseHelper", "Total class instances in database: " + allInstances.size());
+        
+        for (YogaClass cls : allClasses) {
+            android.util.Log.d("DatabaseHelper", 
+                "CLASS - ID: " + cls.getId() + 
+                ", Type: " + cls.getClassType() + 
+                ", Day: " + cls.getDayOfWeek() + 
+                ", Time: " + cls.getTime() + 
+                ", NeedsSync: " + cls.needsSync() + 
+                ", CloudId: " + cls.getCloudId());
+        }
+        
+        for (ClassInstance inst : allInstances) {
+            android.util.Log.d("DatabaseHelper", 
+                "INSTANCE - ID: " + inst.getId() + 
+                ", ClassID: " + inst.getYogaClassId() + 
+                ", Date: " + inst.getDate() + 
+                ", Instructor: " + inst.getInstructor() + 
+                ", NeedsSync: " + inst.needsSync() + 
+                ", CloudId: " + inst.getCloudId());
+        }
+        
+        List<YogaClass> needsSync = getClassesNeedingSync();
+        List<ClassInstance> instancesNeedSync = getInstancesNeedingSync();
+        android.util.Log.d("DatabaseHelper", "Classes needing sync: " + needsSync.size());
+        android.util.Log.d("DatabaseHelper", "Instances needing sync: " + instancesNeedSync.size());
+        android.util.Log.d("DatabaseHelper", "=== END SYNC STATUS ===");
+    }
+    
+    /**
+     * Force all classes to need sync (for debugging)
+     */
+    public void forceAllClassesToNeedSync() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_NEEDS_SYNC, 1);
+        values.put(KEY_LAST_MODIFIED, System.currentTimeMillis());
+        
+        int rowsUpdated = db.update(TABLE_YOGA_CLASSES, values, null, null);
+        android.util.Log.d("DatabaseHelper", "Forced " + rowsUpdated + " classes to need sync");
+        
+        db.close();
     }
 }

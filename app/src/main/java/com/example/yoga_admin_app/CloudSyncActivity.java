@@ -111,6 +111,10 @@ public class CloudSyncActivity extends AppCompatActivity {
     private void uploadData() {
         showProgress("Uploading data...");
         
+        // Debug: Log all classes and their sync status
+        DatabaseHelper debugHelper = new DatabaseHelper(this);
+        debugHelper.logAllClassesSyncStatus();
+        
         cloudSyncService.uploadChangedData(new CloudSyncService.SyncCallback() {
             @Override
             public void onSuccess(String message) {
