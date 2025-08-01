@@ -73,14 +73,20 @@ class ApiService {
     // Map yoga class data to customer format (simplified - no instances)
   mapAdminDataToCustomerFormat(yogaClasses) {
     return yogaClasses.map(yogaClass => {
+      // Calculate available spots based on actual bookings
+      const capacity = yogaClass.capacity || 10;
+      const bookedSpots = yogaClass.bookedSpots || 0;
+      const availableSpots = Math.max(0, capacity - bookedSpots);
+      
       return {
         id: yogaClass.id || Math.random().toString(),
         name: yogaClass.classType || 'Yoga Class',
         date: yogaClass.dayOfWeek || 'Monday', // Show day of week
         time: yogaClass.time || '09:00',
         duration: yogaClass.duration || 60,
-        capacity: yogaClass.capacity || 10,
-        availableSpots: Math.max(0, (yogaClass.capacity || 10) - Math.floor(Math.random() * 5)),
+        capacity: capacity,
+        availableSpots: availableSpots, // Use actual available spots
+        bookedSpots: bookedSpots, // Track booked spots
         price: yogaClass.price || 25,
         level: yogaClass.difficulty || 'All Levels',
         dayOfWeek: yogaClass.dayOfWeek || 'Monday',
@@ -115,14 +121,20 @@ class ApiService {
         
         // Map the Firebase data structure to customer app format
         const mappedData = uniqueYogaClasses.map(yogaClass => {
+          // Calculate available spots based on actual bookings
+          const capacity = yogaClass.capacity || 10;
+          const bookedSpots = yogaClass.bookedSpots || 0;
+          const availableSpots = Math.max(0, capacity - bookedSpots);
+          
           return {
             id: yogaClass.id || Math.random().toString(),
             name: yogaClass.classType || 'Yoga Class',
             date: yogaClass.dayOfWeek || 'Monday', // Show day of week instead of date
             time: yogaClass.time || '09:00',
             duration: yogaClass.duration || 60,
-            capacity: yogaClass.capacity || 10,
-            availableSpots: Math.max(0, (yogaClass.capacity || 10) - Math.floor(Math.random() * 5)), // Random available spots
+            capacity: capacity,
+            availableSpots: availableSpots, // Use actual available spots
+            bookedSpots: bookedSpots, // Track booked spots
             price: yogaClass.price || 25,
             level: yogaClass.difficulty || 'All Levels',
             dayOfWeek: yogaClass.dayOfWeek || 'Monday',
@@ -202,6 +214,129 @@ class ApiService {
   // Get specific yoga class details
   async getYogaClassDetails(classId) {
     return this.request(`/yogaClasses/${classId}`);
+  }
+
+  // Update yoga class available spots
+  async updateYogaClassSpots(classId, spotsToDecrease) {
+    try {
+      console.log(`🔄 Updating available spots for class ${classId}, decreasing by ${spotsToDecrease}`);
+      
+      // First, get the current class data
+      const yogaClasses = await this.request('/yoga-classes');
+      if (!yogaClasses || yogaClasses.length === 0) {
+        throw new Error('No yoga classes found');
+      }
+
+      // Find the specific class
+      const classToUpdate = yogaClasses.find(cls => 
+        String(cls.id) === String(classId) || 
+        String(cls.firebaseKey) === String(classId)
+      );
+
+      if (!classToUpdate) {
+        throw new Error(`Class with ID ${classId} not found`);
+      }
+
+      // Calculate new available spots
+      const currentAvailableSpots = classToUpdate.availableSpots || (classToUpdate.capacity - (classToUpdate.bookedSpots || 0));
+      const newAvailableSpots = Math.max(0, currentAvailableSpots - spotsToDecrease);
+      
+      // Update the bookedSpots field to track total bookings
+      const currentBookedSpots = classToUpdate.bookedSpots || 0;
+      const newBookedSpots = currentBookedSpots + spotsToDecrease;
+
+      console.log(`📊 Class ${classId}: Current available: ${currentAvailableSpots}, New available: ${newAvailableSpots}`);
+
+      // Prepare updated class data
+      const updatedClassData = {
+        ...classToUpdate,
+        availableSpots: newAvailableSpots,
+        bookedSpots: newBookedSpots,
+        lastUpdated: new Date().toISOString()
+      };
+
+      // Remove Firebase-specific fields before updating
+      delete updatedClassData.firebaseKey;
+
+      // Use the Firebase key for the endpoint
+      const firebaseKey = classToUpdate.firebaseKey || classId;
+      const updateEndpoint = `/yoga-classes/${firebaseKey}`;
+
+      // Update the class in Firebase
+      const result = await this.request(updateEndpoint, {
+        method: 'PUT',
+        body: JSON.stringify(updatedClassData),
+      });
+
+      console.log(`✅ Successfully updated available spots for class ${classId}`);
+      return { success: true, newAvailableSpots, result };
+
+    } catch (error) {
+      console.error(`❌ Error updating available spots for class ${classId}:`, error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Increase yoga class available spots (for cancellations)
+  async increaseYogaClassSpots(classId, spotsToIncrease) {
+    try {
+      console.log(`🔄 Increasing available spots for class ${classId}, increasing by ${spotsToIncrease}`);
+      
+      // First, get the current class data
+      const yogaClasses = await this.request('/yoga-classes');
+      if (!yogaClasses || yogaClasses.length === 0) {
+        throw new Error('No yoga classes found');
+      }
+
+      // Find the specific class
+      const classToUpdate = yogaClasses.find(cls => 
+        String(cls.id) === String(classId) || 
+        String(cls.firebaseKey) === String(classId)
+      );
+
+      if (!classToUpdate) {
+        throw new Error(`Class with ID ${classId} not found`);
+      }
+
+      // Calculate new available spots
+      const currentAvailableSpots = classToUpdate.availableSpots || (classToUpdate.capacity - (classToUpdate.bookedSpots || 0));
+      const maxCapacity = classToUpdate.capacity || 10;
+      const newAvailableSpots = Math.min(maxCapacity, currentAvailableSpots + spotsToIncrease);
+      
+      // Update the bookedSpots field to track total bookings
+      const currentBookedSpots = classToUpdate.bookedSpots || 0;
+      const newBookedSpots = Math.max(0, currentBookedSpots - spotsToIncrease);
+
+      console.log(`📊 Class ${classId}: Current available: ${currentAvailableSpots}, New available: ${newAvailableSpots}`);
+
+      // Prepare updated class data
+      const updatedClassData = {
+        ...classToUpdate,
+        availableSpots: newAvailableSpots,
+        bookedSpots: newBookedSpots,
+        lastUpdated: new Date().toISOString()
+      };
+
+      // Remove Firebase-specific fields before updating
+      delete updatedClassData.firebaseKey;
+
+      // Use the Firebase key for the endpoint
+      const firebaseKey = classToUpdate.firebaseKey || classId;
+      const updateEndpoint = `/yoga-classes/${firebaseKey}`;
+
+      // Update the class in Firebase
+      const result = await this.request(updateEndpoint, {
+        method: 'PUT',
+        body: JSON.stringify(updatedClassData),
+      });
+
+      console.log(`✅ Successfully increased available spots for class ${classId}`);
+      return { success: true, newAvailableSpots, result };
+
+    } catch (error) {
+      console.error(`❌ Error increasing available spots for class ${classId}:`, error);
+      return { success: false, error: error.message };
+    }
   }
 
   // Get class instances for a specific yoga class

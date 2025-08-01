@@ -159,7 +159,6 @@ const CartScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       
-      <Text style={styles.itemDetails}>with {item.instructor}</Text>
       <Text style={styles.itemDetails}>
         {formatDate(item.date)} at {formatTime(item.time)}
       </Text>

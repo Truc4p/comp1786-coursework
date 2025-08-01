@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { TouchableOpacity, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -17,7 +17,7 @@ const AppNavigator = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const navigationRef = useRef();
 
-  const HamburgerIcon = ({ navigation }) => (
+  const HamburgerIcon = () => (
     <TouchableOpacity
       onPress={() => {
         try {
@@ -58,6 +58,8 @@ const AppNavigator = () => {
             backgroundColor: '#def4f7',
             height: 90,
             elevation: 0, // Remove shadow on Android
+            shadowOpacity: 0, // Remove shadow on iOS
+            borderBottomWidth: 0, // Remove border bottom
           },
           headerTintColor: '#661a72',
           headerTitleStyle: {

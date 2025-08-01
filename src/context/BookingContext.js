@@ -74,12 +74,30 @@ export const BookingProvider = ({ children }) => {
       console.log('📨 ApiService.createBooking result:', result);
       
       if (result && result.success) {
+        // Update available spots for each booked class
+        console.log('🎯 Updating available spots for booked classes...');
+        for (const item of cartItems) {
+          try {
+            console.log(`📉 Decreasing spots for class ${item.id} by ${item.quantity}`);
+            const spotUpdateResult = await ApiService.updateYogaClassSpots(item.id, item.quantity);
+            
+            if (spotUpdateResult.success) {
+              console.log(`✅ Successfully updated spots for class ${item.id}: ${spotUpdateResult.newAvailableSpots} spots remaining`);
+            } else {
+              console.warn(`⚠️ Failed to update spots for class ${item.id}:`, spotUpdateResult.error);
+            }
+          } catch (spotError) {
+            console.error(`❌ Error updating spots for class ${item.id}:`, spotError);
+            // Continue with other classes even if one fails
+          }
+        }
+
         // Add to local bookings
         const updatedBookings = [...bookings, { ...booking, firebaseId: result.id }];
         setBookings(updatedBookings);
         await saveBookingsToStorage(updatedBookings);
         
-        console.log('✅ Booking submitted successfully');
+        console.log('✅ Booking submitted successfully and spots updated');
         setLoading(false);
         return { success: true, booking };
       } else {
@@ -149,6 +167,26 @@ export const BookingProvider = ({ children }) => {
       }
       
       console.log('✅ Firebase update successful');
+
+      // Increase available spots for each cancelled class
+      if (currentBooking.classes && Array.isArray(currentBooking.classes)) {
+        console.log('🎯 Increasing available spots for cancelled classes...');
+        for (const item of currentBooking.classes) {
+          try {
+            console.log(`📈 Increasing spots for class ${item.id} by ${item.quantity}`);
+            const spotUpdateResult = await ApiService.increaseYogaClassSpots(item.id, item.quantity);
+            
+            if (spotUpdateResult.success) {
+              console.log(`✅ Successfully increased spots for class ${item.id}: ${spotUpdateResult.newAvailableSpots} spots available`);
+            } else {
+              console.warn(`⚠️ Failed to increase spots for class ${item.id}:`, spotUpdateResult.error);
+            }
+          } catch (spotError) {
+            console.error(`❌ Error increasing spots for class ${item.id}:`, spotError);
+            // Continue with other classes even if one fails
+          }
+        }
+      }
       
       // Then update local state - preserve all original booking data
       const updatedBookings = bookings.map(booking =>
@@ -168,7 +206,7 @@ export const BookingProvider = ({ children }) => {
       setBookings(updatedBookings);
       await saveBookingsToStorage(updatedBookings);
       
-      console.log('✅ Local state and storage updated');
+      console.log('✅ Local state and storage updated, spots restored');
       
       setLoading(false);
       return { success: true };

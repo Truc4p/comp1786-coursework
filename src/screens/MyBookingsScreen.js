@@ -269,13 +269,6 @@ const MyBookingsScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {user && (
-        <View style={styles.userInfoContainer}>
-          <Text style={styles.userInfoText}>
-            Bookings for: {user.firstName} {user.lastName} ({user.email})
-          </Text>
-        </View>
-      )}
 
       {userBookings.length > 0 ? (
         <FlatList
@@ -298,16 +291,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F3E5F5',
-  },
-  userInfoContainer: {
-    backgroundColor: '#F3E5F5',
-    padding: 16,
-  },
-  userInfoText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    textAlign: 'center',
   },
   bookingCard: {
     backgroundColor: '#fff',
