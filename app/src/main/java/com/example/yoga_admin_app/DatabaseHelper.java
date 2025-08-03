@@ -12,13 +12,14 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
-    private static final int DATABASE_VERSION = 14; // Added all_classes column for multiple class support
+    private static final int DATABASE_VERSION = 15; // Added users table for authentication
     
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
     private static final String TABLE_CLASS_INSTANCES = "class_instances";
     private static final String TABLE_PENDING_DELETIONS = "pending_deletions";
     private static final String TABLE_BOOKINGS = "bookings";
+    private static final String TABLE_USERS = "users";
     
     // Column names for yoga_classes table
     private static final String KEY_ID = "id";
@@ -81,6 +82,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_BOOKING_UPDATED_AT = "updated_at";
     private static final String COLUMN_BOOKING_IS_SYNCED = "is_synced";
     private static final String COLUMN_BOOKING_LAST_MODIFIED = "last_modified";
+    
+    // Column names for users table
+    private static final String COLUMN_USER_ID = "id";
+    private static final String COLUMN_USERNAME = "username";
+    private static final String COLUMN_EMAIL = "email";
+    private static final String COLUMN_PASSWORD_HASH = "password_hash";
+    private static final String COLUMN_SALT = "salt";
+    private static final String COLUMN_ROLE = "role";
+    private static final String COLUMN_IS_ACTIVE = "is_active";
+    private static final String COLUMN_FAILED_ATTEMPTS = "failed_attempts";
+    private static final String COLUMN_LOCKOUT_UNTIL = "lockout_until";
+    private static final String COLUMN_LAST_LOGIN = "last_login";
+    private static final String COLUMN_SESSION_TOKEN = "session_token";
+    private static final String COLUMN_SESSION_EXPIRES_AT = "session_expires_at";
+    private static final String COLUMN_CREATED_AT = "created_at";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -163,6 +179,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_BOOKING_IS_SYNCED + " INTEGER DEFAULT 0,"
                 + COLUMN_BOOKING_LAST_MODIFIED + " INTEGER DEFAULT 0)";
         db.execSQL(CREATE_BOOKINGS_TABLE);
+        
+        // Create users table for authentication
+        String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS + "("
+                + COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_USERNAME + " TEXT NOT NULL UNIQUE,"
+                + COLUMN_EMAIL + " TEXT NOT NULL UNIQUE,"
+                + COLUMN_PASSWORD_HASH + " TEXT NOT NULL,"
+                + COLUMN_SALT + " TEXT NOT NULL,"
+                + COLUMN_ROLE + " TEXT DEFAULT 'admin',"
+                + COLUMN_IS_ACTIVE + " INTEGER DEFAULT 1,"
+                + COLUMN_FAILED_ATTEMPTS + " INTEGER DEFAULT 0,"
+                + COLUMN_LOCKOUT_UNTIL + " INTEGER DEFAULT 0,"
+                + COLUMN_LAST_LOGIN + " INTEGER DEFAULT 0,"
+                + COLUMN_SESSION_TOKEN + " TEXT,"
+                + COLUMN_SESSION_EXPIRES_AT + " INTEGER DEFAULT 0,"
+                + COLUMN_CREATED_AT + " INTEGER DEFAULT 0)";
+        db.execSQL(CREATE_USERS_TABLE);
+        
+        // Create default admin user
+        createDefaultAdminUser(db);
     }
 
     @Override
@@ -179,6 +215,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_YOGA_CLASSES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PENDING_DELETIONS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         
         // Recreate all tables with the current schema
         onCreate(db);
@@ -1511,5 +1548,228 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         android.util.Log.d("DatabaseHelper", "Forced " + rowsUpdated + " classes to need sync");
         
         db.close();
+    }
+    
+    // ===============================
+    // USER AUTHENTICATION METHODS
+    // ===============================
+    
+    /**
+     * Create default admin user during database initialization
+     */
+    private void createDefaultAdminUser(SQLiteDatabase db) {
+        try {
+            // Generate salt and hash for default password "admin123"
+            String salt = generateSalt();
+            String passwordHash = hashPassword("admin123", salt);
+            
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_USERNAME, "admin");
+            values.put(COLUMN_EMAIL, "admin@yogaapp.com");
+            values.put(COLUMN_PASSWORD_HASH, passwordHash);
+            values.put(COLUMN_SALT, salt);
+            values.put(COLUMN_ROLE, "admin");
+            values.put(COLUMN_IS_ACTIVE, 1);
+            values.put(COLUMN_FAILED_ATTEMPTS, 0);
+            values.put(COLUMN_LOCKOUT_UNTIL, 0);
+            values.put(COLUMN_LAST_LOGIN, 0);
+            values.put(COLUMN_SESSION_TOKEN, (String) null);
+            values.put(COLUMN_SESSION_EXPIRES_AT, 0);
+            values.put(COLUMN_CREATED_AT, System.currentTimeMillis());
+            
+            long result = db.insert(TABLE_USERS, null, values);
+            if (result != -1) {
+                android.util.Log.i("DatabaseHelper", "Default admin user created successfully");
+            } else {
+                android.util.Log.e("DatabaseHelper", "Failed to create default admin user");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error creating default admin user", e);
+        }
+    }
+    
+    /**
+     * Create a new user
+     */
+    public long createUser(User user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_USERNAME, user.getUsername());
+            values.put(COLUMN_EMAIL, user.getEmail());
+            values.put(COLUMN_PASSWORD_HASH, user.getPasswordHash());
+            values.put(COLUMN_SALT, user.getSalt());
+            values.put(COLUMN_ROLE, user.getRole());
+            values.put(COLUMN_IS_ACTIVE, user.isActive() ? 1 : 0);
+            values.put(COLUMN_FAILED_ATTEMPTS, user.getFailedAttempts());
+            values.put(COLUMN_LOCKOUT_UNTIL, user.getLockoutUntil());
+            values.put(COLUMN_LAST_LOGIN, user.getLastLogin());
+            values.put(COLUMN_SESSION_TOKEN, user.getSessionToken());
+            values.put(COLUMN_SESSION_EXPIRES_AT, user.getSessionExpiresAt());
+            values.put(COLUMN_CREATED_AT, user.getCreatedAt());
+            
+            long result = db.insert(TABLE_USERS, null, values);
+            return result;
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error creating user", e);
+            return -1;
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Get user by ID
+     */
+    public User getUserById(long userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        User user = null;
+        
+        try {
+            Cursor cursor = db.query(TABLE_USERS, null, COLUMN_USER_ID + "=?", 
+                    new String[]{String.valueOf(userId)}, null, null, null);
+            
+            if (cursor != null && cursor.moveToFirst()) {
+                user = cursorToUser(cursor);
+                cursor.close();
+            }
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error getting user by ID", e);
+        } finally {
+            db.close();
+        }
+        
+        return user;
+    }
+    
+    /**
+     * Get user by username or email
+     */
+    public User getUserByUsernameOrEmail(String usernameOrEmail) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        User user = null;
+        
+        try {
+            String selection = COLUMN_USERNAME + "=? OR " + COLUMN_EMAIL + "=?";
+            String[] selectionArgs = {usernameOrEmail, usernameOrEmail};
+            
+            Cursor cursor = db.query(TABLE_USERS, null, selection, selectionArgs, null, null, null);
+            
+            if (cursor != null && cursor.moveToFirst()) {
+                user = cursorToUser(cursor);
+                cursor.close();
+            }
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error getting user by username/email", e);
+        } finally {
+            db.close();
+        }
+        
+        return user;
+    }
+    
+    /**
+     * Update user information
+     */
+    public boolean updateUser(User user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_USERNAME, user.getUsername());
+            values.put(COLUMN_EMAIL, user.getEmail());
+            values.put(COLUMN_PASSWORD_HASH, user.getPasswordHash());
+            values.put(COLUMN_SALT, user.getSalt());
+            values.put(COLUMN_ROLE, user.getRole());
+            values.put(COLUMN_IS_ACTIVE, user.isActive() ? 1 : 0);
+            values.put(COLUMN_FAILED_ATTEMPTS, user.getFailedAttempts());
+            values.put(COLUMN_LOCKOUT_UNTIL, user.getLockoutUntil());
+            values.put(COLUMN_LAST_LOGIN, user.getLastLogin());
+            values.put(COLUMN_SESSION_TOKEN, user.getSessionToken());
+            values.put(COLUMN_SESSION_EXPIRES_AT, user.getSessionExpiresAt());
+            
+            int rowsAffected = db.update(TABLE_USERS, values, COLUMN_USER_ID + "=?", 
+                    new String[]{String.valueOf(user.getId())});
+            
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error updating user", e);
+            return false;
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Invalidate all sessions (for security)
+     */
+    public void invalidateAllSessions() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_SESSION_TOKEN, (String) null);
+            values.put(COLUMN_SESSION_EXPIRES_AT, 0);
+            
+            db.update(TABLE_USERS, values, null, null);
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error invalidating all sessions", e);
+        } finally {
+            db.close();
+        }
+    }
+    
+    /**
+     * Convert cursor to User object
+     */
+    private User cursorToUser(Cursor cursor) {
+        User user = new User();
+        
+        user.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)));
+        user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME)));
+        user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)));
+        user.setPasswordHash(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD_HASH)));
+        user.setSalt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SALT)));
+        user.setRole(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ROLE)));
+        user.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_ACTIVE)) == 1);
+        user.setFailedAttempts(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FAILED_ATTEMPTS)));
+        user.setLockoutUntil(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_LOCKOUT_UNTIL)));
+        user.setLastLogin(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_LAST_LOGIN)));
+        user.setSessionToken(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SESSION_TOKEN)));
+        user.setSessionExpiresAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_SESSION_EXPIRES_AT)));
+        user.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
+        
+        return user;
+    }
+    
+    /**
+     * Helper method to generate salt for password hashing
+     */
+    private String generateSalt() {
+        try {
+            java.security.SecureRandom random = new java.security.SecureRandom();
+            byte[] salt = new byte[32];
+            random.nextBytes(salt);
+            return android.util.Base64.encodeToString(salt, android.util.Base64.DEFAULT);
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error generating salt", e);
+            return "defaultSalt" + System.currentTimeMillis(); // Fallback
+        }
+    }
+    
+    /**
+     * Helper method to hash password with salt
+     */
+    private String hashPassword(String password, String salt) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            md.update(salt.getBytes());
+            byte[] hashedPassword = md.digest(password.getBytes());
+            return android.util.Base64.encodeToString(hashedPassword, android.util.Base64.DEFAULT);
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error hashing password", e);
+            return null;
+        }
     }
 }

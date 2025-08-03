@@ -43,6 +43,40 @@
                 android:textStyle="italic" />
 
             <TextView
+                android:id="@+id/tv_welcome_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Welcome, Admin!"
+                android:textColor="@color/dark_purple"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- Logout Button -->
+            <Button
+                android:id="@+id/btn_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:text="🚪 Logout"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:background="@color/warning_red"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:minWidth="100dp" />
+
+            <!-- Logout Info -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="💡 You can also logout from the menu (⋮) in the top bar"
+                android:textSize="10sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center" />
+
+            <TextView
                 android:id="@+id/tv_class_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -22,18 +22,19 @@ import java.util.concurrent.Executors;
 
 public class CloudSyncService {
     private static final String TAG = "CloudSyncService";
-    private static final String BASE_URL = "https://yogaapp-12d2b-default-rtdb.asia-southeast1.firebasedatabase.app/";
     private static final String YOGA_CLASSES_ENDPOINT = "yoga-classes";
     private static final String CLASS_INSTANCES_ENDPOINT = "class-instances";
     
     private Context context;
     private DatabaseHelper databaseHelper;
     private ExecutorService executorService;
+    private String baseUrl;
     
     public CloudSyncService(Context context) {
         this.context = context;
         this.databaseHelper = new DatabaseHelper(context);
         this.executorService = Executors.newSingleThreadExecutor();
+        this.baseUrl = FirebaseConfig.getFirebaseDatabaseUrl(context);
     }
     
     public interface SyncCallback {
@@ -491,7 +492,7 @@ public class CloudSyncService {
      */
     private String sendDataToFirebase(String endpoint, JSONObject data, String method) {
         try {
-            URL url = new URL(BASE_URL + endpoint);
+            URL url = new URL(baseUrl + endpoint);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             
             connection.setRequestMethod(method);
@@ -1013,7 +1014,7 @@ public class CloudSyncService {
                 callback.onProgress("Downloading bookings from cloud...");
                 
                 // Get bookings from Firebase
-                String bookingsUrl = BASE_URL + "bookings.json";
+                String bookingsUrl = baseUrl + "bookings.json";
                 Log.d(TAG, "Requesting bookings from URL: " + bookingsUrl);
                 String response = makeGetRequest(bookingsUrl);
                 
@@ -1165,7 +1166,7 @@ public class CloudSyncService {
                 callback.onProgress("Updating booking status in cloud...");
                 
                 // First find the booking in Firebase
-                String bookingsUrl = BASE_URL + "bookings.json";
+                String bookingsUrl = baseUrl + "bookings.json";
                 String response = makeGetRequest(bookingsUrl);
                 
                 if (response == null || response.equals("null")) {
@@ -1205,7 +1206,7 @@ public class CloudSyncService {
                 }
                 
                 // Update the booking status
-                String updateUrl = BASE_URL + "bookings/" + firebaseKey + ".json";
+                String updateUrl = baseUrl + "bookings/" + firebaseKey + ".json";
                 JSONObject updateData = new JSONObject();
                 updateData.put("status", newStatus);
                 updateData.put("updatedAt", System.currentTimeMillis());
