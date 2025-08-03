@@ -64,7 +64,7 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
         }
         
         // Log successful retrieval for debugging
-        System.out.println("Successfully retrieved yoga class: " + yogaClass.getClassType() + ", ID: " + yogaClass.getId());
+        System.out.println("Successfully retrieved yoga class");
 
         // Initialize views
         tvClassName = findViewById(R.id.tv_class_name);
@@ -310,8 +310,6 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
     // Helper method to check if date matches day of week
     private boolean isDateMatchingDayOfWeek(String dateStr, String requiredDayOfWeek) {
         try {
-            System.out.println("Checking if date " + dateStr + " matches day of week " + requiredDayOfWeek);
-            
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             Date date = dateFormat.parse(dateStr);
             
@@ -333,13 +331,9 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
                 default: dayName = "";
             }
             
-            System.out.println("Calendar.DAY_OF_WEEK value: " + dayOfWeek + ", Calculated day name: " + dayName);
-            System.out.println("Required day of week: " + requiredDayOfWeek);
-            System.out.println("Do they match? " + dayName.equalsIgnoreCase(requiredDayOfWeek));
-            
             return dayName.equalsIgnoreCase(requiredDayOfWeek);
         } catch (ParseException e) {
-            System.out.println("ParseException in isDateMatchingDayOfWeek: " + e.getMessage());
+            System.out.println("ParseException in isDateMatchingDayOfWeek");
             e.printStackTrace();
             return false;
         }

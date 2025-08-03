@@ -295,19 +295,13 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
     
     private void manageClassInstances(YogaClass yogaClass) {
         // Log the yoga class details before creating the intent
-        System.out.println("Managing class instances for: " + yogaClass.getClassType() + ", ID: " + yogaClass.getId());
+        System.out.println("Managing class instances for yoga class");
         
         Intent intent = new Intent(this, ManageClassInstancesActivity.class);
         intent.putExtra("classId", yogaClass.getId());
         intent.putExtra("className", yogaClass.getClassType());
         intent.putExtra("dayOfWeek", yogaClass.getDayOfWeek());
         intent.putExtra("time", yogaClass.getTime());
-        
-        // Log the intent extras for debugging
-        System.out.println("Intent extras - classId: " + yogaClass.getId() + 
-                          ", className: " + yogaClass.getClassType() + 
-                          ", dayOfWeek: " + yogaClass.getDayOfWeek() + 
-                          ", time: " + yogaClass.getTime());
         
         startActivity(intent);
     }

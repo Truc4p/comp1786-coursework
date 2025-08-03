@@ -1047,11 +1047,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 booking.setLastModified(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_LAST_MODIFIED)));
                 
                 // Debug logging
-                android.util.Log.d("DatabaseHelper", "Retrieved booking from database:");
-                android.util.Log.d("DatabaseHelper", "  Booking ID: " + booking.getBookingId());
-                android.util.Log.d("DatabaseHelper", "  Customer Name: " + booking.getCustomerName());
-                android.util.Log.d("DatabaseHelper", "  Customer Email: " + booking.getCustomerEmail());
-                android.util.Log.d("DatabaseHelper", "  Class Name: " + booking.getClassName());
+                android.util.Log.d("DatabaseHelper", "Retrieved booking from database with ID: " + booking.getBookingId());
                 
                 return booking;
             }
@@ -1341,7 +1337,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 do {
                     String bookingId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
                     String customerName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_CUSTOMER_NAME));
-                    android.util.Log.d("DatabaseHelper", "Booking ID: " + bookingId + ", Customer: " + customerName);
+                    android.util.Log.d("DatabaseHelper", "Booking ID: " + bookingId);
                 } while (cursor.moveToNext());
             } else {
                 android.util.Log.d("DatabaseHelper", "No bookings found in database");

@@ -1042,7 +1042,7 @@ public class CloudSyncService {
                         
                         // Skip bookings with empty or null booking IDs
                         if (booking.getBookingId() == null || booking.getBookingId().trim().isEmpty()) {
-                            Log.w(TAG, "Skipping booking with empty booking ID. Customer: " + booking.getCustomerName());
+                            Log.w(TAG, "Skipping booking with empty booking ID");
                             continue;
                         }
                         
@@ -1264,10 +1264,7 @@ public class CloudSyncService {
                     customerName = customerInfo.optString("name", "");
                     customerEmail = customerInfo.optString("email", "");
                     customerPhone = customerInfo.optString("phone", "");
-                    Log.d(TAG, "Extracted customer info from nested object:");
-                    Log.d(TAG, "  name: '" + customerName + "'");
-                    Log.d(TAG, "  email: '" + customerEmail + "'");
-                    Log.d(TAG, "  phone: '" + customerPhone + "'");
+                    Log.d(TAG, "Extracted customer info from nested object");
                 }
             }
             
@@ -1400,15 +1397,7 @@ public class CloudSyncService {
             }
             
             // Extract all other fields with detailed logging
-            Log.d(TAG, "Final extracted values:");
-            Log.d(TAG, "  customerName: '" + customerName + "'");
-            Log.d(TAG, "  customerEmail: '" + customerEmail + "'");
-            Log.d(TAG, "  customerPhone: '" + customerPhone + "'");
-            Log.d(TAG, "  className: '" + className + "'");
-            Log.d(TAG, "  bookingDate: '" + bookingDate + "'");
-            Log.d(TAG, "  bookingTime: '" + bookingTime + "'");
-            Log.d(TAG, "  instructor: '" + instructor + "'");
-            Log.d(TAG, "  totalAmount: " + totalAmount);
+            Log.d(TAG, "Final extracted values for booking ID: " + bookingId);
             
             booking.setBookingId(bookingId);
             booking.setCustomerName(customerName);

@@ -241,16 +241,7 @@ public class BookingActivity extends AppCompatActivity {
 
     private void showBookingDetailsDialog(Booking booking) {
         // Debug logging to see what data we have
-        android.util.Log.d("BookingActivity", "Showing booking details:");
-        android.util.Log.d("BookingActivity", "  Booking ID: " + booking.getBookingId());
-        android.util.Log.d("BookingActivity", "  Customer Name: " + booking.getCustomerName());
-        android.util.Log.d("BookingActivity", "  Customer Email: " + booking.getCustomerEmail());
-        android.util.Log.d("BookingActivity", "  Customer Phone: " + booking.getCustomerPhone());
-        android.util.Log.d("BookingActivity", "  Class Name: " + booking.getClassName());
-        android.util.Log.d("BookingActivity", "  Booking Date: " + booking.getBookingDate());
-        android.util.Log.d("BookingActivity", "  Booking Time: " + booking.getBookingTime());
-        android.util.Log.d("BookingActivity", "  Status: " + booking.getStatus());
-        android.util.Log.d("BookingActivity", "  Payment Status: " + booking.getPaymentStatus());
+        android.util.Log.d("BookingActivity", "Showing booking details for booking ID: " + booking.getBookingId());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Booking Details");
