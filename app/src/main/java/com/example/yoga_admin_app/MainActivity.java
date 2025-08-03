@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
     
     private void redirectToLogin() {
         Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("logout_occurred", true); // Security flag to clear sensitive data
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

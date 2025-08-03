@@ -64,6 +64,7 @@ public class AuthHelper {
      */
     public static void redirectToLogin(Activity activity) {
         Intent intent = new Intent(activity, LoginActivity.class);
+        intent.putExtra("logout_occurred", true); // Security flag to clear sensitive data
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activity.startActivity(intent);
         activity.finish();

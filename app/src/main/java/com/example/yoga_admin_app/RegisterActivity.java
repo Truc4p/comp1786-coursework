@@ -10,10 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ArrayAdapter;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -37,9 +35,6 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText editEmail;
     private EditText editPassword;
     private EditText editConfirmPassword;
-    private ImageView imgTogglePassword;
-    private ImageView imgToggleConfirmPassword;
-    private Spinner spinnerRole;
     private Button btnRegister;
     private ProgressBar progressBar;
     private TextView txtBackToLogin;
@@ -58,7 +53,6 @@ public class RegisterActivity extends AppCompatActivity {
         
         initializeViews();
         setupListeners();
-        setupRoleSpinner();
     }
     
     private void initializeViews() {
@@ -66,9 +60,6 @@ public class RegisterActivity extends AppCompatActivity {
         editEmail = findViewById(R.id.edit_email);
         editPassword = findViewById(R.id.edit_password);
         editConfirmPassword = findViewById(R.id.edit_confirm_password);
-        imgTogglePassword = findViewById(R.id.img_toggle_password);
-        imgToggleConfirmPassword = findViewById(R.id.img_toggle_confirm_password);
-        spinnerRole = findViewById(R.id.spinner_role);
         btnRegister = findViewById(R.id.btn_register);
         progressBar = findViewById(R.id.progress_bar);
         txtBackToLogin = findViewById(R.id.txt_back_to_login);
@@ -80,14 +71,6 @@ public class RegisterActivity extends AppCompatActivity {
     private void setupListeners() {
         btnRegister.setOnClickListener(v -> performRegistration());
         
-        imgTogglePassword.setOnClickListener(v -> togglePasswordVisibility(
-                editPassword, imgTogglePassword, isPasswordVisible, 
-                visible -> isPasswordVisible = visible));
-        
-        imgToggleConfirmPassword.setOnClickListener(v -> togglePasswordVisibility(
-                editConfirmPassword, imgToggleConfirmPassword, isConfirmPasswordVisible,
-                visible -> isConfirmPasswordVisible = visible));
-        
         txtBackToLogin.setOnClickListener(v -> {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
@@ -95,23 +78,12 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
     
-    private void setupRoleSpinner() {
-        String[] roles = {"admin", "manager", "instructor"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, 
-                android.R.layout.simple_spinner_item, roles);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerRole.setAdapter(adapter);
-        
-        // Set default to "admin"
-        spinnerRole.setSelection(0);
-    }
-    
     private void performRegistration() {
         final String username = editUsername.getText().toString().trim();
         final String email = editEmail.getText().toString().trim();
         final String password = editPassword.getText().toString();
         final String confirmPassword = editConfirmPassword.getText().toString();
-        final String role = spinnerRole.getSelectedItem().toString();
+        final String role = "admin"; // All users register as admin by default
         
         // Validate inputs
         if (!validateInputs(username, email, password, confirmPassword)) {
@@ -280,7 +252,6 @@ public class RegisterActivity extends AppCompatActivity {
         editEmail.setEnabled(!inProgress);
         editPassword.setEnabled(!inProgress);
         editConfirmPassword.setEnabled(!inProgress);
-        spinnerRole.setEnabled(!inProgress);
         
         btnRegister.setText(inProgress ? "Creating Account..." : "Register");
     }
@@ -294,12 +265,10 @@ public class RegisterActivity extends AppCompatActivity {
         if (currentlyVisible) {
             // Hide password
             editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            toggleIcon.setImageResource(R.drawable.ic_visibility_off);
             callback.onVisibilityChanged(false);
         } else {
             // Show password
             editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            toggleIcon.setImageResource(R.drawable.ic_visibility);
             callback.onVisibilityChanged(true);
         }
         

@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp"
+        android:padding="16dp"
         tools:context=".MainActivity">
 
         <!-- Header Card -->
@@ -48,43 +48,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:text="Welcome, Admin!"
-                android:textColor="@color/dark_purple"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <!-- Logout Button -->
-            <Button
-                android:id="@+id/btn_logout"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginTop="12dp"
-                android:text="🚪 Logout"
-                android:textSize="12sp"
-                android:textColor="@android:color/white"
-                android:background="@color/warning_red"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:minWidth="100dp" />
-
-            <!-- Logout Info -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="💡 You can also logout from the menu (⋮) in the top bar"
-                android:textSize="10sp"
-                android:textColor="@color/text_secondary"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/tv_class_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Total Classes: 0"
-                android:textColor="@color/dark_purple"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textColor="@color/medium_purple"
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -92,7 +57,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <!-- Management Section -->
             <TextView
@@ -106,53 +73,15 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:orientation="vertical">
-
-                <Button
-                    android:id="@+id/btn_add_class"
-                    style="@style/ButtonStyle"
-                    android:layout_width="280dp"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="12dp"
-                    android:text="Add New Yoga Class"
-                    android:textSize="16sp" />
-
-                <Button
-                    android:id="@+id/btn_view_classes"
-                    style="@style/ButtonStyle"
-                    android:layout_width="280dp"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="12dp"
-                    android:text="View &amp; Manage Classes"
-                    android:textSize="16sp" />
-
-                <Button
-                    android:id="@+id/btn_search_classes"
-                    style="@style/ButtonStyle"
-                    android:layout_width="280dp"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:text="Search Classes"
-                    android:textSize="16sp" />
-
-            </LinearLayout>
-
-            <!-- Data & Sync Section -->
             <TextView
-                android:layout_width="280dp"
+                android:id="@+id/tv_class_count"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="16dp"
-                android:gravity="center"
-                android:text="Data &amp; Synchronization"
+                android:text="Total Classes: 0"
                 android:textColor="@color/dark_purple"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -162,8 +91,47 @@
                 android:orientation="vertical">
 
                 <Button
+                    android:id="@+id/btn_add_class"
+                    style="@style/ButtonStyleSecondary1"
+                    android:layout_width="280dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="12dp"
+                    android:text="Add New Yoga Class"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/btn_view_classes"
+                    style="@style/ButtonStyleSecondary02"
+                    android:layout_width="280dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="12dp"
+                    android:text="View &amp; Manage Classes"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/btn_search_classes"
+                    style="@style/ButtonStyleSecondary3"
+                    android:layout_width="280dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:text="Search Classes"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/btn_view_bookings"
+                    style="@style/ButtonStyleSecondary4"
+                    android:layout_width="280dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="12dp"
+                    android:text="View Customer Bookings"
+                    android:textSize="16sp" />
+
+                <Button
                     android:id="@+id/btn_cloud_sync"
-                    style="@style/ButtonStyleSecondary"
+                    style="@style/ButtonStyleSecondary5"
                     android:layout_width="280dp"
                     android:layout_height="60dp"
                     android:layout_gravity="center"
@@ -171,13 +139,14 @@
                     android:text="Cloud Sync"
                     android:textSize="16sp" />
 
+                <!-- Logout Button -->
                 <Button
-                    android:id="@+id/btn_view_bookings"
-                    style="@style/ButtonStyleSecondary2"
+                    android:id="@+id/btn_logout"
+                    style="@style/ButtonStyleSecondary6"
                     android:layout_width="280dp"
                     android:layout_height="60dp"
                     android:layout_gravity="center"
-                    android:text="View Customer Bookings"
+                    android:text="Logout"
                     android:textSize="16sp" />
 
             </LinearLayout>
@@ -201,15 +170,6 @@
                 android:textColor="@color/medium_purple"
                 android:textSize="16sp"
                 android:textStyle="italic" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text="Version 1.0 • Universal Yoga Admin"
-                android:textColor="@color/dark_gray"
-                android:textSize="12sp" />
 
         </LinearLayout>
 

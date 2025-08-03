@@ -35,7 +35,47 @@
         <item name="android:textColor">@color/medium_purple</item>
         <item name="android:textSize">16sp</item>
     </style>
+
+
         
+    <style name="ButtonStyleSecondary1" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/blue</item>
+    </style>
+
+    <style name="ButtonStyleSecondary02" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/green</item>
+    </style>
+
+    <style name="ButtonStyleSecondary3" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/beige</item>
+    </style>
+
+    <style name="ButtonStyleSecondary4" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/yellow</item>
+    </style>
+
+    <style name="ButtonStyleSecondary5" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/pink</item>
+    </style>
+
+    <style name="ButtonStyleSecondary6" parent="ButtonStyle">
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:backgroundTint">@color/violet</item>
+    </style>
+
+
+
     <style name="ButtonStyleSecondary" parent="ButtonStyle">
         <item name="android:textColor">@color/dark_purple</item>
         <item name="android:background">@drawable/input_background</item>

@@ -9,6 +9,13 @@
     <color name="medium_purple">#9C27B0</color>
     <color name="dark_purple">#661a72</color>
 
+    <color name="blue">#C4DFE5</color>
+    <color name="green">#CDE9DC</color>
+    <color name="beige">#E9ECCE</color>
+    <color name="yellow">#FFE6BB</color>
+    <color name="pink">#FCDCE1</color>
+    <color name="violet">#F0D9EF</color>    
+
     <color name="accent_blue">#def4f7</color>
     <color name="accent_teal">#26A69A</color>
     <color name="accent_yellow">#fcf6c9</color>

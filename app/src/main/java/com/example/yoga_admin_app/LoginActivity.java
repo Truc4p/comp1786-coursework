@@ -28,7 +28,6 @@ public class LoginActivity extends AppCompatActivity {
     
     private EditText editUsername;
     private EditText editPassword;
-    private ImageView imgTogglePassword;
     private Button btnLogin;
     private ProgressBar progressBar;
     private TextView txtForgotPassword;
@@ -58,7 +57,6 @@ public class LoginActivity extends AppCompatActivity {
     private void initializeViews() {
         editUsername = findViewById(R.id.edit_username);
         editPassword = findViewById(R.id.edit_password);
-        imgTogglePassword = findViewById(R.id.img_toggle_password);
         btnLogin = findViewById(R.id.btn_login);
         progressBar = findViewById(R.id.progress_bar);
         txtForgotPassword = findViewById(R.id.txt_forgot_password);
@@ -82,9 +80,7 @@ public class LoginActivity extends AppCompatActivity {
     
     private void setupListeners() {
         btnLogin.setOnClickListener(v -> performLogin());
-        
-        imgTogglePassword.setOnClickListener(v -> togglePasswordVisibility());
-        
+                
         txtForgotPassword.setOnClickListener(v -> {
             Toast.makeText(this, "Please contact system administrator to reset password", 
                     Toast.LENGTH_LONG).show();
@@ -182,12 +178,10 @@ public class LoginActivity extends AppCompatActivity {
         if (isPasswordVisible) {
             // Hide password
             editPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            imgTogglePassword.setImageResource(R.drawable.ic_visibility_off);
             isPasswordVisible = false;
         } else {
             // Show password
             editPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            imgTogglePassword.setImageResource(R.drawable.ic_visibility);
             isPasswordVisible = true;
         }
         
@@ -198,6 +192,10 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        
+        // Security: Clear password field when activity resumes
+        // This prevents unauthorized access if user logged out or session expired
+        clearSensitiveData();
         
         // Check session validity when activity resumes
         if (authManager.isSessionValid()) {
@@ -210,5 +208,40 @@ public class LoginActivity extends AppCompatActivity {
         // Override back button to prevent going back to previous activity
         // without proper authentication
         moveTaskToBack(true);
+    }
+    
+    /**
+     * Clear sensitive data for security
+     * Called when activity resumes to prevent unauthorized access
+     */
+    private void clearSensitiveData() {
+        Intent intent = getIntent();
+        boolean logoutOccurred = intent.getBooleanExtra("logout_occurred", false);
+        String registeredUsername = intent.getStringExtra("registered_username");
+        
+        // Always clear password for security
+        if (editPassword != null) {
+            editPassword.setText("");
+        }
+        
+        // Clear username if user logged out or no registration username provided
+        if (logoutOccurred || (registeredUsername == null || registeredUsername.isEmpty())) {
+            if (editUsername != null) {
+                editUsername.setText("");
+            }
+        }
+        
+        // Clear any previous error messages
+        if (editUsername != null) {
+            editUsername.setError(null);
+        }
+        if (editPassword != null) {
+            editPassword.setError(null);
+        }
+        
+        // Clear the logout flag after processing to prevent repeated clearing
+        if (logoutOccurred) {
+            intent.removeExtra("logout_occurred");
+        }
     }
 }
