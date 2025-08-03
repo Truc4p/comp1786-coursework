@@ -137,12 +137,16 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
         final String[] selectedDate = {""};
 
         // Set up date picker button
+        btnSelectDate.setText("📅 Select " + yogaClass.getDayOfWeek() + " Date");
         btnSelectDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                System.out.println("=== DATE BUTTON CLICKED ===");
+                System.out.println("Day of week: " + yogaClass.getDayOfWeek());
                 showDatePickerForDayOfWeek(yogaClass.getDayOfWeek(), new DatePickerCallback() {
                     @Override
                     public void onDateSelected(String date) {
+                        System.out.println("Date selected: " + date);
                         selectedDate[0] = date;
                         btnSelectDate.setText(date);
                         btnSelectDate.setTextColor(getResources().getColor(android.R.color.black));
@@ -346,42 +350,237 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
 
     // Method to show date picker that only allows selection of dates matching the specified day of week
     private void showDatePickerForDayOfWeek(String requiredDayOfWeek, DatePickerCallback callback) {
+        System.out.println("=== showDatePickerForDayOfWeek called ===");
+        System.out.println("Required day: " + requiredDayOfWeek);
+        
+        // Use the smart date selection that generates real dates for the correct day of week
+        showCustomDateSelectionDialog(requiredDayOfWeek, callback);
+    }
+
+    // Simplified date selection that always shows dates
+    private void showSimpleDateSelectionDialog(String requiredDayOfWeek, DatePickerCallback callback) {
+        System.out.println("=== STARTING showSimpleDateSelectionDialog ===");
+        System.out.println("Required day of week: " + requiredDayOfWeek);
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Date for " + requiredDayOfWeek + " Class");
+        
+        // Create simple weekly dates starting from next week
+        List<String> dates = new java.util.ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        
+        System.out.println("Current date: " + cal.getTime());
+        cal.add(Calendar.DAY_OF_MONTH, 7); // Start from next week
+        System.out.println("Starting date: " + cal.getTime());
+        
+        // Generate 8 weeks of dates
+        for (int i = 0; i < 8; i++) {
+            String formattedDate = String.format(Locale.getDefault(), "%02d/%02d/%d",
+                    cal.get(Calendar.DAY_OF_MONTH),
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.YEAR));
+            
+            // Create display format
+            SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            String displayDate = displayFormat.format(cal.getTime());
+            
+            String displayString = requiredDayOfWeek + " - " + displayDate + " (" + formattedDate + ")";
+            dates.add(displayString);
+            
+            System.out.println("Generated date " + i + ": " + displayString);
+            
+            cal.add(Calendar.WEEK_OF_YEAR, 1); // Move to next week
+        }
+        
+        System.out.println("Total dates generated: " + dates.size());
+        
+        if (dates.isEmpty()) {
+            System.out.println("ERROR: No dates generated!");
+            Toast.makeText(this, "Error generating dates", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String[] dateArray = dates.toArray(new String[0]);
+        System.out.println("Date array length: " + dateArray.length);
+        
+        builder.setItems(dateArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                System.out.println("Date selected: " + which);
+                // Extract the date from the display string
+                String selectedItem = dateArray[which];
+                String date = selectedItem.substring(selectedItem.lastIndexOf("(") + 1, selectedItem.lastIndexOf(")"));
+                System.out.println("Extracted date: " + date);
+                callback.onDateSelected(date);
+            }
+        });
+        
+        builder.setNegativeButton("Cancel", null);
+        // REMOVED setMessage() to allow items to show
+        
+        System.out.println("About to show dialog...");
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        System.out.println("Dialog shown!");
+    }
+
+    // Custom date selection dialog that shows only valid dates
+    private void showCustomDateSelectionDialog(String requiredDayOfWeek, DatePickerCallback callback) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Date for " + requiredDayOfWeek + " Class");
+        
+        // Generate next 8 weeks of valid dates for this day of week
+        List<String> validDates = generateValidDates(requiredDayOfWeek, 8);
+        
+        System.out.println("Valid dates list size: " + validDates.size());
+        for (String date : validDates) {
+            System.out.println("Valid date: " + date);
+        }
+        
+        if (validDates.isEmpty()) {
+            // Fallback: show error message and use simple date generation
+            Toast.makeText(this, "Using fallback date generation...", Toast.LENGTH_SHORT).show();
+            validDates = generateFallbackDates(8);
+        }
+        
+        String[] dateArray = validDates.toArray(new String[0]);
+        
+        // Create display strings with day info
+        String[] displayArray = new String[dateArray.length];
+        for (int i = 0; i < dateArray.length; i++) {
+            displayArray[i] = formatDateForDisplay(dateArray[i], requiredDayOfWeek);
+            System.out.println("Display string " + i + ": " + displayArray[i]);
+        }
+        
+        builder.setItems(displayArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                callback.onDateSelected(dateArray[which]);
+            }
+        });
+        
+        builder.setNegativeButton("Cancel", null);
+        
+        // REMOVED setMessage() to allow items to show
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    // Fallback method to generate simple future dates
+    private List<String> generateFallbackDates(int numberOfDates) {
+        List<String> dates = new java.util.ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        
+        for (int i = 1; i <= numberOfDates; i++) {
+            cal.add(Calendar.DAY_OF_MONTH, 7); // Add 7 days each time
+            String formattedDate = String.format(Locale.getDefault(), "%02d/%02d/%d",
+                    cal.get(Calendar.DAY_OF_MONTH),
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.YEAR));
+            dates.add(formattedDate);
+        }
+        
+        return dates;
+    }
+
+    // Generate a list of valid dates for the specified day of week
+    private List<String> generateValidDates(String requiredDayOfWeek, int numberOfWeeks) {
+        List<String> validDates = new java.util.ArrayList<>();
         Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        
+        // Get the target day of week as Calendar constant
+        int targetDayOfWeek = getCalendarDayOfWeek(requiredDayOfWeek);
+        
+        // Debug logging
+        System.out.println("Required day: " + requiredDayOfWeek + ", Target day of week: " + targetDayOfWeek);
+        System.out.println("Current date: " + calendar.getTime());
+        System.out.println("Current day of week: " + calendar.get(Calendar.DAY_OF_WEEK));
+        
+        // Find the next occurrence of the target day of week
+        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        int daysToAdd = (targetDayOfWeek - currentDayOfWeek + 7) % 7;
+        
+        // If it's the same day and we're past a reasonable time, move to next week
+        if (daysToAdd == 0) {
+            // If it's today but past 6 PM, move to next week
+            if (calendar.get(Calendar.HOUR_OF_DAY) >= 18) {
+                daysToAdd = 7;
+            }
+        }
+        
+        calendar.add(Calendar.DAY_OF_MONTH, daysToAdd);
+        
+        System.out.println("First valid date: " + calendar.getTime());
+        
+        // Generate dates for the specified number of weeks
+        for (int i = 0; i < numberOfWeeks; i++) {
+            String formattedDate = String.format(Locale.getDefault(), "%02d/%02d/%d",
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    calendar.get(Calendar.MONTH) + 1,
+                    calendar.get(Calendar.YEAR));
+            validDates.add(formattedDate);
+            
+            System.out.println("Added date: " + formattedDate);
+            
+            // Move to next week (same day)
+            calendar.add(Calendar.WEEK_OF_YEAR, 1);
+        }
+        
+        System.out.println("Total valid dates generated: " + validDates.size());
+        return validDates;
+    }
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int selectedYear, int selectedMonth, int selectedDay) {
-                        // Create a calendar instance for the selected date
-                        Calendar selectedDate = Calendar.getInstance();
-                        selectedDate.set(selectedYear, selectedMonth, selectedDay);
+    // Format date for better display in the selection list
+    private String formatDateForDisplay(String dateStr, String dayOfWeek) {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            Date date = inputFormat.parse(dateStr);
+            
+            String formattedDate = displayFormat.format(date);
+            
+            // Add relative time information
+            Calendar today = Calendar.getInstance();
+            Calendar dateCalendar = Calendar.getInstance();
+            dateCalendar.setTime(date);
+            
+            long diffInMillis = dateCalendar.getTimeInMillis() - today.getTimeInMillis();
+            long diffInDays = diffInMillis / (1000 * 60 * 60 * 24);
+            
+            String relativeInfo = "";
+            if (diffInDays == 0) {
+                relativeInfo = " (Today)";
+            } else if (diffInDays == 1) {
+                relativeInfo = " (Tomorrow)";
+            } else if (diffInDays < 7) {
+                relativeInfo = " (in " + diffInDays + " days)";
+            } else if (diffInDays < 14) {
+                relativeInfo = " (next week)";
+            } else {
+                int weeks = (int) (diffInDays / 7);
+                relativeInfo = " (in " + weeks + " weeks)";
+            }
+            
+            return dayOfWeek + " - " + formattedDate + relativeInfo;
+            
+        } catch (ParseException e) {
+            return dayOfWeek + " - " + dateStr;
+        }
+    }
 
-                        // Check if the selected date matches the required day of week
-                        int dayOfWeek = selectedDate.get(Calendar.DAY_OF_WEEK);
-                        String dayName = getDayName(dayOfWeek);
-
-                        if (dayName.equalsIgnoreCase(requiredDayOfWeek)) {
-                            // Format the date as dd/MM/yyyy
-                            String formattedDate = String.format(Locale.getDefault(), "%02d/%02d/%d", 
-                                    selectedDay, selectedMonth + 1, selectedYear);
-                            callback.onDateSelected(formattedDate);
-                        } else {
-                            Toast.makeText(ManageClassInstancesActivity.this, 
-                                    "Please select a " + requiredDayOfWeek + ". You selected a " + dayName + ".", 
-                                    Toast.LENGTH_LONG).show();
-                            // Show the date picker again
-                            showDatePickerForDayOfWeek(requiredDayOfWeek, callback);
-                        }
-                    }
-                }, year, month, day);
-
-        // Set minimum date to today to prevent selecting past dates
-        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
-
-        datePickerDialog.show();
+    // Convert day name to Calendar constant
+    private int getCalendarDayOfWeek(String dayName) {
+        switch (dayName.toLowerCase()) {
+            case "sunday": return Calendar.SUNDAY;
+            case "monday": return Calendar.MONDAY;
+            case "tuesday": return Calendar.TUESDAY;
+            case "wednesday": return Calendar.WEDNESDAY;
+            case "thursday": return Calendar.THURSDAY;
+            case "friday": return Calendar.FRIDAY;
+            case "saturday": return Calendar.SATURDAY;
+            default: return Calendar.MONDAY; // Default fallback
+        }
     }
 
     // Helper method to get day name from Calendar day of week constant

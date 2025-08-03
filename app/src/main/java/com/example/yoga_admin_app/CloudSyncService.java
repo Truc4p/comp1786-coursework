@@ -35,6 +35,14 @@ public class CloudSyncService {
         this.databaseHelper = new DatabaseHelper(context);
         this.executorService = Executors.newSingleThreadExecutor();
         this.baseUrl = FirebaseConfig.getFirebaseDatabaseUrl(context);
+        
+        // Log the Firebase URL being used for debugging
+        Log.d(TAG, "CloudSyncService initialized with Firebase URL: " + baseUrl);
+        
+        // Validate URL
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            Log.e(TAG, "ERROR: Firebase URL is null or empty!");
+        }
     }
     
     public interface SyncCallback {
@@ -492,7 +500,10 @@ public class CloudSyncService {
      */
     private String sendDataToFirebase(String endpoint, JSONObject data, String method) {
         try {
-            URL url = new URL(baseUrl + endpoint);
+            String fullUrl = baseUrl + endpoint;
+            Log.d(TAG, "Making " + method + " request to: " + fullUrl);
+            
+            URL url = new URL(fullUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             
             connection.setRequestMethod(method);
@@ -503,6 +514,7 @@ public class CloudSyncService {
             
             // Send data for PUT/POST requests
             if (data != null && ("PUT".equals(method) || "POST".equals(method))) {
+                Log.d(TAG, "Sending data: " + data.toString());
                 connection.setDoOutput(true);
                 try (OutputStream os = connection.getOutputStream()) {
                     byte[] input = data.toString().getBytes(StandardCharsets.UTF_8);
@@ -525,12 +537,31 @@ public class CloudSyncService {
                 
                 return response.toString();
             } else {
-                Log.e(TAG, "HTTP Error: " + responseCode);
+                Log.e(TAG, "HTTP Error: " + responseCode + " for URL: " + fullUrl);
+                
+                // Try to read error response
+                try {
+                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    StringBuilder errorResponse = new StringBuilder();
+                    String errorLine;
+                    
+                    while ((errorLine = errorReader.readLine()) != null) {
+                        errorResponse.append(errorLine);
+                    }
+                    errorReader.close();
+                    
+                    if (errorResponse.length() > 0) {
+                        Log.e(TAG, "Error response body: " + errorResponse.toString());
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Could not read error response", e);
+                }
+                
                 return null;
             }
             
         } catch (IOException e) {
-            Log.e(TAG, "Network error in " + method + " " + endpoint, e);
+            Log.e(TAG, "Network error in " + method + " " + endpoint + " (Full URL: " + baseUrl + endpoint + ")", e);
             return null;
         }
     }
@@ -690,13 +721,18 @@ public class CloudSyncService {
         
         executorService.execute(() -> {
             try {
+                Log.d(TAG, "=== Firebase Connection Test ===");
+                Log.d(TAG, "Base URL: " + baseUrl);
+                
                 // Test Firebase connection by trying to read from root
                 String response = downloadDataFromFirebase(".json");
                 
                 if (response != null) {
+                    Log.d(TAG, "Firebase connection successful");
                     callback.onSuccess("Firebase cloud service is reachable");
                 } else {
-                    callback.onError("Cannot reach Firebase cloud service");
+                    Log.e(TAG, "Firebase connection failed - no response");
+                    callback.onError("Cannot reach Firebase cloud service. Check URL: " + baseUrl);
                 }
                 
             } catch (Exception e) {

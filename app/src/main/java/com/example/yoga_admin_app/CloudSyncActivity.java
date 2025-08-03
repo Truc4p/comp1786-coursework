@@ -177,7 +177,7 @@ public class CloudSyncActivity extends AppCompatActivity {
     }
     
     private void checkCloudConnection() {
-        showProgress("Checking cloud connection...");
+        showProgress("Checking Firebase connection...");
         
         cloudSyncService.checkCloudConnection(new CloudSyncService.SyncCallback() {
             @Override
@@ -192,7 +192,7 @@ public class CloudSyncActivity extends AppCompatActivity {
             public void onError(String error) {
                 runOnUiThread(() -> {
                     hideProgress();
-                    Toast.makeText(CloudSyncActivity.this, error, Toast.LENGTH_LONG).show();
+                    showFirebaseDebugInfo(error);
                 });
             }
             
@@ -205,6 +205,43 @@ public class CloudSyncActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+    
+    private void showFirebaseDebugInfo(String error) {
+        String projectId = FirebaseConfig.getProjectIdFromGoogleServices(this);
+        String currentUrl = FirebaseConfig.getFirebaseDatabaseUrl(this);
+        
+        StringBuilder debugInfo = new StringBuilder();
+        debugInfo.append("Firebase Connection Failed\n\n");
+        debugInfo.append("Error: ").append(error).append("\n\n");
+        debugInfo.append("Project ID: ").append(projectId != null ? projectId : "Not found").append("\n");
+        debugInfo.append("Current URL: ").append(currentUrl != null ? currentUrl : "Not available").append("\n\n");
+        debugInfo.append("Possible URLs to try:\n");
+        
+        if (projectId != null) {
+            String[] possibleUrls = FirebaseConfig.getPossibleFirebaseUrls(projectId);
+            for (int i = 0; i < possibleUrls.length; i++) {
+                debugInfo.append((i + 1)).append(". ").append(possibleUrls[i]).append("\n");
+            }
+        }
+        
+        new AlertDialog.Builder(this)
+                .setTitle("Firebase Debug Information")
+                .setMessage(debugInfo.toString())
+                .setPositiveButton("OK", null)
+                .setNegativeButton("Copy Info", (dialog, which) -> {
+                    // Copy debug info to clipboard if available
+                    try {
+                        android.content.ClipboardManager clipboard = 
+                            (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                        android.content.ClipData clip = android.content.ClipData.newPlainText("Firebase Debug", debugInfo.toString());
+                        clipboard.setPrimaryClip(clip);
+                        Toast.makeText(this, "Debug info copied to clipboard", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Could not copy to clipboard", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
     }
     
     private void showProgress(String message) {
