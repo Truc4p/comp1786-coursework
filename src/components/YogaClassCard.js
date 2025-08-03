@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import { formatTime, formatDate } from '../utils/helpers';
 import { getYogaClassImage } from '../utils/imageMapping';
 import { useCart } from '../context/CartContext';
 
-const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
+const YogaClassCard = memo(({ yogaClass, onPress, onAddToCart }) => {
   const {
     name,
     date,
@@ -25,6 +25,15 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
   const isFullyBooked = availableSpots <= 0;
   const imageUrl = getYogaClassImage(yogaClass);
   const { addToCart } = useCart();
+
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handlePress = useCallback(() => {
+    onPress(yogaClass);
+  }, [onPress, yogaClass]);
+
+  const handleAddToCart = useCallback(() => {
+    addToCart(yogaClass);
+  }, [addToCart, yogaClass]);
 
   // Function to get level badge colors
   const getLevelBadgeStyle = (level) => {
@@ -42,7 +51,7 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={() => onPress(yogaClass)}>
+    <TouchableOpacity style={styles.card} onPress={handlePress}>
       <View style={styles.imageContainer}>
         <Image
           source={imageUrl}
@@ -102,7 +111,7 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.addToCartButton, styles.fullWidthButton]}
-              onPress={() => addToCart(yogaClass)}
+              onPress={handleAddToCart}
             >
               <Text style={[styles.addToCartButtonText]}>
                 Add to Cart
@@ -113,7 +122,10 @@ const YogaClassCard = ({ yogaClass, onPress, onAddToCart }) => {
       </View>
     </TouchableOpacity>
   );
-};
+});
+
+// Add display name for debugging
+YogaClassCard.displayName = 'YogaClassCard';
 
 const styles = StyleSheet.create({
   card: {

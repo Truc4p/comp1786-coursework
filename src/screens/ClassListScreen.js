@@ -12,6 +12,7 @@ import {
 import YogaClassCard from '../components/YogaClassCard';
 import SearchFilter from '../components/SearchFilter';
 import LoadingSpinner from '../components/LoadingSpinner';
+// import PerformanceMonitor from '../components/PerformanceMonitor';
 import ApiService from '../services/api';
 import { filterClassesBySearchCriteria } from '../utils/helpers';
 import { useCart } from '../context/CartContext';
@@ -104,13 +105,24 @@ const ClassListScreen = ({ navigation }) => {
     return activeFilters.length > 0 ? activeFilters.join(', ') : 'All Classes';
   };
 
-  const renderClass = ({ item }) => (
+  const renderClass = ({ item, index }) => (
     <YogaClassCard
       yogaClass={item}
       onPress={handleClassPress}
       onAddToCart={handleAddToCart}
     />
   );
+
+  const getItemLayout = (data, index) => ({
+    length: 280, // Estimated height of each YogaClassCard
+    offset: 280 * index,
+    index,
+  });
+
+  const keyExtractor = (item, index) => {
+    // Use a combination of id and index for better performance
+    return item.id ? item.id.toString() : `class-${index}`;
+  };
 
   const renderEmptyComponent = () => (
     <View style={styles.emptyContainer}>
@@ -144,10 +156,15 @@ const ClassListScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* <PerformanceMonitor 
+        componentName="ClassListScreen" 
+        dataLength={filteredClasses.length} 
+      /> */}
       <FlatList
         data={filteredClasses}
         renderItem={renderClass}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
         ListHeaderComponent={renderHeader}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -155,6 +172,19 @@ const ClassListScreen = ({ navigation }) => {
         ListEmptyComponent={renderEmptyComponent}
         showsVerticalScrollIndicator={false}
         style={styles.list}
+        // Performance optimizations
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={8}
+        windowSize={10}
+        legacyImplementation={false}
+        disableVirtualization={false}
+        // Memory optimizations
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 0,
+          autoscrollToTopThreshold: 10,
+        }}
       />
 
       {/* Floating Cart Button */}

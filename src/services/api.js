@@ -1,5 +1,5 @@
 // API service for connecting to the yoga class cloud service
-import { CONFIG } from '../utils/config';
+import { CONFIG, validateConfig } from '../utils/config';
 import { hashPassword, verifyPassword } from '../utils/password';
 
 const API_BASE_URL = CONFIG.API_BASE_URL;
@@ -7,6 +7,9 @@ const API_BASE_URL = CONFIG.API_BASE_URL;
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    
+    // Validate configuration on startup
+    validateConfig();
   }
 
   async request(endpoint, options = {}) {

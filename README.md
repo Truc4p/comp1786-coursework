@@ -40,12 +40,25 @@ cd customer-yoga-app
 npm install
 ```
 
-### Step 2: Configure API Connection
-1. Open `src/utils/config.js`
-2. Replace `API_BASE_URL` with your actual cloud service URL:
-```javascript
-API_BASE_URL: 'https://your-actual-api-url.com/api',
+### Step 2: Environment Configuration
+1. Copy the environment template:
+```bash
+cp .env.example .env
 ```
+
+2. Update `.env` with your Firebase configuration:
+```bash
+EXPO_PUBLIC_API_BASE_URL=https://your-firebase-project-default-rtdb.region.firebasedatabase.app/
+```
+
+3. Verify your configuration:
+```bash
+npm run check-env
+```
+
+4. For detailed environment setup instructions, see [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md)
+
+> **Note**: The app will work with default fallback values, but you should configure your own Firebase URL for production use.
 
 ### Step 3: API Endpoints Structure
 Your cloud service should provide the following endpoints:
