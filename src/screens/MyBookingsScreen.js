@@ -68,7 +68,7 @@ const MyBookingsScreen = ({ route, navigation }) => {
         console.log('🔍 Using userId for filtering:', userId);
         
         const userBookingsList = getBookingsByUserId(userId);
-        console.log('📋 Raw user bookings:', userBookingsList);
+        // console.log('📋 Raw user bookings:', userBookingsList);
         
         // Sort bookings by booking date in descending order (latest first)
         const sortedBookings = userBookingsList.sort((a, b) => {
@@ -200,7 +200,7 @@ const MyBookingsScreen = ({ route, navigation }) => {
             <View style={styles.classInfo}>
               <Text style={styles.className}>{classItem.name || 'Unknown Class'}</Text>
               <Text style={styles.classDetails}>
-                with {classItem.instructor || 'TBA'} • {formatDate(classItem.date)} at {formatTime(classItem.time)}
+                {formatDate(classItem.date)} at {formatTime(classItem.time)}
               </Text>
               <Text style={styles.classDetails}>
                 Duration: {classItem.duration || 0} min • Qty: {classItem.quantity || 1}
