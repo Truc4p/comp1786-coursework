@@ -217,22 +217,7 @@ public class AuthenticationManager {
             return null;
         }
     }
-    
-    /**
-     * Check if user has specific role
-     */
-    public boolean hasRole(String role) {
-        User user = getCurrentUser();
-        return user != null && role.equals(user.getRole());
-    }
-    
-    /**
-     * Check if user is admin
-     */
-    public boolean isAdmin() {
-        return hasRole("admin");
-    }
-    
+
     /**
      * Force logout all sessions (useful for security)
      */

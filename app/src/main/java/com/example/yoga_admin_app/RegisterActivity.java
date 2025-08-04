@@ -258,7 +258,6 @@ public class RegisterActivity extends AppCompatActivity {
             user.setEmail(email);
             user.setPasswordHash(passwordHash);
             user.setSalt(salt);
-            user.setRole(role);
             user.setActive(true);
             user.setCreatedAt(System.currentTimeMillis());
             

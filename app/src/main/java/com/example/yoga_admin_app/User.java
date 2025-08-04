@@ -9,7 +9,6 @@ public class User {
     private String email;
     private String passwordHash;
     private String salt;
-    private String role; // "admin", "manager", "instructor"
     private boolean isActive;
     private long createdAt;
     private long updatedAt;
@@ -43,9 +42,6 @@ public class User {
     
     public String getSalt() { return salt; }
     public void setSalt(String salt) { this.salt = salt; }
-    
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
     
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }

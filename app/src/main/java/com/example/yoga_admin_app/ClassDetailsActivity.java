@@ -214,14 +214,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
     private void editYogaClass() {
         Intent intent = new Intent(this, EditYogaClassActivity.class);
         intent.putExtra("classId", yogaClass.getId());
-        intent.putExtra("dayOfWeek", yogaClass.getDayOfWeek());
-        intent.putExtra("time", yogaClass.getTime());
-        intent.putExtra("capacity", yogaClass.getCapacity());
-        intent.putExtra("duration", yogaClass.getDuration());
-        intent.putExtra("price", yogaClass.getPrice());
-        intent.putExtra("classType", yogaClass.getClassType());
-        intent.putExtra("description", yogaClass.getDescription());
-        intent.putExtra("difficulty", yogaClass.getDifficulty());
         startActivity(intent);
     }
 

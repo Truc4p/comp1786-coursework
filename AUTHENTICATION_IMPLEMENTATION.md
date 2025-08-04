@@ -38,15 +38,10 @@
   - Secure form handling
 
 ### ✅ [L1] Server-Side Authentication
-- **Authentication Helper** (`AuthHelper.java`): Centralized auth checking
-  - Cross-activity authentication enforcement
-  - Role-based access control
-  - Consistent security policies
-
-- **Base Authenticated Activity** (`BaseAuthenticatedActivity.java`): 
-  - Automatic authentication checking for all activities
-  - Session validation on activity resume
-  - Consistent auth enforcement across app
+- **Authentication Manager Integration**: Direct authentication checking in activities
+  - Manual authentication verification in each activity's onCreate()
+  - Session validation using AuthenticationManager.isSessionValid()
+  - Consistent security enforcement across all protected activities
 
 ### ✅ [L1] Proper Session Logout
 - **Login Activity** (`LoginActivity.java`): Secure login interface

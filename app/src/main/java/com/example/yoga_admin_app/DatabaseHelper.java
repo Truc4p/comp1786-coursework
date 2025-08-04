@@ -1600,7 +1600,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_EMAIL, user.getEmail());
             values.put(COLUMN_PASSWORD_HASH, user.getPasswordHash());
             values.put(COLUMN_SALT, user.getSalt());
-            values.put(COLUMN_ROLE, user.getRole());
             values.put(COLUMN_IS_ACTIVE, user.isActive() ? 1 : 0);
             values.put(COLUMN_FAILED_ATTEMPTS, user.getFailedAttempts());
             values.put(COLUMN_LOCKOUT_UNTIL, user.getLockoutUntil());
@@ -1681,7 +1680,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_EMAIL, user.getEmail());
             values.put(COLUMN_PASSWORD_HASH, user.getPasswordHash());
             values.put(COLUMN_SALT, user.getSalt());
-            values.put(COLUMN_ROLE, user.getRole());
             values.put(COLUMN_IS_ACTIVE, user.isActive() ? 1 : 0);
             values.put(COLUMN_FAILED_ATTEMPTS, user.getFailedAttempts());
             values.put(COLUMN_LOCKOUT_UNTIL, user.getLockoutUntil());
@@ -1731,7 +1729,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)));
         user.setPasswordHash(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD_HASH)));
         user.setSalt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SALT)));
-        user.setRole(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ROLE)));
         user.setActive(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_ACTIVE)) == 1);
         user.setFailedAttempts(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_FAILED_ATTEMPTS)));
         user.setLockoutUntil(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_LOCKOUT_UNTIL)));
