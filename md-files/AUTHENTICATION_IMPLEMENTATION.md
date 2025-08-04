@@ -7,7 +7,6 @@
   - Password hashing with SHA-256 + salt
   - Account lockout after 5 failed attempts (30 min lockout)
   - Session token management
-  - Role-based access control (admin, manager, instructor roles)
 
 - **Authentication Manager** (`AuthenticationManager.java`): Core authentication logic
   - Secure password verification with salt
@@ -27,14 +26,12 @@
   - Username uniqueness checking
   - Email format validation
   - Password confirmation and strength checking
-  - Role selection (admin, manager, instructor)
   - Secure password hashing with unique salt
 
 - **Registration UI** (`activity_register.xml`): Professional registration interface
   - Material Design components
   - Password visibility toggles
   - Real-time validation feedback
-  - Role selection spinner
   - Secure form handling
 
 ### ✅ [L1] Server-Side Authentication
@@ -112,7 +109,6 @@
 - Material Design components
 - Comprehensive input validation
 - Password confirmation fields
-- Role selection dropdown
 - Password visibility toggles for both fields
 - Back to login navigation
 
@@ -133,10 +129,6 @@
 
 ## 📋 DEFAULT CREDENTIALS & NEW USER REGISTRATION
 - **Default Admin**: `admin` / `admin123`
-- **New Registration**: Any user can register with roles:
-  - `admin` - Full administrative access
-  - `manager` - Management-level access
-  - `instructor` - Instructor-level access
 
 ## 🎯 NEXT STEPS (Optional Enhancements)
 - [ ] Password reset functionality

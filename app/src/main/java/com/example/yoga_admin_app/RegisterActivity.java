@@ -24,7 +24,6 @@ import android.util.Base64;
  * Features:
  * - Secure user registration with validation
  * - Password confirmation and strength checking
- * - Role selection (admin, manager, instructor)
  * - Email format validation
  * - Username uniqueness checking
  */
@@ -86,7 +85,6 @@ public class RegisterActivity extends AppCompatActivity {
         final String adminKey = editAdminKey.getText().toString().trim();
         final String password = editPassword.getText().toString();
         final String confirmPassword = editConfirmPassword.getText().toString();
-        final String role = "admin"; // All users register as admin by default
         
         // Validate inputs (including admin key)
         if (!validateInputs(username, email, adminKey, password, confirmPassword)) {
@@ -128,7 +126,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
                 
                 // Create new user
-                User newUser = createNewUser(username, email, password, role);
+                User newUser = createNewUser(username, email, password);
                 long userId = databaseHelper.createUser(newUser);
                 
                 runOnUiThread(() -> {
@@ -246,7 +244,7 @@ public class RegisterActivity extends AppCompatActivity {
         return isValid;
     }
     
-    private User createNewUser(String username, String email, String password, String role) {
+    private User createNewUser(String username, String email, String password) {
         try {
             // Generate salt and hash password
             String salt = generateSalt();
@@ -333,6 +331,7 @@ public class RegisterActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
+        super.onBackPressed();
     }
     
     // Interface for password visibility callback

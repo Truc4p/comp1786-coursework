@@ -1,0 +1,3901 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.9.0" type="baseline" client="gradle" dependencies="false" name="AGP (8.9.0)" variant="all" version="8.9.0">
+
+    <issue
+        id="ResAuto"
+        message="In Gradle projects, always use `http://schemas.android.com/apk/res-auto` for custom attributes"
+        errorLine1="    xmlns:app=&quot;http://schemas.android.com/apk/res/auto&quot;"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="3"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="NestedScrolling"
+        message="The vertically scrolling `ScrollView` should not contain another vertically scrolling widget (`ListView`)"
+        errorLine1="            &lt;ListView"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="165"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        String searchText = etSearchBookings.getText().toString().toLowerCase().trim();"
+        errorLine2="                                                                  ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="157"
+            column="67"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                customerName.toLowerCase().contains(searchText) ||"
+        errorLine2="                             ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="171"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                customerEmail.toLowerCase().contains(searchText) ||"
+        errorLine2="                              ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="172"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                className.toLowerCase().contains(searchText) ||"
+        errorLine2="                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="173"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="                bookingDate.toLowerCase().contains(searchText);"
+        errorLine2="                            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="174"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        String details = String.format("
+        errorLine2="                         ^">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="267"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        holder.tvStatus.setText(booking.getStatus().toUpperCase());"
+        errorLine2="                                                    ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingAdapter.java"
+            line="84"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        String paymentInfo = String.format(&quot;£%.2f - %s&quot;, "
+        errorLine2="                             ^">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingAdapter.java"
+            line="88"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toUpperCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="            booking.getPaymentStatus().toUpperCase());"
+        errorLine2="                                       ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingAdapter.java"
+            line="90"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        switch (status.toLowerCase()) {"
+        errorLine2="                       ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingAdapter.java"
+            line="104"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        tvPrice.setText(&quot;£&quot; + String.format(&quot;%.2f&quot;, yogaClass.getPrice()));"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="144"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        switch (difficulty.toLowerCase()) {"
+        errorLine2="                           ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="173"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="            return String.format(&quot;📍 %.6f, %.6f&quot;, yogaClass.getLatitude(), yogaClass.getLongitude());"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="198"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="                String message = String.format(&quot;Bookings sync completed. %d new, %d updated, %d deleted&quot;, "
+        errorLine2="                                 ^">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/CloudSyncService.java"
+            line="784"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        tvPrice.setText(&quot;£&quot; + String.format(&quot;%.2f&quot;, yogaClass.getPrice()));"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="86"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="                tvLocation.setText(String.format(&quot;%.6f, %.6f&quot;, yogaClass.getLatitude(), yogaClass.getLongitude()));"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="104"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="                etLocationAddress.setText(String.format(&quot;📍 %.6f, %.6f&quot;, currentLatitude, currentLongitude));"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/EditYogaClassActivity.java"
+            line="225"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        return &quot;Lat: &quot; + String.format(&quot;%.6f&quot;, latitude) + &quot;, Lng: &quot; + String.format(&quot;%.6f&quot;, longitude);"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/LocationService.java"
+            line="322"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        return &quot;Lat: &quot; + String.format(&quot;%.6f&quot;, latitude) + &quot;, Lng: &quot; + String.format(&quot;%.6f&quot;, longitude);"
+        errorLine2="                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/LocationService.java"
+            line="322"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="            return String.format(&quot;%.6f, %.6f&quot;, latitude, longitude);"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/LocationService.java"
+            line="347"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        switch (dayName.toLowerCase()) {"
+        errorLine2="                        ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ManageClassInstancesActivity.java"
+            line="574"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        tvPrice.setText(&quot;£&quot; + String.format(&quot;%.2f&quot;, yogaClass.getPrice()));"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ViewYogaClassesActivity.java"
+            line="150"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="        switch (difficulty.toLowerCase()) {"
+        errorLine2="                           ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ViewYogaClassesActivity.java"
+            line="166"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="            return String.format(&quot;📍 %.6f, %.6f&quot;, yogaClass.getLatitude(), yogaClass.getLongitude());"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ViewYogaClassesActivity.java"
+            line="191"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="                String.format(&quot;%.2f&quot;, yogaClass.getPrice()));"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/YogaClassAdapter.java"
+            line="60"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="SimpleDateFormat"
+        message="To get local formatting use `getDateInstance()`, `getDateTimeInstance()`, or `getTimeInstance()`, or use `new SimpleDateFormat(String template, Locale locale)` with for example `Locale.US` for ASCII dates."
+        errorLine1="            java.text.SimpleDateFormat isoFormat = new java.text.SimpleDateFormat(&quot;yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSS&apos;Z&apos;&quot;);"
+        errorLine2="                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/CloudSyncService.java"
+            line="1232"
+            column="52"/>
+    </issue>
+
+    <issue
+        id="SimpleDateFormat"
+        message="To get local formatting use `getDateInstance()`, `getDateTimeInstance()`, or `getTimeInstance()`, or use `new SimpleDateFormat(String template, Locale locale)` with for example `Locale.US` for ASCII dates."
+        errorLine1="            java.text.SimpleDateFormat readableFormat = new java.text.SimpleDateFormat(&quot;MMMM dd, yyyy &apos;at&apos; HH:mm&quot;);"
+        errorLine2="                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/CloudSyncService.java"
+            line="1237"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of com.android.application than 8.9.0 is available: 8.12.0. (There is also a newer version of 8.9.𝑥 available, if upgrading to 8.12.0 is difficult: 8.9.3)"
+        errorLine1="agp = &quot;8.9.0&quot;"
+        errorLine2="      ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="2"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of com.android.application than 8.9.0 is available: 8.12.0. (There is also a newer version of 8.9.𝑥 available, if upgrading to 8.12.0 is difficult: 8.9.3)"
+        errorLine1="agp = &quot;8.9.0&quot;"
+        errorLine2="      ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="2"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of com.android.application than 8.9.0 is available: 8.12.0. (There is also a newer version of 8.9.𝑥 available, if upgrading to 8.12.0 is difficult: 8.9.3)"
+        errorLine1="agp = &quot;8.9.0&quot;"
+        errorLine2="      ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="2"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0"
+        errorLine1="junitVersion = &quot;1.2.1&quot;"
+        errorLine2="               ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="4"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0"
+        errorLine1="junitVersion = &quot;1.2.1&quot;"
+        errorLine2="               ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="4"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0"
+        errorLine1="junitVersion = &quot;1.2.1&quot;"
+        errorLine2="               ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="4"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.6.1 is available: 3.7.0"
+        errorLine1="espressoCore = &quot;3.6.1&quot;"
+        errorLine2="               ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="5"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.6.1 is available: 3.7.0"
+        errorLine1="espressoCore = &quot;3.6.1&quot;"
+        errorLine2="               ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="5"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.6.1 is available: 3.7.0"
+        errorLine1="espressoCore = &quot;3.6.1&quot;"
+        errorLine2="               ~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="5"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.firebase:firebase-database than 21.0.0 is available: 22.0.0"
+        errorLine1="firebaseDatabase = &quot;21.0.0&quot;"
+        errorLine2="                   ~~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="11"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.firebase:firebase-database than 21.0.0 is available: 22.0.0"
+        errorLine1="firebaseDatabase = &quot;21.0.0&quot;"
+        errorLine2="                   ~~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="11"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.firebase:firebase-database than 21.0.0 is available: 22.0.0"
+        errorLine1="firebaseDatabase = &quot;21.0.0&quot;"
+        errorLine2="                   ~~~~~~~~">
+        <location
+            file="$HOME/Downloads/uni/c1786/Coursework/admin-yoga-app/gradle/libs.versions.toml"
+            line="11"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/NetworkUtils.java"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/NetworkUtils.java"
+            line="50"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/NetworkUtils.java"
+            line="73"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/background_light` with a theme that also paints a background (inferred theme is `@style/Theme_MaterialComponents_DayNight_NoActionBar`)"
+        errorLine1="    android:background=&quot;@color/background_light&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_login.xml"
+            line="7"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="7"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/background_light` with a theme that also paints a background (inferred theme is `@style/Theme_MaterialComponents_DayNight_NoActionBar`)"
+        errorLine1="    android:background=&quot;@color/background_light&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="6"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="7"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/light_purple` with a theme that also paints a background (inferred theme is `@style/Theme.Yogaadminapp`)"
+        errorLine1="    android:background=&quot;@color/light_purple&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.black` appears to be unused"
+        errorLine1="    &lt;color name=&quot;black&quot;>#FF000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="3"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.accent_teal` appears to be unused"
+        errorLine1="    &lt;color name=&quot;accent_teal&quot;>#26A69A&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="20"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.success_green` appears to be unused"
+        errorLine1="    &lt;color name=&quot;success_green&quot;>#4CAF50&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="27"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_launcher_background` appears to be unused"
+        errorLine1="&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_launcher_background.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_launcher_background_plain` appears to be unused"
+        errorLine1="&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_launcher_background_plain.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_launcher_plain` appears to be unused"
+        errorLine1="&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_launcher_plain.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.mipmap.ic_launcher_round` appears to be unused">
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher_round.png"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_role` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_role.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.layout.spinner_dropdown_item` appears to be unused"
+        errorLine1="&lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/layout/spinner_dropdown_item.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.layout.spinner_item` appears to be unused"
+        errorLine1="&lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/layout/spinner_item.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.manage_class_instances` appears to be unused"
+        errorLine1="    &lt;string name=&quot;manage_class_instances&quot;>Manage Class Instances&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.add_class_instance` appears to be unused"
+        errorLine1="    &lt;string name=&quot;add_class_instance&quot;>Add Class Instance&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="6"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.edit_class_instance` appears to be unused"
+        errorLine1="    &lt;string name=&quot;edit_class_instance&quot;>Edit Class Instance&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="7"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.delete_class_instance` appears to be unused"
+        errorLine1="    &lt;string name=&quot;delete_class_instance&quot;>Delete Class Instance&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="8"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.no_instances_found` appears to be unused"
+        errorLine1="    &lt;string name=&quot;no_instances_found&quot;>No class instances found&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="9"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.add_first_instance` appears to be unused"
+        errorLine1="    &lt;string name=&quot;add_first_instance&quot;>Start by adding your first class instance!&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="10"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.date_format_hint` appears to be unused"
+        errorLine1="    &lt;string name=&quot;date_format_hint&quot;>dd/MM/yyyy&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="11"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.date_must_match` appears to be unused"
+        errorLine1="    &lt;string name=&quot;date_must_match&quot;>Date must match the day of week for this class&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedNamespace"
+        message="Unused namespace `app`"
+        errorLine1="    xmlns:app=&quot;http://schemas.android.com/apk/res/auto&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="3"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-mdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-xhdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-xxhdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-xxxhdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="TextFields"
+        message="The view name (`@+id/et_date`) suggests this is a date, but it does not include &apos;`date`&apos; or &apos;`datetime`&apos; in the `inputType`"
+        errorLine1="                android:inputType=&quot;none&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="105"
+            column="17"/>
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="97"
+            column="17"
+            message="id defined here"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="44"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="61"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="76"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="91"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="132"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="178"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="70"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="44"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="61"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="76"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="91"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="132"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="178"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="            &lt;EditText"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="66"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="            &lt;EditText"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="96"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="        &lt;EditText"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="43"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="    &lt;EditText"
+        errorLine2="     ~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="42"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="Autofill"
+        message="Missing `autofillHints` attribute"
+        errorLine1="    &lt;EditText"
+        errorLine2="     ~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="57"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="KeyboardInaccessibleWidget"
+        message="&apos;clickable&apos; attribute found, please also add &apos;focusable&apos;"
+        errorLine1="            android:clickable=&quot;true&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="52"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="KeyboardInaccessibleWidget"
+        message="&apos;clickable&apos; attribute found, please also add &apos;focusable&apos;"
+        errorLine1="            android:clickable=&quot;true&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="52"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="KeyboardInaccessibleWidget"
+        message="&apos;clickable&apos; attribute found, please also add &apos;focusable&apos;"
+        errorLine1="                android:clickable=&quot;true&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="102"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvLocationStatus.setText(&quot;🔄 Getting your location...&quot;);"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="181"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                    tvLocationStatus.setText(&quot;✅ Location detected successfully&quot;);"
+        errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="193"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                    btnGetLocation.setText(&quot;📍 Update Location&quot;);"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="195"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="                    tvLocationStatus.setText(&quot;❌ &quot; + error);"
+        errorLine2="                                             ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="204"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                tvLocationStatus.setText(&quot;Permission granted! Tap to get location&quot;);"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="234"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                tvLocationStatus.setText(&quot;Location permission required for automatic detection&quot;);"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="237"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="                        tvLocationStatus.setText(&quot;✅ Location detected: &quot; + currentLocationAddress);"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="488"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                        tvLocationStatus.setText(&quot;✅ Location detected: &quot; + currentLocationAddress);"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="488"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="                        tvLocationStatus.setText(&quot;✅ Location detected: &quot; + latitude + &quot;, &quot; + longitude);"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="490"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                        tvLocationStatus.setText(&quot;✅ Location detected: &quot; + latitude + &quot;, &quot; + longitude);"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/AddYogaClassActivity.java"
+            line="490"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        btnSyncBookings.setText(&quot;Syncing...&quot;);"
+        errorLine2="                                ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="200"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                    btnSyncBookings.setText(&quot;Sync Bookings&quot;);"
+        errorLine2="                                            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="207"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                    btnSyncBookings.setText(&quot;Sync Bookings&quot;);"
+        errorLine2="                                            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingActivity.java"
+            line="228"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        holder.tvBookingId.setText(&quot;ID: &quot; + booking.getBookingId());"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingAdapter.java"
+            line="65"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        holder.tvBookingId.setText(&quot;ID: &quot; + booking.getBookingId());"
+        errorLine2="                                   ~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/BookingAdapter.java"
+            line="65"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvClassTitle.setText(&quot;🧘 &quot; + yogaClass.getClassType() + &quot; Details&quot;);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="133"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvClassTitle.setText(&quot;🧘 &quot; + yogaClass.getClassType() + &quot; Details&quot;);"
+        errorLine2="                                                                ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="133"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvDuration.setText(yogaClass.getDuration() + &quot; minutes&quot;);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="138"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvDuration.setText(yogaClass.getDuration() + &quot; minutes&quot;);"
+        errorLine2="                                                     ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="138"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvCapacity.setText(yogaClass.getCapacity() + &quot; people&quot;);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="143"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvCapacity.setText(yogaClass.getCapacity() + &quot; people&quot;);"
+        errorLine2="                                                     ~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="143"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvPrice.setText(&quot;£&quot; + String.format(&quot;%.2f&quot;, yogaClass.getPrice()));"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassDetailsActivity.java"
+            line="144"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        holder.tvInstructor.setText(&quot;Instructor: &quot; + instance.getInstructor());"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassInstanceAdapter.java"
+            line="57"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        holder.tvInstructor.setText(&quot;Instructor: &quot; + instance.getInstructor());"
+        errorLine2="                                    ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ClassInstanceAdapter.java"
+            line="57"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="            tvNetworkStatus.setText(&quot;Connected (&quot; + networkType + &quot;)&quot;);"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/CloudSyncActivity.java"
+            line="75"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="            tvNetworkStatus.setText(&quot;Connected (&quot; + networkType + &quot;)&quot;);"
+        errorLine2="                                    ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/CloudSyncActivity.java"
+            line="75"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="            tvNetworkStatus.setText(&quot;No Internet Connection&quot;);"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/CloudSyncActivity.java"
+            line="78"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvLastSync.setText(&quot;Last sync: &quot; + currentTime);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/CloudSyncActivity.java"
+            line="260"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvLastSync.setText(&quot;Last sync: &quot; + currentTime);"
+        errorLine2="                           ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/CloudSyncActivity.java"
+            line="260"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvCapacity.setText(String.valueOf(yogaClass.getCapacity()) + &quot; people&quot;);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="84"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvCapacity.setText(String.valueOf(yogaClass.getCapacity()) + &quot; people&quot;);"
+        errorLine2="                                                                     ~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="84"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvDuration.setText(String.valueOf(yogaClass.getDuration()) + &quot; minutes&quot;);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="85"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvDuration.setText(String.valueOf(yogaClass.getDuration()) + &quot; minutes&quot;);"
+        errorLine2="                                                                     ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="85"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvPrice.setText(&quot;£&quot; + String.format(&quot;%.2f&quot;, yogaClass.getPrice()));"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="86"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="            tvDescription.setText(&quot;No description provided&quot;);"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="92"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                tvLocation.setText(&quot;No location specified&quot;);"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ConfirmationActivity.java"
+            line="106"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                tvLocationStatus.setText(&quot;Location set&quot;);"
+        errorLine2="                                         ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/EditYogaClassActivity.java"
+            line="223"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                tvLocationStatus.setText(&quot;Coordinates available&quot;);"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/EditYogaClassActivity.java"
+            line="226"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                tvLocationStatus.setText(&quot;No location set&quot;);"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/EditYogaClassActivity.java"
+            line="228"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvLocationStatus.setText(&quot;Getting location...&quot;);"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/EditYogaClassActivity.java"
+            line="424"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                tvLocationStatus.setText(&quot;Location retrieved successfully&quot;);"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/EditYogaClassActivity.java"
+            line="431"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="                tvLocationStatus.setText(&quot;Error: &quot; + error);"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/EditYogaClassActivity.java"
+            line="436"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="                tvLocationStatus.setText(&quot;Error: &quot; + error);"
+        errorLine2="                                         ~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/EditYogaClassActivity.java"
+            line="436"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="            editUsername.setText(&quot;admin&quot;);"
+        errorLine2="                                 ~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/LoginActivity.java"
+            line="76"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="            editPassword.setText(&quot;admin123&quot;);"
+        errorLine2="                                 ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/LoginActivity.java"
+            line="77"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvClassCount.setText(&quot;Total Classes: &quot; + count);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/MainActivity.java"
+            line="115"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvClassCount.setText(&quot;Total Classes: &quot; + count);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/MainActivity.java"
+            line="115"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="            tvWelcomeMessage.setText(&quot;Welcome, &quot; + currentUser.getUsername() + &quot;!&quot;);"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/MainActivity.java"
+            line="160"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="            tvWelcomeMessage.setText(&quot;Welcome, &quot; + currentUser.getUsername() + &quot;!&quot;);"
+        errorLine2="                                     ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/MainActivity.java"
+            line="160"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvClassDetails.setText(yogaClass.getDayOfWeek() + &quot; at &quot; + yogaClass.getTime());"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ManageClassInstancesActivity.java"
+            line="79"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvClassDetails.setText(yogaClass.getDayOfWeek() + &quot; at &quot; + yogaClass.getTime());"
+        errorLine2="                                                          ~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ManageClassInstancesActivity.java"
+            line="79"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        btnSelectDate.setText(&quot;📅 Select &quot; + yogaClass.getDayOfWeek() + &quot; Date&quot;);"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ManageClassInstancesActivity.java"
+            line="140"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        btnSelectDate.setText(&quot;📅 Select &quot; + yogaClass.getDayOfWeek() + &quot; Date&quot;);"
+        errorLine2="                              ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ManageClassInstancesActivity.java"
+            line="140"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        btnSelectDate.setText(&quot;📅 Select &quot; + yogaClass.getDayOfWeek() + &quot; Date&quot;);"
+        errorLine2="                                                                        ~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ManageClassInstancesActivity.java"
+            line="140"
+            column="73"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvSearchResultsHeader.setText(&quot;Search Results (&quot; + searchResults.size() + &quot; found)&quot;);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/SearchYogaClassesActivity.java"
+            line="230"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvSearchResultsHeader.setText(&quot;Search Results (&quot; + searchResults.size() + &quot; found)&quot;);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/SearchYogaClassesActivity.java"
+            line="230"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvSearchResultsHeader.setText(&quot;Search Results (&quot; + searchResults.size() + &quot; found)&quot;);"
+        errorLine2="                                                                                  ~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/SearchYogaClassesActivity.java"
+            line="230"
+            column="83"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvDuration.setText(yogaClass.getDuration() + &quot; minutes&quot;);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ViewYogaClassesActivity.java"
+            line="139"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvDuration.setText(yogaClass.getDuration() + &quot; minutes&quot;);"
+        errorLine2="                                                     ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ViewYogaClassesActivity.java"
+            line="139"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvCapacity.setText(yogaClass.getCapacity() + &quot; people&quot;);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ViewYogaClassesActivity.java"
+            line="149"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        tvCapacity.setText(yogaClass.getCapacity() + &quot; people&quot;);"
+        errorLine2="                                                     ~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ViewYogaClassesActivity.java"
+            line="149"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        tvPrice.setText(&quot;£&quot; + String.format(&quot;%.2f&quot;, yogaClass.getPrice()));"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/ViewYogaClassesActivity.java"
+            line="150"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        holder.tvDayAndTime.setText(yogaClass.getDayOfWeek() + &quot; at &quot; + yogaClass.getTime());"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/YogaClassAdapter.java"
+            line="58"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        holder.tvDayAndTime.setText(yogaClass.getDayOfWeek() + &quot; at &quot; + yogaClass.getTime());"
+        errorLine2="                                                               ~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/YogaClassAdapter.java"
+            line="58"
+            column="64"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        holder.tvCapacityAndPrice.setText(yogaClass.getCapacity() + &quot; people • £&quot; + "
+        errorLine2="                                          ^">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/YogaClassAdapter.java"
+            line="59"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="String literal in `setText` can not be translated. Use Android resources instead."
+        errorLine1="        holder.tvCapacityAndPrice.setText(yogaClass.getCapacity() + &quot; people • £&quot; + "
+        errorLine2="                                                                    ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/example/yoga_admin_app/YogaClassAdapter.java"
+            line="59"
+            column="69"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Add New Yoga Class&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Add New Yoga Class&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Day of Week *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Day of Week *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Time *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Time *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Tap to select time&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Tap to select time&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Capacity *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Capacity *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="59"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Maximum number of participants&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Maximum number of participants&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="66"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Duration (minutes) *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Duration (minutes) *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="74"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;e.g. 60&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;e.g. 60&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="81"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Price (£) *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Price (£) *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="89"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;e.g. 15.00&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;e.g. 15.00&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="96"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Type of Class *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Type of Class *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="104"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Difficulty Level *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Difficulty Level *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Description&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Description&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="130"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Additional details about the class (optional)&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Additional details about the class (optional)&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="138"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Location&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Location&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="148"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;📍 Get Current Location&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;📍 Get Current Location&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="162"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Tap to detect location automatically&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Tap to detect location automatically&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="171"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Location will be detected automatically&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Location will be detected automatically&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="183"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;* Required fields&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;* Required fields&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="193"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Cancel&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Cancel&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="212"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Continue&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Continue&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_add_yoga_class.xml"
+            line="221"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Customer Bookings&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Customer Bookings&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Tap a booking to view details and update status&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Tap a booking to view details and update status&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Sync from Cloud&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Sync from Cloud&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="50"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Refresh&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Refresh&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="59"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Search customer name, email, class...&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Search customer name, email, class...&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="77"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;📅&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;📅&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="115"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;No bookings found&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;No bookings found&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="122"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Sync from cloud to load customer bookings&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Sync from cloud to load customer bookings&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="131"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Back to Main Menu&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Back to Main Menu&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_booking.xml"
+            line="144"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;← Back&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;← Back&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="26"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;🧘 Class Details&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;🧘 Class Details&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="34"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;📅 SCHEDULE&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;📅 SCHEDULE&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Day:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Day:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="73"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Time:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Time:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="97"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Duration:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Duration:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="120"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Date:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Date:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="147"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Instructor:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Instructor:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="175"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;ℹ️ CLASS INFORMATION&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;ℹ️ CLASS INFORMATION&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="194"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Type:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Type:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="221"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Difficulty:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Difficulty:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="245"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Capacity:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Capacity:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="269"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Price:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Price:&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="292"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;📍 LOCATION&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;📍 LOCATION&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="310"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;📝 DESCRIPTION&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;📝 DESCRIPTION&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="340"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;⚙️ ACTIONS&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;⚙️ ACTIONS&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="370"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;📅\nManage\nInstances&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;📅\nManage\nInstances&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="393"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;✏️\nEdit\nClass&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;✏️\nEdit\nClass&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="406"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;🗑️\nDelete\nClass&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;🗑️\nDelete\nClass&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_class_details.xml"
+            line="418"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Cloud Synchronization&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Cloud Synchronization&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="14"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Sync your yoga classes with cloud service&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Sync your yoga classes with cloud service&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="24"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Connection Status&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Connection Status&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Network:&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Network:&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="57"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Checking...&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Checking...&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="66"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Last Sync:&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Last Sync:&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="81"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Never&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Never&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="90"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Sync Actions&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Sync Actions&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="110"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Upload All Data to Cloud&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Upload All Data to Cloud&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="122"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Download &amp; Sync from Cloud&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Download &amp;amp; Sync from Cloud&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="131"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Test Cloud Connection&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Test Cloud Connection&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="140"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Reset Local Database&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Reset Local Database&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="149"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Important Notes&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Important Notes&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="165"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;• Upload: Sends all local data to cloud&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;• Upload: Sends all local data to cloud&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="174"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;• Sync: Downloads cloud data and merges with local&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;• Sync: Downloads cloud data and merges with local&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="182"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;• Requires stable internet connection&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;• Requires stable internet connection&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="189"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Back to Main&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Back to Main&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_cloud_sync.xml"
+            line="206"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Confirm Class Details&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Confirm Class Details&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Day:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Day:&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="45"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Monday&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Monday&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="52"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Time:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Time:&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="69"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;10:00 AM&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;10:00 AM&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="76"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Class Type:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Class Type:&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="93"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Flow Yoga&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Flow Yoga&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="100"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Capacity:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Capacity:&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="117"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;20 people&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;20 people&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="124"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Duration:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Duration:&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="141"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;60 minutes&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;60 minutes&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="148"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Price:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Price:&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="165"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;£15.00&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;£15.00&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="172"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Difficulty:&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Difficulty:&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="190"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Beginner&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Beginner&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="197"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Description:&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Description:&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="207"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Class description will appear here&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Class description will appear here&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="213"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Location:&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Location:&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="224"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;No location specified&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;No location specified&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="230"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Please review the details above. You can go back to edit or save the class.&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Please review the details above. You can go back to edit or save the class.&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="243"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;← Back to Edit&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;← Back to Edit&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="261"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Save Class ✓&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Save Class ✓&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_confirmation.xml"
+            line="270"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Edit Yoga Class&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Edit Yoga Class&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Day of Week *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Day of Week *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Time *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Time *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Tap to select time&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Tap to select time&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Capacity *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Capacity *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="59"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Maximum number of participants&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Maximum number of participants&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="66"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Duration (minutes) *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Duration (minutes) *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="74"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;e.g. 60&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;e.g. 60&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="81"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Price (£) *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Price (£) *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="89"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;e.g. 15.00&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;e.g. 15.00&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="96"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Type of Class *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Type of Class *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="104"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Difficulty Level *&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Difficulty Level *&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Description&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Description&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="130"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Additional details about the class (optional)&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Additional details about the class (optional)&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="138"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Location&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Location&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="148"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;📍 Get Current Location&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;📍 Get Current Location&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="162"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Tap to detect location automatically&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Tap to detect location automatically&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="171"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Location will be detected automatically&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Location will be detected automatically&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="183"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;* Required fields&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;* Required fields&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="193"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Cancel&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Cancel&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="212"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Update Class&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Update Class&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_edit_yoga_class.xml"
+            line="221"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Yoga Admin&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Yoga Admin&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_login.xml"
+            line="16"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Secure Login Required&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Secure Login Required&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_login.xml"
+            line="25"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Username or Email&quot;, should use `@string` resource"
+        errorLine1="                android:hint=&quot;Username or Email&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_login.xml"
+            line="51"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Password&quot;, should use `@string` resource"
+        errorLine1="                android:hint=&quot;Password&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_login.xml"
+            line="70"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Login&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Login&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_login.xml"
+            line="90"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Forgot Password?&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Forgot Password?&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_login.xml"
+            line="119"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Don&apos;t have an account? Register here&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Don&apos;t have an account? Register here&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_login.xml"
+            line="130"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Universal Yoga&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Universal Yoga&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="30"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Admin Dashboard&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Admin Dashboard&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="40"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Welcome, Admin!&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Welcome, Admin!&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="50"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Class Management&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Class Management&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="71"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Total Classes: 0&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Total Classes: 0&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="82"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Add New Yoga Class&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Add New Yoga Class&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="100"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;View &amp; Manage Classes&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;View &amp;amp; Manage Classes&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="110"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Search Classes&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Search Classes&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="119"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;View Customer Bookings&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;View Customer Bookings&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="129"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Cloud Sync&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Cloud Sync&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="139"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Logout&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Logout&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="149"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;✨ Manage your yoga studio with ease&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;✨ Manage your yoga studio with ease&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_main.xml"
+            line="169"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Flow Yoga&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Flow Yoga&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Monday at 10:00 AM&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Monday at 10:00 AM&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="31"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Class Instances&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Class Instances&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="39"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Tap an instance to edit or delete&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Tap an instance to edit or delete&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="48"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;No class instances found&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;No class instances found&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="79"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Start by adding your first class instance!&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Start by adding your first class instance!&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="88"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;+ Add Class Instance&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;+ Add Class Instance&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="101"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;← Back&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;← Back&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_manage_class_instances.xml"
+            line="110"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Admin Registration&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Admin Registration&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Create Admin Account with Valid Key&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Create Admin Account with Valid Key&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;🔑&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;🔑&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="54"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Admin registration requires a valid admin key. Contact your system administrator if you don&apos;t have one.&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Admin registration requires a valid admin key. Contact your system administrator if you don&apos;t have one.&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="62"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Username&quot;, should use `@string` resource"
+        errorLine1="                    android:hint=&quot;Username&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="92"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Email Address&quot;, should use `@string` resource"
+        errorLine1="                    android:hint=&quot;Email Address&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="112"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Admin Registration Key&quot;, should use `@string` resource"
+        errorLine1="                    android:hint=&quot;Admin Registration Key&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="131"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Password&quot;, should use `@string` resource"
+        errorLine1="                    android:hint=&quot;Password&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="151"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Confirm Password&quot;, should use `@string` resource"
+        errorLine1="                    android:hint=&quot;Confirm Password&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="171"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Register&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Register&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="190"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Already have an account? Login here&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Already have an account? Login here&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_register.xml"
+            line="219"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Search Yoga Classes&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Search Yoga Classes&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="27"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Find classes by instructor, day, or date&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Find classes by instructor, day, or date&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="36"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Search Criteria&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Search Criteria&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="56"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Instructor Name:&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Instructor Name:&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="64"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Enter instructor name...&quot;, should use `@string` resource"
+        errorLine1="                android:hint=&quot;Enter instructor name...&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="72"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Day of Week:&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Day of Week:&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="80"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Specific Date:&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Specific Date:&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="94"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Select date...&quot;, should use `@string` resource"
+        errorLine1="                android:hint=&quot;Select date...&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="104"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Search&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Search&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="120"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Clear&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;Clear&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="130"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Search Results&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;Search Results&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="148"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;No search results found.\nTry adjusting your search criteria.&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;No search results found.\nTry adjusting your search criteria.&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="160"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Back to Main&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Back to Main&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_search_yoga_classes.xml"
+            line="184"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Yoga Classes&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Yoga Classes&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Tap a class to view, edit, or delete&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Tap a class to view, edit, or delete&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Search by instructor name...&quot;, should use `@string` resource"
+        errorLine1="            android:hint=&quot;Search by instructor name...&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Advanced&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Advanced&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="58"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;No yoga classes found&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;No yoga classes found&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="86"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Start by adding your first yoga class!&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;Start by adding your first yoga class!&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="95"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;← Back to Main Menu&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;← Back to Main Menu&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_view_yoga_classes.xml"
+            line="108"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Date *&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Date *&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="13"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Select Date&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Select Date&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="21"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Tap to select a date from the calendar. Only dates matching this class&apos;s day of week will be available.&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Tap to select a date from the calendar. Only dates matching this class&apos;s day of week will be available.&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="30"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Instructor *&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Instructor *&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="40"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Enter instructor name&quot;, should use `@string` resource"
+        errorLine1="        android:hint=&quot;Enter instructor name&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="47"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Additional Comments (Optional)&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Additional Comments (Optional)&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="55"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Enter any additional comments&quot;, should use `@string` resource"
+        errorLine1="        android:hint=&quot;Enter any additional comments&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_add_class_instance.xml"
+            line="63"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;John Doe&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;John Doe&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_booking.xml"
+            line="15"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;ID: booking_1234567890&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;ID: booking_1234567890&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_booking.xml"
+            line="26"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;john.doe@email.com • +44 7123 456789&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;john.doe@email.com • +44 7123 456789&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_booking.xml"
+            line="37"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Flow Yoga&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Flow Yoga&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_booking.xml"
+            line="48"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;2024-01-15 at 10:00 AM&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;2024-01-15 at 10:00 AM&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_booking.xml"
+            line="59"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;CONFIRMED&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;CONFIRMED&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_booking.xml"
+            line="75"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;£15.00 - PAID&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;£15.00 - PAID&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_booking.xml"
+            line="88"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;17/10/2023&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;17/10/2023&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_class_instance.xml"
+            line="15"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Instructor: John Doe&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Instructor: John Doe&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_class_instance.xml"
+            line="26"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Additional comments about this class instance&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Additional comments about this class instance&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_class_instance.xml"
+            line="36"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Flow Yoga&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Flow Yoga&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_yoga_class.xml"
+            line="15"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Monday at 10:00 AM&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;Monday at 10:00 AM&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_yoga_class.xml"
+            line="26"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;20 people • £15.00&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;20 people • £15.00&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_yoga_class.xml"
+            line="36"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Logout&quot;, should use `@string` resource"
+        errorLine1="        android:title=&quot;Logout&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/menu/main_menu.xml"
+            line="7"
+            column="9"/>
+    </issue>
+
+</issues>

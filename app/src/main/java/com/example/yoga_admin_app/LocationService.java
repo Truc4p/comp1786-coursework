@@ -58,9 +58,9 @@ public class LocationService {
     }
     
     /**
-     * Check if we have high-accuracy location permission
+     * Check if we have high-accuracy location permission (private helper)
      */
-    public boolean hasHighAccuracyPermission() {
+    private boolean hasHighAccuracyPermission() {
         return ActivityCompat.checkSelfPermission(context, 
             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
@@ -266,9 +266,9 @@ public class LocationService {
     }
     
     /**
-     * Check if location services are enabled
+     * Check if location services are enabled (private helper)
      */
-    public boolean isLocationEnabled() {
+    private boolean isLocationEnabled() {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) 
             || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
@@ -320,31 +320,5 @@ public class LocationService {
         }
         
         return "Lat: " + String.format("%.6f", latitude) + ", Lng: " + String.format("%.6f", longitude);
-    }
-    
-    /**
-     * Get distance between two locations in meters
-     */
-    public static double getDistance(double lat1, double lon1, double lat2, double lon2) {
-        Location location1 = new Location("");
-        location1.setLatitude(lat1);
-        location1.setLongitude(lon1);
-        
-        Location location2 = new Location("");
-        location2.setLatitude(lat2);
-        location2.setLongitude(lon2);
-        
-        return location1.distanceTo(location2);
-    }
-    
-    /**
-     * Format location for display
-     */
-    public static String formatLocation(double latitude, double longitude, String address) {
-        if (address != null && !address.trim().isEmpty() && !address.equals("Unknown location")) {
-            return address;
-        } else {
-            return String.format("%.6f, %.6f", latitude, longitude);
-        }
     }
 }

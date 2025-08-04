@@ -89,7 +89,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_EMAIL = "email";
     private static final String COLUMN_PASSWORD_HASH = "password_hash";
     private static final String COLUMN_SALT = "salt";
-    private static final String COLUMN_ROLE = "role";
     private static final String COLUMN_IS_ACTIVE = "is_active";
     private static final String COLUMN_FAILED_ATTEMPTS = "failed_attempts";
     private static final String COLUMN_LOCKOUT_UNTIL = "lockout_until";
@@ -187,7 +186,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_EMAIL + " TEXT NOT NULL UNIQUE,"
                 + COLUMN_PASSWORD_HASH + " TEXT NOT NULL,"
                 + COLUMN_SALT + " TEXT NOT NULL,"
-                + COLUMN_ROLE + " TEXT DEFAULT 'admin',"
                 + COLUMN_IS_ACTIVE + " INTEGER DEFAULT 1,"
                 + COLUMN_FAILED_ATTEMPTS + " INTEGER DEFAULT 0,"
                 + COLUMN_LOCKOUT_UNTIL + " INTEGER DEFAULT 0,"
@@ -1535,21 +1533,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         android.util.Log.d("DatabaseHelper", "=== END SYNC STATUS ===");
     }
     
-    /**
-     * Force all classes to need sync (for debugging)
-     */
-    public void forceAllClassesToNeedSync() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(KEY_NEEDS_SYNC, 1);
-        values.put(KEY_LAST_MODIFIED, System.currentTimeMillis());
-        
-        int rowsUpdated = db.update(TABLE_YOGA_CLASSES, values, null, null);
-        android.util.Log.d("DatabaseHelper", "Forced " + rowsUpdated + " classes to need sync");
-        
-        db.close();
-    }
-    
     // ===============================
     // USER AUTHENTICATION METHODS
     // ===============================
@@ -1568,7 +1551,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_EMAIL, "admin@yogaapp.com");
             values.put(COLUMN_PASSWORD_HASH, passwordHash);
             values.put(COLUMN_SALT, salt);
-            values.put(COLUMN_ROLE, "admin");
             values.put(COLUMN_IS_ACTIVE, 1);
             values.put(COLUMN_FAILED_ATTEMPTS, 0);
             values.put(COLUMN_LOCKOUT_UNTIL, 0);

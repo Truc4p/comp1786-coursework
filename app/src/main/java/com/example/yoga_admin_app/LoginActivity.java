@@ -208,6 +208,7 @@ public class LoginActivity extends AppCompatActivity {
         // Override back button to prevent going back to previous activity
         // without proper authentication
         moveTaskToBack(true);
+        super.onBackPressed();
     }
     
     /**
