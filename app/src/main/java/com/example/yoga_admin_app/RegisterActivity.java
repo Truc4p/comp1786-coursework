@@ -33,6 +33,7 @@ public class RegisterActivity extends AppCompatActivity {
     
     private EditText editUsername;
     private EditText editEmail;
+    private EditText editAdminKey;
     private EditText editPassword;
     private EditText editConfirmPassword;
     private Button btnRegister;
@@ -58,6 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void initializeViews() {
         editUsername = findViewById(R.id.edit_username);
         editEmail = findViewById(R.id.edit_email);
+        editAdminKey = findViewById(R.id.edit_admin_key);
         editPassword = findViewById(R.id.edit_password);
         editConfirmPassword = findViewById(R.id.edit_confirm_password);
         btnRegister = findViewById(R.id.btn_register);
@@ -81,12 +83,13 @@ public class RegisterActivity extends AppCompatActivity {
     private void performRegistration() {
         final String username = editUsername.getText().toString().trim();
         final String email = editEmail.getText().toString().trim();
+        final String adminKey = editAdminKey.getText().toString().trim();
         final String password = editPassword.getText().toString();
         final String confirmPassword = editConfirmPassword.getText().toString();
         final String role = "admin"; // All users register as admin by default
         
-        // Validate inputs
-        if (!validateInputs(username, email, password, confirmPassword)) {
+        // Validate inputs (including admin key)
+        if (!validateInputs(username, email, adminKey, password, confirmPassword)) {
             return;
         }
         
@@ -147,66 +150,100 @@ public class RegisterActivity extends AppCompatActivity {
         }).start();
     }
     
-    private boolean validateInputs(String username, String email, String password, String confirmPassword) {
+    private boolean validateInputs(String username, String email, String adminKey, String password, String confirmPassword) {
+        boolean isValid = true;
+        EditText firstErrorField = null;
+        StringBuilder errorSummary = new StringBuilder();
+        
+        // Clear all previous errors first
+        editUsername.setError(null);
+        editEmail.setError(null);
+        editAdminKey.setError(null);
+        editPassword.setError(null);
+        editConfirmPassword.setError(null);
+        
         // Username validation
         if (username.isEmpty()) {
             editUsername.setError("Username is required");
-            editUsername.requestFocus();
-            return false;
-        }
-        
-        if (username.length() < 3) {
+            errorSummary.append("• Username is required\n");
+            if (firstErrorField == null) firstErrorField = editUsername;
+            isValid = false;
+        } else if (username.length() < 3) {
             editUsername.setError("Username must be at least 3 characters");
-            editUsername.requestFocus();
-            return false;
-        }
-        
-        if (!username.matches("^[a-zA-Z0-9_]+$")) {
+            errorSummary.append("• Username must be at least 3 characters\n");
+            if (firstErrorField == null) firstErrorField = editUsername;
+            isValid = false;
+        } else if (!username.matches("^[a-zA-Z0-9_]+$")) {
             editUsername.setError("Username can only contain letters, numbers, and underscores");
-            editUsername.requestFocus();
-            return false;
+            errorSummary.append("• Username can only contain letters, numbers, and underscores\n");
+            if (firstErrorField == null) firstErrorField = editUsername;
+            isValid = false;
         }
         
         // Email validation
         if (email.isEmpty()) {
             editEmail.setError("Email is required");
-            editEmail.requestFocus();
-            return false;
+            errorSummary.append("• Email is required\n");
+            if (firstErrorField == null) firstErrorField = editEmail;
+            isValid = false;
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            editEmail.setError("Please enter a valid email address");
+            errorSummary.append("• Please enter a valid email address\n");
+            if (firstErrorField == null) firstErrorField = editEmail;
+            isValid = false;
         }
         
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            editEmail.setError("Please enter a valid email address");
-            editEmail.requestFocus();
-            return false;
+        // Admin Key validation
+        if (adminKey.isEmpty()) {
+            editAdminKey.setError("Admin registration key is required");
+            errorSummary.append("• Admin registration key is required\n");
+            if (firstErrorField == null) firstErrorField = editAdminKey;
+            isValid = false;
+        } else if (!SecurityConfig.validateAdminKey(adminKey)) {
+            editAdminKey.setError("Invalid admin registration key");
+            errorSummary.append("• Invalid admin registration key\n");
+            if (firstErrorField == null) firstErrorField = editAdminKey;
+            isValid = false;
         }
         
         // Password validation
         if (password.isEmpty()) {
             editPassword.setError("Password is required");
-            editPassword.requestFocus();
-            return false;
-        }
-        
-        if (password.length() < 6) {
+            errorSummary.append("• Password is required\n");
+            if (firstErrorField == null) firstErrorField = editPassword;
+            isValid = false;
+        } else if (password.length() < 6) {
             editPassword.setError("Password must be at least 6 characters");
-            editPassword.requestFocus();
-            return false;
+            errorSummary.append("• Password must be at least 6 characters\n");
+            if (firstErrorField == null) firstErrorField = editPassword;
+            isValid = false;
         }
         
         // Password confirmation validation
         if (confirmPassword.isEmpty()) {
             editConfirmPassword.setError("Please confirm your password");
-            editConfirmPassword.requestFocus();
-            return false;
-        }
-        
-        if (!password.equals(confirmPassword)) {
+            errorSummary.append("• Please confirm your password\n");
+            if (firstErrorField == null) firstErrorField = editConfirmPassword;
+            isValid = false;
+        } else if (!password.equals(confirmPassword)) {
             editConfirmPassword.setError("Passwords do not match");
-            editConfirmPassword.requestFocus();
-            return false;
+            errorSummary.append("• Passwords do not match\n");
+            if (firstErrorField == null) firstErrorField = editConfirmPassword;
+            isValid = false;
         }
         
-        return true;
+        // Focus on the first field with an error and show summary if there are errors
+        if (firstErrorField != null) {
+            firstErrorField.requestFocus();
+            
+            // Show a summary of all errors in a toast
+            if (errorSummary.length() > 0) {
+                String summaryMessage = "Please fix the following issues:\n" + errorSummary.toString().trim();
+                Toast.makeText(this, summaryMessage, Toast.LENGTH_LONG).show();
+            }
+        }
+        
+        return isValid;
     }
     
     private User createNewUser(String username, String email, String password, String role) {
@@ -250,6 +287,7 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister.setEnabled(!inProgress);
         editUsername.setEnabled(!inProgress);
         editEmail.setEnabled(!inProgress);
+        editAdminKey.setEnabled(!inProgress);
         editPassword.setEnabled(!inProgress);
         editConfirmPassword.setEnabled(!inProgress);
         
