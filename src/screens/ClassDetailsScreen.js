@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import{ useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { formatTime, formatDate } from '../utils/helpers';
+import { formatTime } from '../utils/helpers';
 import { getYogaClassImage } from '../utils/imageMapping';
 import { useCart } from '../context/CartContext';
 import ApiService from '../services/api';
@@ -47,7 +47,6 @@ const ClassDetailsScreen = ({ route, navigation }) => {
     price,
     level,
     description,
-    image,
   } = yogaClass;
 
   const isFullyBooked = availableSpots <= 0;

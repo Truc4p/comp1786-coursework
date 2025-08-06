@@ -12,7 +12,6 @@ import {
 import YogaClassCard from '../components/YogaClassCard';
 import SearchFilter from '../components/SearchFilter';
 import LoadingSpinner from '../components/LoadingSpinner';
-// import PerformanceMonitor from '../components/PerformanceMonitor';
 import ApiService from '../services/api';
 import { filterClassesBySearchCriteria } from '../utils/helpers';
 import { useCart } from '../context/CartContext';
@@ -156,10 +155,6 @@ const ClassListScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <PerformanceMonitor 
-        componentName="ClassListScreen" 
-        dataLength={filteredClasses.length} 
-      /> */}
       <FlatList
         data={filteredClasses}
         renderItem={renderClass}

@@ -399,43 +399,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
   },
-  autoFillNotice: {
-    backgroundColor: '#E8F5E8',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  autoFillText: {
-    fontSize: 14,
-    color: '#2E7D32',
-    fontWeight: '500',
-  },
-  guestNotice: {
-    backgroundColor: '#FFF3E0',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  guestNoticeText: {
-    fontSize: 14,
-    color: '#E65100',
-    flex: 1,
-    marginRight: 12,
-  },
-  signInLink: {
-    backgroundColor: '#661a72',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  signInLinkText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
   inputGroup: {
     marginBottom: 16,
   },

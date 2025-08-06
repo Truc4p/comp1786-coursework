@@ -7,13 +7,19 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "check-env": "node check-env.js"
+    "check-env": "node check-env.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:unused": "eslint . --rule 'no-unused-vars: error' --rule 'react/no-unused-state: error' --rule 'react-native/no-unused-styles: error'",
+    "find-unused": "unimported",
+    "find-unused-files": "unimported --find-unused-files",
+    "check-deps": "depcheck",
+    "clean-unused": "echo 'Found unused code:' && npm run find-unused && echo '\nFound unused dependencies:' && npm run check-deps"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/native": "^7.1.14",
     "@react-navigation/stack": "^7.4.2",
-    "crypto-js": "^4.2.0",
     "expo": "~53.0.20",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
@@ -23,7 +29,14 @@
     "react-native-screens": "~4.11.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@babel/eslint-parser": "^7.28.0",
+    "@eslint/js": "^9.32.0",
+    "depcheck": "^1.4.7",
+    "eslint": "^9.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-native": "^5.0.0",
+    "unimported": "^1.31.0"
   },
   "private": true
 }
