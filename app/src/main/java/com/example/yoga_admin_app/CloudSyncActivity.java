@@ -66,6 +66,18 @@ public class CloudSyncActivity extends AppCompatActivity {
         btnResetDatabase.setOnClickListener(v -> showResetConfirmation());
         
         btnBack.setOnClickListener(v -> finish());
+        
+        // Add long click for debug full sync
+        btnDownloadSync.setOnLongClickListener(v -> {
+            showDebugSyncConfirmation();
+            return true;
+        });
+        
+        // Add long click for reset sync timestamp
+        btnCheckConnection.setOnLongClickListener(v -> {
+            showResetSyncTimestampConfirmation();
+            return true;
+        });
     }
     
     private void updateNetworkStatus() {
@@ -101,7 +113,7 @@ public class CloudSyncActivity extends AppCompatActivity {
         
         new AlertDialog.Builder(this)
                 .setTitle("Sync with Cloud")
-                .setMessage("This will download data from cloud and sync with local database. Any conflicts will be resolved by using cloud data. Continue?")
+                .setMessage("This will download data from cloud and sync with local database. Any conflicts will be resolved by using cloud data.\n\nTip: Long-press to access debug sync options")
                 .setPositiveButton("Sync", (dialog, which) -> downloadAndSync())
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -144,9 +156,9 @@ public class CloudSyncActivity extends AppCompatActivity {
     }
     
     private void downloadAndSync() {
-        showProgress("Syncing with cloud...");
+        showProgress("Downloading from cloud...");
         
-        cloudSyncService.performTwoWaySync(new CloudSyncService.SyncCallback() {
+        cloudSyncService.performDownloadOnlySync(new CloudSyncService.SyncCallback() {
             @Override
             public void onSuccess(String message) {
                 runOnUiThread(() -> {
@@ -241,6 +253,68 @@ public class CloudSyncActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+    
+    private void showDebugSyncConfirmation() {
+        if (!NetworkUtils.isNetworkAvailable(this)) {
+            Toast.makeText(this, "No internet connection available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        new AlertDialog.Builder(this)
+                .setTitle("Debug Full Sync")
+                .setMessage("This will perform a full sync ignoring timestamps to debug sync issues. Check logcat for detailed information. Continue?")
+                .setPositiveButton("Debug Sync", (dialog, which) -> performDebugSync())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+    
+    private void showResetSyncTimestampConfirmation() {
+        new AlertDialog.Builder(this)
+                .setTitle("Reset Sync Timestamp")
+                .setMessage("This will reset the sync timestamp, causing the next sync to process all cloud data regardless of modification dates. Continue?")
+                .setPositiveButton("Reset", (dialog, which) -> {
+                    cloudSyncService.resetSyncTimestamp();
+                    Toast.makeText(this, "Sync timestamp reset. Next sync will process all cloud data.", Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+    
+    private void performDebugSync() {
+        showProgress("Performing debug sync...");
+        
+        cloudSyncService.performFullSyncDebug(new CloudSyncService.SyncCallback() {
+            @Override
+            public void onSuccess(String message) {
+                runOnUiThread(() -> {
+                    hideProgress();
+                    // Log final count for debugging
+                    int classCount = new DatabaseHelper(CloudSyncActivity.this).getAllYogaClasses().size();
+                    int instanceCount = new DatabaseHelper(CloudSyncActivity.this).getAllClassInstances().size();
+                    String resultMessage = message + "\nFinal class count: " + classCount + "\nFinal instance count: " + instanceCount;
+                    Toast.makeText(CloudSyncActivity.this, resultMessage, Toast.LENGTH_LONG).show();
+                    updateLastSyncTime();
+                });
+            }
+            
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    hideProgress();
+                    Toast.makeText(CloudSyncActivity.this, "Debug sync failed: " + error, Toast.LENGTH_LONG).show();
+                });
+            }
+            
+            @Override
+            public void onProgress(String progress) {
+                runOnUiThread(() -> {
+                    if (progressDialog.isShowing()) {
+                        progressDialog.setMessage(progress);
+                    }
+                });
+            }
+        });
     }
     
     private void showProgress(String message) {

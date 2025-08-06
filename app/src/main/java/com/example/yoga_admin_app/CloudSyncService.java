@@ -273,6 +273,30 @@ public class CloudSyncService {
     }
     
     /**
+     * Download-only sync - download from Firebase without uploading local changes
+     * This is useful when you want to get all data from Firebase without overwriting it
+     */
+    public void performDownloadOnlySync(SyncCallback callback) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            callback.onError("No internet connection available");
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                // Only download and merge changes from cloud, no upload
+                callback.onProgress("Downloading all data from cloud...");
+                downloadAndMergeChanges(callback);
+                callback.onSuccess("Download-only sync completed successfully");
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error in download-only sync", e);
+                callback.onError("Download-only sync failed: " + e.getMessage());
+            }
+        });
+    }
+    
+    /**
      * IMPROVED: Two-way sync - download changes first, then upload
      */
     public void performTwoWaySync(SyncCallback callback) {
@@ -314,46 +338,149 @@ public class CloudSyncService {
     }
     
     /**
+     * DEBUG: Force full sync without timestamp filtering
+     */
+    public void performFullSyncDebug(SyncCallback callback) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            callback.onError("No internet connection available");
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "=== STARTING FULL DEBUG SYNC ===");
+                callback.onProgress("Starting full debug sync...");
+                
+                // Reset last sync timestamp to force processing all cloud data
+                long originalTimestamp = getLastSyncTimestamp();
+                updateLastSyncTimestamp(0);
+                
+                // Download and merge all changes
+                downloadAndMergeChanges(callback);
+                
+                // Restore original timestamp
+                updateLastSyncTimestamp(originalTimestamp);
+                
+                callback.onSuccess("Full debug sync completed successfully");
+                Log.d(TAG, "=== FULL DEBUG SYNC COMPLETED ===");
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error in full debug sync", e);
+                callback.onError("Full debug sync failed: " + e.getMessage());
+            }
+        });
+    }
+    
+    /**
      * Download changes and merge with local data (with conflict resolution)
      */
     private void downloadAndMergeChanges(SyncCallback callback) throws Exception {
         // Get timestamp of last sync
         long lastSyncTime = getLastSyncTimestamp();
+        Log.d(TAG, "=== STARTING DOWNLOAD AND MERGE ===");
+        Log.d(TAG, "Last sync timestamp: " + lastSyncTime + " (" + new java.util.Date(lastSyncTime) + ")");
         
-        // Download all classes from Firebase
+        // Log current local classes before sync
+        List<YogaClass> localClasses = databaseHelper.getAllYogaClasses();
+        Log.d(TAG, "LOCAL CLASSES BEFORE SYNC: " + localClasses.size());
+        for (YogaClass cls : localClasses) {
+            Log.d(TAG, "Local class: ID=" + cls.getId() + ", Type=" + cls.getClassType() + ", LastModified=" + cls.getLastModified());
+        }
+        
+        // STEP 1: Download and process yoga classes
+        callback.onProgress("Downloading yoga classes from cloud...");
+        downloadAndProcessClasses();
+        
+        // STEP 2: Download and process class instances
+        callback.onProgress("Downloading class instances from cloud...");
+        downloadAndProcessClassInstances();
+        
+        // Log final local classes after sync
+        List<YogaClass> finalLocalClasses = databaseHelper.getAllYogaClasses();
+        List<ClassInstance> finalLocalInstances = databaseHelper.getAllClassInstances();
+        Log.d(TAG, "LOCAL CLASSES AFTER SYNC: " + finalLocalClasses.size());
+        Log.d(TAG, "LOCAL INSTANCES AFTER SYNC: " + finalLocalInstances.size());
+        for (YogaClass cls : finalLocalClasses) {
+            Log.d(TAG, "Final local class: ID=" + cls.getId() + ", Type=" + cls.getClassType() + ", LastModified=" + cls.getLastModified());
+        }
+        for (ClassInstance inst : finalLocalInstances) {
+            Log.d(TAG, "Final local instance: ID=" + inst.getId() + ", ClassID=" + inst.getYogaClassId() + ", Date=" + inst.getDate());
+        }
+        
+        // Update last sync timestamp
+        updateLastSyncTimestamp(System.currentTimeMillis());
+        Log.d(TAG, "=== DOWNLOAD AND MERGE COMPLETED ===");
+    }
+    
+    /**
+     * Download and process yoga classes from Firebase
+     */
+    private void downloadAndProcessClasses() throws Exception {
         String cloudData = downloadDataFromFirebase(YOGA_CLASSES_ENDPOINT + ".json");
         
         if (cloudData == null || cloudData.equals("null")) {
-            Log.d(TAG, "No cloud data found");
-            return; // No cloud data
+            Log.d(TAG, "No cloud classes found");
+            return;
         }
         
-        Log.d(TAG, "Cloud data received: " + cloudData.substring(0, Math.min(cloudData.length(), 200)) + "...");
+        Log.d(TAG, "FULL CLOUD CLASSES DATA: " + cloudData);
         
         // Firebase might return either JSONObject or JSONArray depending on data structure
         try {
             // First try to parse as JSONObject (key-value pairs)
             JSONObject cloudClasses = new JSONObject(cloudData);
-            processCloudClassesFromObject(cloudClasses, lastSyncTime);
+            Log.d(TAG, "Parsing classes as JSONObject with " + cloudClasses.length() + " keys");
+            processCloudClassesFromObject(cloudClasses);
         } catch (JSONException e) {
             try {
                 // If that fails, try to parse as JSONArray
                 JSONArray cloudArray = new JSONArray(cloudData);
-                processCloudClassesFromArray(cloudArray, lastSyncTime);
+                Log.d(TAG, "Parsing classes as JSONArray with " + cloudArray.length() + " items");
+                processCloudClassesFromArray(cloudArray);
             } catch (JSONException e2) {
-                Log.e(TAG, "Could not parse cloud data as JSONObject or JSONArray: " + cloudData);
-                throw new Exception("Invalid cloud data format: " + e2.getMessage());
+                Log.e(TAG, "Could not parse cloud classes data as JSONObject or JSONArray: " + cloudData);
+                throw new Exception("Invalid cloud classes data format: " + e2.getMessage());
             }
         }
+    }
+    
+    /**
+     * Download and process class instances from Firebase
+     */
+    private void downloadAndProcessClassInstances() throws Exception {
+        String cloudData = downloadDataFromFirebase(CLASS_INSTANCES_ENDPOINT + ".json");
         
-        // Update last sync timestamp
-        updateLastSyncTimestamp(System.currentTimeMillis());
+        if (cloudData == null || cloudData.equals("null")) {
+            Log.d(TAG, "No cloud class instances found");
+            return;
+        }
+        
+        Log.d(TAG, "FULL CLOUD INSTANCES DATA: " + cloudData);
+        
+        // Firebase might return either JSONObject or JSONArray depending on data structure
+        try {
+            // First try to parse as JSONObject (key-value pairs)
+            JSONObject cloudInstances = new JSONObject(cloudData);
+            Log.d(TAG, "Parsing instances as JSONObject with " + cloudInstances.length() + " keys");
+            processCloudInstancesFromObject(cloudInstances);
+        } catch (JSONException e) {
+            try {
+                // If that fails, try to parse as JSONArray
+                JSONArray cloudArray = new JSONArray(cloudData);
+                Log.d(TAG, "Parsing instances as JSONArray with " + cloudArray.length() + " items");
+                processCloudInstancesFromArray(cloudArray);
+            } catch (JSONException e2) {
+                Log.e(TAG, "Could not parse cloud instances data as JSONObject or JSONArray: " + cloudData);
+                Log.d(TAG, "Instances parsing failed, continuing without instances");
+                // Don't throw exception for instances, just log and continue
+            }
+        }
     }
     
     /**
      * Process cloud classes when they come as a JSONObject (key-value pairs)
      */
-    private void processCloudClassesFromObject(JSONObject cloudClasses, long lastSyncTime) throws Exception {
+    private void processCloudClassesFromObject(JSONObject cloudClasses) throws Exception {
         // Process each class from cloud
         Iterator<String> keys = cloudClasses.keys();
         while (keys.hasNext()) {
@@ -361,18 +488,15 @@ public class CloudSyncService {
             JSONObject cloudClass = cloudClasses.getJSONObject(classId);
             long cloudTimestamp = cloudClass.optLong("lastModified", 0);
             
-            // Only process if cloud version is newer than our last sync
-            if (cloudTimestamp > lastSyncTime) {
-                long classIdLong = Long.parseLong(classId);
-                processIndividualCloudClass(cloudClass, classIdLong, cloudTimestamp);
-            }
+            long classIdLong = Long.parseLong(classId);
+            processIndividualCloudClass(cloudClass, classIdLong, cloudTimestamp);
         }
     }
     
     /**
      * Process cloud classes when they come as a JSONArray
      */
-    private void processCloudClassesFromArray(JSONArray cloudArray, long lastSyncTime) throws Exception {
+    private void processCloudClassesFromArray(JSONArray cloudArray) throws Exception {
         for (int i = 0; i < cloudArray.length(); i++) {
             Object item = cloudArray.get(i);
             
@@ -385,15 +509,12 @@ public class CloudSyncService {
                 JSONObject cloudClass = (JSONObject) item;
                 long cloudTimestamp = cloudClass.optLong("lastModified", 0);
                 
-                // Only process if cloud version is newer than our last sync
-                if (cloudTimestamp > lastSyncTime) {
-                    // Try to get the actual ID from the JSON, don't use array index
-                    long classIdLong = cloudClass.optLong("id", -1);
-                    if (classIdLong != -1) {
-                        processIndividualCloudClass(cloudClass, classIdLong, cloudTimestamp);
-                    } else {
-                        Log.w(TAG, "Cloud class at index " + i + " has no ID, skipping");
-                    }
+                // Try to get the actual ID from the JSON, don't use array index
+                long classIdLong = cloudClass.optLong("id", -1);
+                if (classIdLong != -1) {
+                    processIndividualCloudClass(cloudClass, classIdLong, cloudTimestamp);
+                } else {
+                    Log.w(TAG, "Cloud class at index " + i + " has no ID, skipping");
                 }
             }
         }
@@ -461,6 +582,135 @@ public class CloudSyncService {
             Log.e(TAG, "Error deleting class " + cloudId + " from cloud", e);
             return false;
         }
+    }
+    
+    /**
+     * Process cloud class instances when they come as a JSONObject (key-value pairs)
+     */
+    private void processCloudInstancesFromObject(JSONObject cloudInstances) throws Exception {
+        Log.d(TAG, "=== PROCESSING CLOUD INSTANCES FROM OBJECT ===");
+        Log.d(TAG, "Cloud has " + cloudInstances.length() + " instance entries");
+        
+        int processedCount = 0;
+        
+        // Process each instance from cloud
+        Iterator<String> keys = cloudInstances.keys();
+        while (keys.hasNext()) {
+            String instanceId = keys.next();
+            Object instanceValue = cloudInstances.get(instanceId);
+            
+            // Skip null entries
+            if (instanceValue == null || instanceValue == JSONObject.NULL) {
+                Log.d(TAG, "Skipping null instance entry for key: " + instanceId);
+                continue;
+            }
+            
+            if (!(instanceValue instanceof JSONObject)) {
+                Log.w(TAG, "Expected JSONObject for instance " + instanceId + " but got " + instanceValue.getClass().getSimpleName());
+                continue;
+            }
+            
+            JSONObject cloudInstance = (JSONObject) instanceValue;
+            long cloudTimestamp = cloudInstance.optLong("lastModified", 0);
+            long yogaClassId = cloudInstance.optLong("yogaClassId", -1);
+            
+            Log.d(TAG, "Cloud instance " + instanceId + ": timestamp=" + cloudTimestamp + 
+                      " (" + new java.util.Date(cloudTimestamp) + "), yogaClassId=" + yogaClassId);
+            
+            Log.d(TAG, "Processing cloud instance " + instanceId);
+            long instanceIdLong = Long.parseLong(instanceId);
+            processIndividualCloudInstance(cloudInstance, instanceIdLong, cloudTimestamp);
+            processedCount++;
+        }
+        
+        Log.d(TAG, "Instance processing summary: " + processedCount + " processed");
+        Log.d(TAG, "=== FINISHED PROCESSING CLOUD INSTANCES FROM OBJECT ===");
+    }
+    
+    /**
+     * Process cloud class instances when they come as a JSONArray
+     */
+    private void processCloudInstancesFromArray(JSONArray cloudArray) throws Exception {
+        Log.d(TAG, "=== PROCESSING CLOUD INSTANCES FROM ARRAY ===");
+        Log.d(TAG, "Cloud array has " + cloudArray.length() + " instance entries");
+        
+        int processedCount = 0;
+        int nullCount = 0;
+        
+        for (int i = 0; i < cloudArray.length(); i++) {
+            Object item = cloudArray.get(i);
+            
+            // Skip null entries in the array
+            if (item == null || item == JSONObject.NULL) {
+                Log.d(TAG, "Skipping null instance entry at index " + i);
+                nullCount++;
+                continue;
+            }
+            
+            if (item instanceof JSONObject) {
+                JSONObject cloudInstance = (JSONObject) item;
+                long instanceIdLong = cloudInstance.optLong("id", -1);
+                long cloudTimestamp = cloudInstance.optLong("lastModified", 0);
+                long yogaClassId = cloudInstance.optLong("yogaClassId", -1);
+                
+                Log.d(TAG, "Array index " + i + ": ID=" + instanceIdLong + ", YogaClassID=" + yogaClassId + 
+                          ", Timestamp=" + cloudTimestamp + " (" + new java.util.Date(cloudTimestamp) + ")");
+                
+                if (instanceIdLong != -1) {
+                    Log.d(TAG, "Processing cloud instance " + instanceIdLong);
+                    processIndividualCloudInstance(cloudInstance, instanceIdLong, cloudTimestamp);
+                    processedCount++;
+                } else {
+                    Log.w(TAG, "Cloud instance at index " + i + " has no ID, skipping");
+                }
+            } else {
+                Log.w(TAG, "Array index " + i + " is not a JSONObject: " + item.getClass().getSimpleName());
+            }
+        }
+        
+        Log.d(TAG, "Instance array processing summary: " + processedCount + " processed, " + nullCount + " null entries");
+        Log.d(TAG, "=== FINISHED PROCESSING CLOUD INSTANCES FROM ARRAY ===");
+    }
+    
+    /**
+     * Process an individual cloud class instance record
+     */
+    private void processIndividualCloudInstance(JSONObject cloudInstance, long instanceIdLong, long cloudTimestamp) throws Exception {
+        Log.d(TAG, "=== PROCESSING INDIVIDUAL CLOUD INSTANCE ===");
+        Log.d(TAG, "Cloud instance ID: " + instanceIdLong);
+        Log.d(TAG, "Cloud instance data: " + cloudInstance.toString());
+        
+        ClassInstance localInstance = databaseHelper.getClassInstance(instanceIdLong);
+        
+        if (localInstance == null) {
+            Log.d(TAG, "No local instance found with ID " + instanceIdLong);
+            
+            // Create new instance from cloud data
+            Log.d(TAG, "Creating new local instance from cloud instance " + instanceIdLong);
+            ClassInstance newInstance = createInstanceFromJson(cloudInstance);
+            newInstance.setId(instanceIdLong);
+            long insertedId = databaseHelper.addClassInstance(newInstance);
+            Log.d(TAG, "New instance inserted with local ID: " + insertedId);
+            
+        } else {
+            Log.d(TAG, "Found local instance with ID " + instanceIdLong + ", lastModified=" + localInstance.getLastModified());
+            
+            if (cloudTimestamp > localInstance.getLastModified()) {
+                // Cloud version is newer - update local
+                Log.d(TAG, "Cloud version is newer, updating local instance " + instanceIdLong);
+                ClassInstance updatedInstance = createInstanceFromJson(cloudInstance);
+                updatedInstance.setId(instanceIdLong);
+                databaseHelper.updateClassInstance(updatedInstance);
+                
+            } else if (localInstance.getLastModified() > cloudTimestamp) {
+                // Local version is newer - will be uploaded in next phase
+                Log.d(TAG, "Local instance " + instanceIdLong + " is newer, will upload");
+            } else {
+                Log.d(TAG, "Instance " + instanceIdLong + " timestamps are equal, no action needed");
+            }
+        }
+        
+        Log.d(TAG, "=== FINISHED PROCESSING INDIVIDUAL CLOUD INSTANCE ===");
     }
     
     /**
@@ -593,6 +843,14 @@ public class CloudSyncService {
     }
     
     /**
+     * Reset sync timestamp to force full re-sync
+     */
+    public void resetSyncTimestamp() {
+        updateLastSyncTimestamp(0);
+        Log.d(TAG, "Sync timestamp reset to 0 - next sync will process all cloud data");
+    }
+    
+    /**
      * Find a local class that matches the cloud class by content (not just ID)
      * This helps prevent duplicates when the same class has different IDs locally vs cloud
      */
@@ -665,6 +923,17 @@ public class CloudSyncService {
         instance.setLastModified(json.optLong("lastModified", System.currentTimeMillis()));
         instance.setNeedsSync(false); // From cloud, so doesn't need sync
         return instance;
+    }
+    
+    /**
+     * Create ClassInstance object from JSON (extracting yogaClassId from JSON)
+     */
+    private ClassInstance createInstanceFromJson(JSONObject json) throws JSONException {
+        long yogaClassId = json.optLong("yogaClassId", -1);
+        if (yogaClassId == -1) {
+            throw new JSONException("Missing yogaClassId in class instance JSON");
+        }
+        return createInstanceFromJson(json, yogaClassId);
     }
     
     /**
