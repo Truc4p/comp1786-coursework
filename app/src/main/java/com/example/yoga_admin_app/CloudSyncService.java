@@ -13,8 +13,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,7 +32,6 @@ public class CloudSyncService {
     
     public CloudSyncService(Context context) {
         this.context = context;
-        this.databaseHelper = new DatabaseHelper(context);
         this.executorService = Executors.newSingleThreadExecutor();
         this.baseUrl = FirebaseConfig.getFirebaseDatabaseUrl(context);
         
@@ -43,10 +44,163 @@ public class CloudSyncService {
         }
     }
     
+    /**
+     * Set the DatabaseHelper instance to avoid circular dependency
+     */
+    public void setDatabaseHelper(DatabaseHelper databaseHelper) {
+        this.databaseHelper = databaseHelper;
+    }
+    
+    /**
+     * Get DatabaseHelper instance, creating one if needed
+     */
+    private DatabaseHelper getDatabaseHelper() {
+        if (databaseHelper == null) {
+            databaseHelper = new DatabaseHelper(context);
+        }
+        return databaseHelper;
+    }
+    
     public interface SyncCallback {
         void onSuccess(String message);
         void onError(String error);
         void onProgress(String progress);
+    }
+    
+    // ===== AUTOMATIC SYNC METHODS =====
+    
+    /**
+     * Automatically sync a single yoga class to Firebase when it's added/updated locally
+     */
+    public void autoSyncYogaClass(YogaClass yogaClass) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            Log.d(TAG, "No network available for auto-sync of class " + yogaClass.getId());
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "Auto-syncing yoga class " + yogaClass.getId() + " to Firebase");
+                boolean success = uploadSingleClass(yogaClass);
+                if (success) {
+                    Log.d(TAG, "Auto-sync successful for class " + yogaClass.getId());
+                } else {
+                    Log.e(TAG, "Auto-sync failed for class " + yogaClass.getId());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Auto-sync error for class " + yogaClass.getId(), e);
+            }
+        });
+    }
+    
+    /**
+     * Automatically sync a single class instance to Firebase when it's added/updated locally
+     */
+    public void autoSyncClassInstance(ClassInstance instance) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            Log.d(TAG, "No network available for auto-sync of instance " + instance.getId());
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "Auto-syncing class instance " + instance.getId() + " to Firebase");
+                boolean success = uploadSingleClassInstance(instance);
+                if (success) {
+                    Log.d(TAG, "Auto-sync successful for instance " + instance.getId());
+                } else {
+                    Log.e(TAG, "Auto-sync failed for instance " + instance.getId());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Auto-sync error for instance " + instance.getId(), e);
+            }
+        });
+    }
+    
+    /**
+     * Automatically delete a yoga class from Firebase when it's deleted locally
+     */
+    public void autoDeleteYogaClass(long classId) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            Log.d(TAG, "No network available for auto-delete of class " + classId);
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "Auto-deleting yoga class " + classId + " from Firebase");
+                boolean success = deleteClassFromCloud(classId);
+                if (success) {
+                    Log.d(TAG, "Auto-delete successful for class " + classId);
+                } else {
+                    Log.e(TAG, "Auto-delete failed for class " + classId);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Auto-delete error for class " + classId, e);
+            }
+        });
+    }
+    
+    /**
+     * Automatically delete a class instance from Firebase when it's deleted locally
+     */
+    public void autoDeleteClassInstance(long instanceId) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            Log.d(TAG, "No network available for auto-delete of instance " + instanceId);
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "Auto-deleting class instance " + instanceId + " from Firebase");
+                boolean success = deleteInstanceFromCloud(instanceId);
+                if (success) {
+                    Log.d(TAG, "Auto-delete successful for instance " + instanceId);
+                } else {
+                    Log.e(TAG, "Auto-delete failed for instance " + instanceId);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Auto-delete error for instance " + instanceId, e);
+            }
+        });
+    }
+    
+    /**
+     * Perform initial download sync when app starts to get latest Firebase data
+     */
+    public void performInitialSync() {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            Log.d(TAG, "No network available for initial sync");
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "Performing initial sync from Firebase...");
+                downloadAndMergeChanges(new SyncCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        Log.d(TAG, "Initial sync completed successfully");
+                        // Log final counts for debugging
+                        List<YogaClass> classes = getDatabaseHelper().getAllYogaClasses();
+                        List<ClassInstance> instances = getDatabaseHelper().getAllClassInstances();
+                        Log.d(TAG, "After initial sync: " + classes.size() + " classes, " + instances.size() + " instances");
+                    }
+                    
+                    @Override
+                    public void onError(String error) {
+                        Log.e(TAG, "Initial sync failed: " + error);
+                    }
+                    
+                    @Override
+                    public void onProgress(String progress) {
+                        Log.d(TAG, "Initial sync progress: " + progress);
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Error in initial sync", e);
+            }
+        });
     }
     
     /**
@@ -63,13 +217,13 @@ public class CloudSyncService {
                 callback.onProgress("Checking for changes to upload...");
                 
                 // Get only classes that need syncing
-                List<YogaClass> changedClasses = databaseHelper.getClassesNeedingSync();
+                List<YogaClass> changedClasses = getDatabaseHelper().getClassesNeedingSync();
                 
                 // Get class instances that need syncing
-                List<ClassInstance> changedInstances = databaseHelper.getInstancesNeedingSync();
+                List<ClassInstance> changedInstances = getDatabaseHelper().getInstancesNeedingSync();
                 
                 // Get pending deletions that need to be synced
-                List<PendingDeletion> pendingDeletions = databaseHelper.getPendingDeletions();
+                List<PendingDeletion> pendingDeletions = getDatabaseHelper().getPendingDeletions();
                 
                 // Enhanced logging for debugging
                 Log.d(TAG, "Found " + changedClasses.size() + " classes needing sync");
@@ -86,11 +240,11 @@ public class CloudSyncService {
                 
                 if (changedClasses.isEmpty() && changedInstances.isEmpty() && pendingDeletions.isEmpty()) {
                     // Let's also check total classes in database for debugging
-                    List<YogaClass> allClasses = databaseHelper.getAllYogaClasses();
+                    List<YogaClass> allClasses = getDatabaseHelper().getAllYogaClasses();
                     Log.d(TAG, "Total classes in database: " + allClasses.size());
                     
                     callback.onSuccess("No changes to upload. Total classes: " + allClasses.size() + ", Total instances: " + 
-                                     databaseHelper.getAllClassInstances().size());
+                                     getDatabaseHelper().getAllClassInstances().size());
                     return;
                 }
                 
@@ -109,7 +263,7 @@ public class CloudSyncService {
                         if ("class".equals(deletion.getItemType())) {
                             boolean success = deleteClassFromCloudSync(deletion.getCloudId());
                             if (success) {
-                                databaseHelper.removePendingDeletion(deletion.getId());
+                                getDatabaseHelper().removePendingDeletion(deletion.getId());
                                 deletedCount++;
                                 callback.onProgress("Deleted class from cloud " + deletedCount + "/" + pendingDeletions.size());
                             } else {
@@ -135,7 +289,7 @@ public class CloudSyncService {
                             uploadClassInstances(yogaClass.getId());
                             
                             // Mark as synced in local database
-                            databaseHelper.markClassAsSynced(yogaClass.getId());
+                            getDatabaseHelper().markClassAsSynced(yogaClass.getId());
                             successCount++;
                             
                             callback.onProgress("Uploaded class " + successCount + "/" + changedClasses.size());
@@ -156,7 +310,7 @@ public class CloudSyncService {
                         boolean success = uploadSingleClassInstance(instance);
                         
                         if (success) {
-                            databaseHelper.markInstanceAsSynced(instance.getId());
+                            getDatabaseHelper().markInstanceAsSynced(instance.getId());
                             instanceSuccessCount++;
                             
                             callback.onProgress("Uploaded instance " + instanceSuccessCount + "/" + changedInstances.size());
@@ -228,7 +382,7 @@ public class CloudSyncService {
      */
     private boolean uploadClassInstances(long yogaClassId) {
         try {
-            List<ClassInstance> instances = databaseHelper.getClassInstancesByYogaClassId(yogaClassId);
+            List<ClassInstance> instances = getDatabaseHelper().getClassInstancesByYogaClassId(yogaClassId);
             boolean allSuccess = true;
             
             for (ClassInstance instance : instances) {
@@ -239,7 +393,7 @@ public class CloudSyncService {
                     String response = sendDataToFirebase(instanceEndpoint, instanceData, "PUT");
                     
                     if (response != null) {
-                        databaseHelper.markInstanceAsSynced(instance.getId());
+                        getDatabaseHelper().markInstanceAsSynced(instance.getId());
                     } else {
                         allSuccess = false;
                     }
@@ -380,8 +534,11 @@ public class CloudSyncService {
         Log.d(TAG, "=== STARTING DOWNLOAD AND MERGE ===");
         Log.d(TAG, "Last sync timestamp: " + lastSyncTime + " (" + new java.util.Date(lastSyncTime) + ")");
         
+        // Create a map to track Firebase class ID to local class ID mappings
+        Map<Long, Long> cloudToLocalIdMapping = new HashMap<>();
+        
         // Log current local classes before sync
-        List<YogaClass> localClasses = databaseHelper.getAllYogaClasses();
+        List<YogaClass> localClasses = getDatabaseHelper().getAllYogaClasses();
         Log.d(TAG, "LOCAL CLASSES BEFORE SYNC: " + localClasses.size());
         for (YogaClass cls : localClasses) {
             Log.d(TAG, "Local class: ID=" + cls.getId() + ", Type=" + cls.getClassType() + ", LastModified=" + cls.getLastModified());
@@ -389,15 +546,21 @@ public class CloudSyncService {
         
         // STEP 1: Download and process yoga classes
         callback.onProgress("Downloading yoga classes from cloud...");
-        downloadAndProcessClasses();
+        downloadAndProcessClasses(cloudToLocalIdMapping);
         
-        // STEP 2: Download and process class instances
+        // STEP 2: Download and process class instances (with ID mapping)
         callback.onProgress("Downloading class instances from cloud...");
-        downloadAndProcessClassInstances();
+        downloadAndProcessClassInstances(cloudToLocalIdMapping);
+        
+        // STEP 3: Update Firebase instances with correct local IDs if needed
+        if (!cloudToLocalIdMapping.isEmpty()) {
+            callback.onProgress("Updating Firebase instance references...");
+            updateFirebaseInstancesWithMappedIds(cloudToLocalIdMapping);
+        }
         
         // Log final local classes after sync
-        List<YogaClass> finalLocalClasses = databaseHelper.getAllYogaClasses();
-        List<ClassInstance> finalLocalInstances = databaseHelper.getAllClassInstances();
+        List<YogaClass> finalLocalClasses = getDatabaseHelper().getAllYogaClasses();
+        List<ClassInstance> finalLocalInstances = getDatabaseHelper().getAllClassInstances();
         Log.d(TAG, "LOCAL CLASSES AFTER SYNC: " + finalLocalClasses.size());
         Log.d(TAG, "LOCAL INSTANCES AFTER SYNC: " + finalLocalInstances.size());
         for (YogaClass cls : finalLocalClasses) {
@@ -415,7 +578,7 @@ public class CloudSyncService {
     /**
      * Download and process yoga classes from Firebase
      */
-    private void downloadAndProcessClasses() throws Exception {
+    private void downloadAndProcessClasses(Map<Long, Long> cloudToLocalIdMapping) throws Exception {
         String cloudData = downloadDataFromFirebase(YOGA_CLASSES_ENDPOINT + ".json");
         
         if (cloudData == null || cloudData.equals("null")) {
@@ -430,13 +593,13 @@ public class CloudSyncService {
             // First try to parse as JSONObject (key-value pairs)
             JSONObject cloudClasses = new JSONObject(cloudData);
             Log.d(TAG, "Parsing classes as JSONObject with " + cloudClasses.length() + " keys");
-            processCloudClassesFromObject(cloudClasses);
+            processCloudClassesFromObject(cloudClasses, cloudToLocalIdMapping);
         } catch (JSONException e) {
             try {
                 // If that fails, try to parse as JSONArray
                 JSONArray cloudArray = new JSONArray(cloudData);
                 Log.d(TAG, "Parsing classes as JSONArray with " + cloudArray.length() + " items");
-                processCloudClassesFromArray(cloudArray);
+                processCloudClassesFromArray(cloudArray, cloudToLocalIdMapping);
             } catch (JSONException e2) {
                 Log.e(TAG, "Could not parse cloud classes data as JSONObject or JSONArray: " + cloudData);
                 throw new Exception("Invalid cloud classes data format: " + e2.getMessage());
@@ -447,7 +610,7 @@ public class CloudSyncService {
     /**
      * Download and process class instances from Firebase
      */
-    private void downloadAndProcessClassInstances() throws Exception {
+    private void downloadAndProcessClassInstances(Map<Long, Long> cloudToLocalIdMapping) throws Exception {
         String cloudData = downloadDataFromFirebase(CLASS_INSTANCES_ENDPOINT + ".json");
         
         if (cloudData == null || cloudData.equals("null")) {
@@ -462,13 +625,13 @@ public class CloudSyncService {
             // First try to parse as JSONObject (key-value pairs)
             JSONObject cloudInstances = new JSONObject(cloudData);
             Log.d(TAG, "Parsing instances as JSONObject with " + cloudInstances.length() + " keys");
-            processCloudInstancesFromObject(cloudInstances);
+            processCloudInstancesFromObject(cloudInstances, cloudToLocalIdMapping);
         } catch (JSONException e) {
             try {
                 // If that fails, try to parse as JSONArray
                 JSONArray cloudArray = new JSONArray(cloudData);
                 Log.d(TAG, "Parsing instances as JSONArray with " + cloudArray.length() + " items");
-                processCloudInstancesFromArray(cloudArray);
+                processCloudInstancesFromArray(cloudArray, cloudToLocalIdMapping);
             } catch (JSONException e2) {
                 Log.e(TAG, "Could not parse cloud instances data as JSONObject or JSONArray: " + cloudData);
                 Log.d(TAG, "Instances parsing failed, continuing without instances");
@@ -480,7 +643,7 @@ public class CloudSyncService {
     /**
      * Process cloud classes when they come as a JSONObject (key-value pairs)
      */
-    private void processCloudClassesFromObject(JSONObject cloudClasses) throws Exception {
+    private void processCloudClassesFromObject(JSONObject cloudClasses, Map<Long, Long> cloudToLocalIdMapping) throws Exception {
         // Process each class from cloud
         Iterator<String> keys = cloudClasses.keys();
         while (keys.hasNext()) {
@@ -489,14 +652,14 @@ public class CloudSyncService {
             long cloudTimestamp = cloudClass.optLong("lastModified", 0);
             
             long classIdLong = Long.parseLong(classId);
-            processIndividualCloudClass(cloudClass, classIdLong, cloudTimestamp);
+            processIndividualCloudClass(cloudClass, classIdLong, cloudTimestamp, cloudToLocalIdMapping);
         }
     }
     
     /**
      * Process cloud classes when they come as a JSONArray
      */
-    private void processCloudClassesFromArray(JSONArray cloudArray) throws Exception {
+    private void processCloudClassesFromArray(JSONArray cloudArray, Map<Long, Long> cloudToLocalIdMapping) throws Exception {
         for (int i = 0; i < cloudArray.length(); i++) {
             Object item = cloudArray.get(i);
             
@@ -512,7 +675,7 @@ public class CloudSyncService {
                 // Try to get the actual ID from the JSON, don't use array index
                 long classIdLong = cloudClass.optLong("id", -1);
                 if (classIdLong != -1) {
-                    processIndividualCloudClass(cloudClass, classIdLong, cloudTimestamp);
+                    processIndividualCloudClass(cloudClass, classIdLong, cloudTimestamp, cloudToLocalIdMapping);
                 } else {
                     Log.w(TAG, "Cloud class at index " + i + " has no ID, skipping");
                 }
@@ -523,8 +686,8 @@ public class CloudSyncService {
     /**
      * Process an individual cloud class record
      */
-    private void processIndividualCloudClass(JSONObject cloudClass, long classIdLong, long cloudTimestamp) throws Exception {
-        YogaClass localClass = databaseHelper.getYogaClass(classIdLong);
+    private void processIndividualCloudClass(JSONObject cloudClass, long classIdLong, long cloudTimestamp, Map<Long, Long> cloudToLocalIdMapping) throws Exception {
+        YogaClass localClass = getDatabaseHelper().getYogaClass(classIdLong);
         
         if (localClass == null) {
             // Check if this might be a class we uploaded but don't recognize
@@ -534,23 +697,31 @@ public class CloudSyncService {
             if (potentialMatch != null) {
                 // This is likely a class we uploaded - update it instead of creating duplicate
                 Log.d(TAG, "Found matching local class " + potentialMatch.getId() + " for cloud class " + classIdLong);
+                
+                // Record the ID mapping: Firebase ID -> Local ID
+                cloudToLocalIdMapping.put(classIdLong, potentialMatch.getId());
+                Log.d(TAG, "ID mapping: Firebase class " + classIdLong + " -> Local class " + potentialMatch.getId());
+                
                 if (cloudTimestamp > potentialMatch.getLastModified()) {
                     YogaClass updatedClass = createYogaClassFromJson(cloudClass);
                     updatedClass.setId(potentialMatch.getId()); // Keep local ID
-                    databaseHelper.updateYogaClass(updatedClass);
+                    getDatabaseHelper().updateYogaClass(updatedClass);
                 }
             } else {
                 // Truly new class from cloud - add it
                 YogaClass newClass = createYogaClassFromJson(cloudClass);
                 newClass.setId(classIdLong);
-                databaseHelper.addYogaClass(newClass);
+                getDatabaseHelper().addYogaClass(newClass);
+                
+                // No mapping needed as the IDs match
+                Log.d(TAG, "Added new class from cloud with ID " + classIdLong);
             }
             
         } else if (cloudTimestamp > localClass.getLastModified()) {
             // Cloud version is newer - update local
             YogaClass updatedClass = createYogaClassFromJson(cloudClass);
             updatedClass.setId(classIdLong);
-            databaseHelper.updateYogaClass(updatedClass);
+            getDatabaseHelper().updateYogaClass(updatedClass);
             
         } else if (localClass.getLastModified() > cloudTimestamp) {
             // Local version is newer - will be uploaded in next phase
@@ -587,11 +758,13 @@ public class CloudSyncService {
     /**
      * Process cloud class instances when they come as a JSONObject (key-value pairs)
      */
-    private void processCloudInstancesFromObject(JSONObject cloudInstances) throws Exception {
+    private void processCloudInstancesFromObject(JSONObject cloudInstances, Map<Long, Long> cloudToLocalIdMapping) throws Exception {
         Log.d(TAG, "=== PROCESSING CLOUD INSTANCES FROM OBJECT ===");
         Log.d(TAG, "Cloud has " + cloudInstances.length() + " instance entries");
+        Log.d(TAG, "Available ID mappings: " + cloudToLocalIdMapping.size());
         
         int processedCount = 0;
+        int mappedCount = 0;
         
         // Process each instance from cloud
         Iterator<String> keys = cloudInstances.keys();
@@ -617,25 +790,31 @@ public class CloudSyncService {
             Log.d(TAG, "Cloud instance " + instanceId + ": timestamp=" + cloudTimestamp + 
                       " (" + new java.util.Date(cloudTimestamp) + "), yogaClassId=" + yogaClassId);
             
-            Log.d(TAG, "Processing cloud instance " + instanceId);
-            long instanceIdLong = Long.parseLong(instanceId);
-            processIndividualCloudInstance(cloudInstance, instanceIdLong, cloudTimestamp);
-            processedCount++;
+            try {
+                long instanceIdLong = Long.parseLong(instanceId);
+                boolean wasMapped = processIndividualCloudInstance(cloudInstance, instanceIdLong, cloudTimestamp, cloudToLocalIdMapping);
+                processedCount++;
+                if (wasMapped) mappedCount++;
+            } catch (NumberFormatException e) {
+                Log.w(TAG, "Invalid instance ID format: " + instanceId);
+            }
         }
         
-        Log.d(TAG, "Instance processing summary: " + processedCount + " processed");
+        Log.d(TAG, "Instance object processing summary: " + processedCount + " processed, " + mappedCount + " mapped");
         Log.d(TAG, "=== FINISHED PROCESSING CLOUD INSTANCES FROM OBJECT ===");
     }
     
     /**
      * Process cloud class instances when they come as a JSONArray
      */
-    private void processCloudInstancesFromArray(JSONArray cloudArray) throws Exception {
+    private void processCloudInstancesFromArray(JSONArray cloudArray, Map<Long, Long> cloudToLocalIdMapping) throws Exception {
         Log.d(TAG, "=== PROCESSING CLOUD INSTANCES FROM ARRAY ===");
         Log.d(TAG, "Cloud array has " + cloudArray.length() + " instance entries");
+        Log.d(TAG, "Available ID mappings: " + cloudToLocalIdMapping.size());
         
         int processedCount = 0;
         int nullCount = 0;
+        int mappedCount = 0;
         
         for (int i = 0; i < cloudArray.length(); i++) {
             Object item = cloudArray.get(i);
@@ -658,8 +837,9 @@ public class CloudSyncService {
                 
                 if (instanceIdLong != -1) {
                     Log.d(TAG, "Processing cloud instance " + instanceIdLong);
-                    processIndividualCloudInstance(cloudInstance, instanceIdLong, cloudTimestamp);
+                    boolean wasMapped = processIndividualCloudInstance(cloudInstance, instanceIdLong, cloudTimestamp, cloudToLocalIdMapping);
                     processedCount++;
+                    if (wasMapped) mappedCount++;
                 } else {
                     Log.w(TAG, "Cloud instance at index " + i + " has no ID, skipping");
                 }
@@ -668,29 +848,53 @@ public class CloudSyncService {
             }
         }
         
-        Log.d(TAG, "Instance array processing summary: " + processedCount + " processed, " + nullCount + " null entries");
+        Log.d(TAG, "Instance array processing summary: " + processedCount + " processed, " + mappedCount + " mapped, " + nullCount + " null entries");
         Log.d(TAG, "=== FINISHED PROCESSING CLOUD INSTANCES FROM ARRAY ===");
     }
     
     /**
      * Process an individual cloud class instance record
      */
-    private void processIndividualCloudInstance(JSONObject cloudInstance, long instanceIdLong, long cloudTimestamp) throws Exception {
+    private boolean processIndividualCloudInstance(JSONObject cloudInstance, long instanceIdLong, long cloudTimestamp, Map<Long, Long> cloudToLocalIdMapping) throws Exception {
         Log.d(TAG, "=== PROCESSING INDIVIDUAL CLOUD INSTANCE ===");
         Log.d(TAG, "Cloud instance ID: " + instanceIdLong);
         Log.d(TAG, "Cloud instance data: " + cloudInstance.toString());
         
-        ClassInstance localInstance = databaseHelper.getClassInstance(instanceIdLong);
+        ClassInstance localInstance = getDatabaseHelper().getClassInstance(instanceIdLong);
         
         if (localInstance == null) {
             Log.d(TAG, "No local instance found with ID " + instanceIdLong);
             
-            // Create new instance from cloud data
-            Log.d(TAG, "Creating new local instance from cloud instance " + instanceIdLong);
+            // Get yogaClassId from cloud instance
+            long originalYogaClassId = cloudInstance.optLong("yogaClassId", -1);
+            if (originalYogaClassId == -1) {
+                Log.w(TAG, "Cloud instance " + instanceIdLong + " has no yogaClassId, skipping");
+                return false;
+            }
+            
+            // Check if we need to map the class ID
+            long actualYogaClassId = originalYogaClassId;
+            if (cloudToLocalIdMapping.containsKey(originalYogaClassId)) {
+                actualYogaClassId = cloudToLocalIdMapping.get(originalYogaClassId);
+                Log.d(TAG, "Mapping class ID: " + originalYogaClassId + " -> " + actualYogaClassId);
+            }
+            
+            // Check if the referenced yoga class exists locally
+            YogaClass referencedClass = getDatabaseHelper().getYogaClass(actualYogaClassId);
+            if (referencedClass == null) {
+                Log.w(TAG, "Cloud instance " + instanceIdLong + " references yoga class " + actualYogaClassId + " which doesn't exist locally, skipping");
+                return false;
+            }
+            
+            // Create new instance from cloud data with mapped class ID
+            Log.d(TAG, "Creating new local instance from cloud instance " + instanceIdLong + " for class " + actualYogaClassId);
             ClassInstance newInstance = createInstanceFromJson(cloudInstance);
             newInstance.setId(instanceIdLong);
-            long insertedId = databaseHelper.addClassInstance(newInstance);
+            newInstance.setYogaClassId(actualYogaClassId); // Use the mapped ID
+            long insertedId = getDatabaseHelper().addClassInstance(newInstance);
             Log.d(TAG, "New instance inserted with local ID: " + insertedId);
+            
+            return cloudToLocalIdMapping.containsKey(originalYogaClassId);
             
         } else {
             Log.d(TAG, "Found local instance with ID " + instanceIdLong + ", lastModified=" + localInstance.getLastModified());
@@ -698,19 +902,102 @@ public class CloudSyncService {
             if (cloudTimestamp > localInstance.getLastModified()) {
                 // Cloud version is newer - update local
                 Log.d(TAG, "Cloud version is newer, updating local instance " + instanceIdLong);
+                
+                // Get yogaClassId from cloud instance and map if necessary
+                long originalYogaClassId = cloudInstance.optLong("yogaClassId", -1);
+                long actualYogaClassId = originalYogaClassId;
+                if (cloudToLocalIdMapping.containsKey(originalYogaClassId)) {
+                    actualYogaClassId = cloudToLocalIdMapping.get(originalYogaClassId);
+                    Log.d(TAG, "Mapping class ID for update: " + originalYogaClassId + " -> " + actualYogaClassId);
+                }
+                
+                YogaClass referencedClass = getDatabaseHelper().getYogaClass(actualYogaClassId);
+                if (referencedClass == null) {
+                    Log.w(TAG, "Cloud instance " + instanceIdLong + " references yoga class " + actualYogaClassId + " which doesn't exist locally, skipping update");
+                    return false;
+                }
+                
                 ClassInstance updatedInstance = createInstanceFromJson(cloudInstance);
                 updatedInstance.setId(instanceIdLong);
-                databaseHelper.updateClassInstance(updatedInstance);
+                updatedInstance.setYogaClassId(actualYogaClassId); // Use the mapped ID
+                getDatabaseHelper().updateClassInstance(updatedInstance);
+                Log.d(TAG, "Instance " + instanceIdLong + " updated successfully");
+                
+                return cloudToLocalIdMapping.containsKey(originalYogaClassId);
                 
             } else if (localInstance.getLastModified() > cloudTimestamp) {
                 // Local version is newer - will be uploaded in next phase
                 Log.d(TAG, "Local instance " + instanceIdLong + " is newer, will upload");
-            } else {
-                Log.d(TAG, "Instance " + instanceIdLong + " timestamps are equal, no action needed");
             }
+            // If timestamps are equal, no action needed
         }
         
-        Log.d(TAG, "=== FINISHED PROCESSING INDIVIDUAL CLOUD INSTANCE ===");
+        return false;
+    }
+    
+    /**
+     * Update Firebase instances with corrected local class IDs
+     */
+    private void updateFirebaseInstancesWithMappedIds(Map<Long, Long> cloudToLocalIdMapping) throws Exception {
+        Log.d(TAG, "=== UPDATING FIREBASE INSTANCES WITH MAPPED IDS ===");
+        Log.d(TAG, "Processing " + cloudToLocalIdMapping.size() + " ID mappings");
+        
+        // Download current instances from Firebase
+        String cloudData = downloadDataFromFirebase(CLASS_INSTANCES_ENDPOINT + ".json");
+        
+        if (cloudData == null || cloudData.equals("null")) {
+            Log.d(TAG, "No cloud instances to update");
+            return;
+        }
+        
+        try {
+            JSONArray cloudArray = new JSONArray(cloudData);
+            Log.d(TAG, "Checking " + cloudArray.length() + " Firebase instances for class ID updates");
+            
+            int updatedCount = 0;
+            
+            for (int i = 0; i < cloudArray.length(); i++) {
+                Object item = cloudArray.get(i);
+                
+                if (item == null || item == JSONObject.NULL) {
+                    continue;
+                }
+                
+                if (item instanceof JSONObject) {
+                    JSONObject cloudInstance = (JSONObject) item;
+                    long instanceId = cloudInstance.optLong("id", -1);
+                    long currentClassId = cloudInstance.optLong("yogaClassId", -1);
+                    
+                    // Check if this class ID needs to be updated
+                    if (cloudToLocalIdMapping.containsKey(currentClassId)) {
+                        long newClassId = cloudToLocalIdMapping.get(currentClassId);
+                        Log.d(TAG, "Updating Firebase instance " + instanceId + ": classId " + currentClassId + " -> " + newClassId);
+                        
+                        // Update the instance data
+                        cloudInstance.put("yogaClassId", newClassId);
+                        cloudInstance.put("lastModified", System.currentTimeMillis());
+                        
+                        // Update in Firebase
+                        String instanceEndpoint = CLASS_INSTANCES_ENDPOINT + "/" + instanceId + ".json";
+                        String response = sendDataToFirebase(instanceEndpoint, cloudInstance, "PUT");
+                        
+                        if (response != null) {
+                            updatedCount++;
+                            Log.d(TAG, "Successfully updated Firebase instance " + instanceId + " with new class ID " + newClassId);
+                        } else {
+                            Log.e(TAG, "Failed to update Firebase instance " + instanceId);
+                        }
+                    }
+                }
+            }
+            
+            Log.d(TAG, "Updated " + updatedCount + " Firebase instances with correct class IDs");
+            
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to parse Firebase instances for ID mapping update", e);
+        }
+        
+        Log.d(TAG, "=== FINISHED UPDATING FIREBASE INSTANCES ===");
     }
     
     /**
@@ -861,7 +1148,7 @@ public class CloudSyncService {
             String classType = cloudClass.optString("classType", "");
             
             // Get all local classes and check for content match
-            List<YogaClass> allClasses = databaseHelper.getAllYogaClasses();
+            List<YogaClass> allClasses = getDatabaseHelper().getAllYogaClasses();
             
             for (YogaClass localClass : allClasses) {
                 // Match by key identifying fields
@@ -1019,9 +1306,9 @@ public class CloudSyncService {
                         }
                         
                         // Check if booking already exists using efficient method
-                        if (databaseHelper.bookingExists(booking.getBookingId())) {
+                        if (getDatabaseHelper().bookingExists(booking.getBookingId())) {
                             // Get existing booking to compare timestamps
-                            Booking existingBooking = databaseHelper.getBookingByBookingId(booking.getBookingId());
+                            Booking existingBooking = getDatabaseHelper().getBookingByBookingId(booking.getBookingId());
                             if (existingBooking != null && booking.getLastModified() > existingBooking.getLastModified()) {
                                 updateBookingInDatabase(booking);
                                 syncedCount++;
@@ -1031,7 +1318,7 @@ public class CloudSyncService {
                             }
                         } else {
                             // Add new booking
-                            long result = databaseHelper.addBooking(booking);
+                            long result = getDatabaseHelper().addBooking(booking);
                             if (result != -1) {
                                 newCount++;
                                 Log.d(TAG, "Added new booking: " + booking.getBookingId() + " with DB id: " + result);
@@ -1090,7 +1377,7 @@ public class CloudSyncService {
             Log.d(TAG, "Firebase has " + firebaseBookingIds.size() + " bookings");
             
             // Get all booking IDs from local database
-            List<String> localBookingIds = databaseHelper.getAllBookingIds();
+            List<String> localBookingIds = getDatabaseHelper().getAllBookingIds();
             Log.d(TAG, "Local database has " + localBookingIds.size() + " bookings");
             
             // Find bookings that exist locally but not in Firebase (deleted bookings)
@@ -1105,7 +1392,7 @@ public class CloudSyncService {
             // Delete the bookings that no longer exist in Firebase
             int deletedCount = 0;
             for (String bookingIdToDelete : bookingsToDelete) {
-                int result = databaseHelper.deleteBookingByBookingId(bookingIdToDelete);
+                int result = getDatabaseHelper().deleteBookingByBookingId(bookingIdToDelete);
                 if (result > 0) {
                     deletedCount++;
                     Log.d(TAG, "Successfully deleted booking: " + bookingIdToDelete);
@@ -1187,7 +1474,7 @@ public class CloudSyncService {
                 
                 if (updateResponse != null) {
                     // Update local database
-                    databaseHelper.updateBookingStatus(bookingId, newStatus);
+                    getDatabaseHelper().updateBookingStatus(bookingId, newStatus);
                     callback.onSuccess("Booking status updated successfully");
                 } else {
                     callback.onError("Failed to update booking status in cloud");
@@ -1413,7 +1700,7 @@ public class CloudSyncService {
      */
     private void updateBookingInDatabase(Booking booking) {
         // Use update method instead of delete and re-add
-        int result = databaseHelper.updateBooking(booking);
+        int result = getDatabaseHelper().updateBooking(booking);
         if (result == 0) {
             Log.w(TAG, "No booking found to update with ID: " + booking.getBookingId());
         }
@@ -1509,6 +1796,145 @@ public class CloudSyncService {
             // Return original if parsing fails
             return isoDate;
         }
+    }
+    
+    /**
+     * Delete a yoga class from Firebase by ID
+     */
+    private boolean deleteClassFromCloud(long classId) {
+        try {
+            String endpoint = YOGA_CLASSES_ENDPOINT + "/" + classId + ".json";
+            String url = baseUrl + "/" + endpoint;
+            
+            Log.d(TAG, "Making DELETE request to: " + url);
+            
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("DELETE");
+            connection.setRequestProperty("Content-Type", "application/json");
+            
+            int responseCode = connection.getResponseCode();
+            Log.d(TAG, "DELETE " + endpoint + " - Response: " + responseCode);
+            
+            return responseCode == HttpURLConnection.HTTP_OK;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error deleting class from cloud", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Delete a class instance from Firebase by ID
+     */
+    private boolean deleteInstanceFromCloud(long instanceId) {
+        try {
+            String endpoint = CLASS_INSTANCES_ENDPOINT + "/" + instanceId + ".json";
+            String url = baseUrl + "/" + endpoint;
+            
+            Log.d(TAG, "Making DELETE request to: " + url);
+            
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("DELETE");
+            connection.setRequestProperty("Content-Type", "application/json");
+            
+            int responseCode = connection.getResponseCode();
+            Log.d(TAG, "DELETE " + endpoint + " - Response: " + responseCode);
+            
+            return responseCode == HttpURLConnection.HTTP_OK;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error deleting instance from cloud", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Debug method to diagnose sync issues between local and Firebase data
+     */
+    public void debugSyncStatus() {
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "=== DEBUG SYNC STATUS ===");
+                
+                // Get local data
+                List<YogaClass> localClasses = getDatabaseHelper().getAllYogaClasses();
+                List<ClassInstance> localInstances = getDatabaseHelper().getAllClassInstances();
+                
+                Log.d(TAG, "LOCAL DATABASE:");
+                Log.d(TAG, "- Classes: " + localClasses.size());
+                for (YogaClass cls : localClasses) {
+                    List<ClassInstance> classInstances = getDatabaseHelper().getClassInstancesByYogaClassId(cls.getId());
+                    Log.d(TAG, "  Class ID=" + cls.getId() + ", Type=" + cls.getClassType() + 
+                          ", Instances=" + classInstances.size());
+                }
+                Log.d(TAG, "- Total Instances: " + localInstances.size());
+                for (ClassInstance inst : localInstances) {
+                    Log.d(TAG, "  Instance ID=" + inst.getId() + ", ClassID=" + inst.getYogaClassId() + 
+                          ", Date=" + inst.getDate() + ", Instructor=" + inst.getInstructor());
+                }
+                
+                // Get Firebase data
+                Log.d(TAG, "FIREBASE DATA:");
+                String classData = downloadDataFromFirebase(YOGA_CLASSES_ENDPOINT + ".json");
+                String instanceData = downloadDataFromFirebase(CLASS_INSTANCES_ENDPOINT + ".json");
+                
+                Log.d(TAG, "- Firebase Classes: " + (classData != null ? "Present" : "None"));
+                Log.d(TAG, "- Firebase Instances: " + (instanceData != null ? "Present" : "None"));
+                
+                if (classData != null && !classData.equals("null")) {
+                    try {
+                        JSONArray classes = new JSONArray(classData);
+                        int validClasses = 0;
+                        for (int i = 0; i < classes.length(); i++) {
+                            if (classes.get(i) != null && classes.get(i) != JSONObject.NULL) {
+                                validClasses++;
+                            }
+                        }
+                        Log.d(TAG, "- Firebase Classes Count: " + validClasses);
+                    } catch (Exception e) {
+                        try {
+                            JSONObject classes = new JSONObject(classData);
+                            Log.d(TAG, "- Firebase Classes Count: " + classes.length());
+                        } catch (Exception e2) {
+                            Log.d(TAG, "- Firebase Classes: Unable to parse");
+                        }
+                    }
+                }
+                
+                if (instanceData != null && !instanceData.equals("null")) {
+                    try {
+                        JSONArray instances = new JSONArray(instanceData);
+                        int validInstances = 0;
+                        for (int i = 0; i < instances.length(); i++) {
+                            Object item = instances.get(i);
+                            if (item != null && item != JSONObject.NULL) {
+                                validInstances++;
+                                if (item instanceof JSONObject) {
+                                    JSONObject inst = (JSONObject) item;
+                                    long instId = inst.optLong("id", -1);
+                                    long classId = inst.optLong("yogaClassId", -1);
+                                    String date = inst.optString("date", "");
+                                    Log.d(TAG, "  Firebase Instance ID=" + instId + ", ClassID=" + classId + ", Date=" + date);
+                                }
+                            }
+                        }
+                        Log.d(TAG, "- Firebase Instances Count: " + validInstances);
+                    } catch (Exception e) {
+                        try {
+                            JSONObject instances = new JSONObject(instanceData);
+                            Log.d(TAG, "- Firebase Instances Count: " + instances.length());
+                        } catch (Exception e2) {
+                            Log.d(TAG, "- Firebase Instances: Unable to parse");
+                        }
+                    }
+                }
+                
+                Log.d(TAG, "=== END DEBUG SYNC STATUS ===");
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error in debug sync status", e);
+            }
+        });
     }
     
     public void shutdown() {

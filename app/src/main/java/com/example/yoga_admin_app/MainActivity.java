@@ -48,6 +48,19 @@ public class MainActivity extends AppCompatActivity {
         // Initialize database helper
         databaseHelper = new DatabaseHelper(this);
         
+        // Initialize cloud sync service and set up bidirectional relationship
+        CloudSyncService cloudSyncService = new CloudSyncService(this);
+        cloudSyncService.setDatabaseHelper(databaseHelper);
+        databaseHelper.setCloudSyncService(cloudSyncService);
+        
+        // Perform initial sync to get latest data from Firebase
+        cloudSyncService.performInitialSync();
+        
+        // Debug: Check sync status after a delay to see what data we have
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            cloudSyncService.debugSyncStatus();
+        }, 3000); // Wait 3 seconds for initial sync to complete
+        
         // Initialize views
         initializeViews();
         
@@ -60,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
         Button btnAddClass = findViewById(R.id.btn_add_class);
         Button btnViewClasses = findViewById(R.id.btn_view_classes);
         Button btnSearchClasses = findViewById(R.id.btn_search_classes);
-        Button btnCloudSync = findViewById(R.id.btn_cloud_sync);
         Button btnViewBookings = findViewById(R.id.btn_view_bookings);
         btnLogout = findViewById(R.id.btn_logout);
         tvClassCount = findViewById(R.id.tv_class_count);
@@ -89,14 +101,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, SearchYogaClassesActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        btnCloudSync.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CloudSyncActivity.class);
                 startActivity(intent);
             }
         });

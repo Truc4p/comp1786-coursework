@@ -87,12 +87,6 @@
             android:exported="false"
             android:parentActivityName=".ViewYogaClassesActivity" />
         
-        <!-- Cloud Sync Activity -->
-        <activity
-            android:name=".CloudSyncActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
-        
         <!-- Booking Activity -->
         <activity
             android:name=".BookingActivity"

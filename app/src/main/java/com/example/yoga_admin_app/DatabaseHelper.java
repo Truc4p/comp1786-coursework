@@ -14,6 +14,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "yoga_admin.db";
     private static final int DATABASE_VERSION = 15; // Added users table for authentication
     
+    private Context context;
+    private CloudSyncService cloudSyncService;
+    
     // Table names
     private static final String TABLE_YOGA_CLASSES = "yoga_classes";
     private static final String TABLE_CLASS_INSTANCES = "class_instances";
@@ -99,6 +102,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
+        // Don't create CloudSyncService here to avoid circular dependency
+    }
+    
+    /**
+     * Set the CloudSyncService instance for automatic syncing
+     */
+    public void setCloudSyncService(CloudSyncService cloudSyncService) {
+        this.cloudSyncService = cloudSyncService;
     }
     
     @Override
@@ -252,6 +264,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         long id = db.insert(TABLE_YOGA_CLASSES, null, values);
         db.close();
+        
+        // Auto-sync to Firebase if insert was successful
+        if (id != -1 && cloudSyncService != null) {
+            yogaClass.setId(id);
+            cloudSyncService.autoSyncYogaClass(yogaClass);
+        }
+        
         return id;
     }
 
@@ -367,6 +386,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int result = db.update(TABLE_YOGA_CLASSES, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(yogaClass.getId())});
         db.close();
+        
+        // Auto-sync to Firebase if update was successful
+        if (result > 0 && cloudSyncService != null) {
+            cloudSyncService.autoSyncYogaClass(yogaClass);
+        }
+        
         return result;
     }
 
@@ -399,6 +424,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.delete(TABLE_CLASS_INSTANCES, KEY_YOGA_CLASS_ID + " = ?", new String[]{String.valueOf(id)});
             // Delete the yoga class
             db.delete(TABLE_YOGA_CLASSES, KEY_ID + " = ?", new String[]{String.valueOf(id)});
+            
+            // Auto-delete from Firebase
+            if (cloudSyncService != null) {
+                cloudSyncService.autoDeleteYogaClass(id);
+            }
+            
         } finally {
             db.close();
         }
@@ -443,6 +474,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         long id = db.insert(TABLE_CLASS_INSTANCES, null, values);
         db.close();
+        
+        // Auto-sync to Firebase if insert was successful
+        if (id != -1 && cloudSyncService != null) {
+            classInstance.setId(id);
+            cloudSyncService.autoSyncClassInstance(classInstance);
+        }
+        
         return id;
     }
     
@@ -544,6 +582,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int result = db.update(TABLE_CLASS_INSTANCES, values, KEY_INSTANCE_ID + " = ?",
                 new String[]{String.valueOf(instance.getId())});
         db.close();
+        
+        // Auto-sync to Firebase if update was successful
+        if (result > 0 && cloudSyncService != null) {
+            cloudSyncService.autoSyncClassInstance(instance);
+        }
+        
         return result;
     }
     
@@ -552,6 +596,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         try {
             db.delete(TABLE_CLASS_INSTANCES, KEY_INSTANCE_ID + " = ?", new String[]{String.valueOf(id)});
+            
+            // Auto-delete from Firebase
+            if (cloudSyncService != null) {
+                cloudSyncService.autoDeleteClassInstance(id);
+            }
+            
         } finally {
             db.close();
         }
