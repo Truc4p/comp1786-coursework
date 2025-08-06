@@ -18,7 +18,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -90,36 +89,6 @@ public class ViewYogaClassesActivity extends AppCompatActivity {
                 }
             });
         }
-    }
-
-    private void showClassOptionsDialog(YogaClass yogaClass) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(yogaClass.getClassType() + " - " + yogaClass.getDayOfWeek());
-        
-        String[] options = {"View Details", "Edit Class", "Manage Class Instances", "Delete Class"};
-        
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0: // View Details
-                        showClassDetails(yogaClass);
-                        break;
-                    case 1: // Edit Class
-                        editYogaClass(yogaClass);
-                        break;
-                    case 2: // Manage Class Instances
-                        manageClassInstances(yogaClass);
-                        break;
-                    case 3: // Delete Class
-                        confirmDeleteClass(yogaClass);
-                        break;
-                }
-            }
-        });
-        
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
     }
 
     private void showClassDetails(YogaClass yogaClass) {

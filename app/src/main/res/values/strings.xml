@@ -1,13 +1,3 @@
 <resources>
     <string name="app_name">yoga-admin-app</string>
-    
-    <!-- Class Instances Strings -->
-    <string name="manage_class_instances">Manage Class Instances</string>
-    <string name="add_class_instance">Add Class Instance</string>
-    <string name="edit_class_instance">Edit Class Instance</string>
-    <string name="delete_class_instance">Delete Class Instance</string>
-    <string name="no_instances_found">No class instances found</string>
-    <string name="add_first_instance">Start by adding your first class instance!</string>
-    <string name="date_format_hint">dd/MM/yyyy</string>
-    <string name="date_must_match">Date must match the day of week for this class</string>
 </resources>

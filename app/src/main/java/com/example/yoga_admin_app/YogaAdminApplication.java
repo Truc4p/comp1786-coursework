@@ -27,6 +27,9 @@ public class YogaAdminApplication extends Application {
             FirebaseDatabase database = FirebaseDatabase.getInstance(correctUrl);
             
             // Enable offline persistence for Firebase Database
+            // allows the app to cache data locally, so it can read and write 
+            // to the database even when offline. 
+            // Changes are synchronized with the server when the device reconnects.
             database.setPersistenceEnabled(true);
             Log.d(TAG, "Firebase persistence enabled for URL: " + correctUrl);
             

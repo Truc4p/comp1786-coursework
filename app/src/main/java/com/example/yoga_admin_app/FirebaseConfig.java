@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.database.FirebaseDatabase;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;

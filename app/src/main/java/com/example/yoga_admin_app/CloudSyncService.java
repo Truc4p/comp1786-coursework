@@ -1,8 +1,6 @@
 package com.example.yoga_admin_app;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;

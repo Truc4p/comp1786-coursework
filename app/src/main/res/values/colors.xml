@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     
     <!-- Yoga-themed colors -->
@@ -17,14 +16,12 @@
     <color name="violet">#F0D9EF</color>    
 
     <color name="accent_blue">#def4f7</color>
-    <color name="accent_teal">#26A69A</color>
     <color name="accent_yellow">#fcf6c9</color>
     <color name="accent_orange">#fce4c9</color>
     <color name="accent_green">#defce3</color>
     <color name="accent_red">#ffccbc</color>
 
     <color name="warning_red">#F44336</color>
-    <color name="success_green">#4CAF50</color>
     <color name="light_gray">#F5F5F5</color>
     <color name="dark_gray">#424242</color>
     

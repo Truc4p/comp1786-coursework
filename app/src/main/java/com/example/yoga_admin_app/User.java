@@ -79,12 +79,13 @@ public class User {
     public void incrementFailedAttempts() {
         failedLoginAttempts++;
         if (failedLoginAttempts >= 5) {
-            // Lock account for 30 minutes after 5 failed attempts
+            // Lock account for 30 minutes after 5 failed login attempts
             lockoutUntil = System.currentTimeMillis() + (30 * 60 * 1000);
         }
         updatedAt = System.currentTimeMillis();
     }
     
+    // Resets the failed login attempts and lockout status
     public void resetFailedAttempts() {
         failedLoginAttempts = 0;
         lockoutUntil = 0;

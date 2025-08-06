@@ -2,13 +2,11 @@ package com.example.yoga_admin_app;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,8 +38,6 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView txtBackToLogin;
     
     private DatabaseHelper databaseHelper;
-    private boolean isPasswordVisible = false;
-    private boolean isConfirmPasswordVisible = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,24 +93,18 @@ public class RegisterActivity extends AppCompatActivity {
         // Perform registration in background thread
         new Thread(() -> {
             try {
-                // Check if username or email already exists
+                // Check if username already exists
                 User existingUser = databaseHelper.getUserByUsernameOrEmail(username);
                 if (existingUser != null) {
-                    final User finalExistingUser = existingUser;
                     runOnUiThread(() -> {
                         setRegistrationInProgress(false);
-                        if (finalExistingUser.getUsername().equals(username)) {
-                            editUsername.setError("Username already exists");
-                            editUsername.requestFocus();
-                        } else {
-                            editEmail.setError("Email already registered");
-                            editEmail.requestFocus();
-                        }
+                        editUsername.setError("Username already exists");
+                        editUsername.requestFocus();
                     });
                     return;
                 }
                 
-                // Check email separately
+                // Check if email already exists
                 User emailUser = databaseHelper.getUserByUsernameOrEmail(email);
                 if (emailUser != null) {
                     runOnUiThread(() -> {
@@ -295,22 +285,6 @@ public class RegisterActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
     
-    private void togglePasswordVisibility(EditText editText, ImageView toggleIcon, 
-                                        boolean currentlyVisible, VisibilityCallback callback) {
-        if (currentlyVisible) {
-            // Hide password
-            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            callback.onVisibilityChanged(false);
-        } else {
-            // Show password
-            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            callback.onVisibilityChanged(true);
-        }
-        
-        // Move cursor to end of text
-        editText.setSelection(editText.getText().length());
-    }
-    
     private String generateSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[32];
@@ -332,10 +306,5 @@ public class RegisterActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
         super.onBackPressed();
-    }
-    
-    // Interface for password visibility callback
-    private interface VisibilityCallback {
-        void onVisibilityChanged(boolean visible);
     }
 }

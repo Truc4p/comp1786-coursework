@@ -2,7 +2,6 @@ package com.example.yoga_admin_app;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;

@@ -29,12 +29,6 @@ public class AuthenticationManager {
     // Session timeout: 30 minutes of inactivity
     private static final long SESSION_TIMEOUT_MS = 30 * 60 * 1000;
     
-    // Maximum failed login attempts before lockout
-    private static final int MAX_FAILED_ATTEMPTS = 5;
-    
-    // Account lockout duration: 30 minutes
-    private static final long LOCKOUT_DURATION_MS = 30 * 60 * 1000;
-    
     private Context context;
     private DatabaseHelper databaseHelper;
     private SharedPreferences prefs;
@@ -248,13 +242,6 @@ public class AuthenticationManager {
         md.update(salt.getBytes());
         byte[] hashedPassword = md.digest(password.getBytes());
         return Base64.encodeToString(hashedPassword, Base64.DEFAULT);
-    }
-    
-    private String generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[32];
-        random.nextBytes(salt);
-        return Base64.encodeToString(salt, Base64.DEFAULT);
     }
     
     private String generateSessionToken() {
