@@ -20,18 +20,22 @@ public class YogaAdminApplication extends Application {
             FirebaseApp.initializeApp(this);
             Log.d(TAG, "Firebase initialized successfully");
             
-            // Get the correct Firebase Database URL for our region
-            String correctUrl = "https://yogaapp-12d2b-default-rtdb.asia-southeast1.firebasedatabase.app";
+            // Get the Firebase Database URL from configuration
+            String databaseUrl = FirebaseConfig.getFirebaseDatabaseUrl(this);
             
-            // Initialize Firebase Database with correct URL
-            FirebaseDatabase database = FirebaseDatabase.getInstance(correctUrl);
-            
-            // Enable offline persistence for Firebase Database
-            // allows the app to cache data locally, so it can read and write 
-            // to the database even when offline. 
-            // Changes are synchronized with the server when the device reconnects.
-            database.setPersistenceEnabled(true);
-            Log.d(TAG, "Firebase persistence enabled for URL: " + correctUrl);
+            if (databaseUrl != null) {
+                // Initialize Firebase Database with configured URL
+                FirebaseDatabase database = FirebaseDatabase.getInstance(databaseUrl);
+                
+                // Enable offline persistence for Firebase Database
+                // allows the app to cache data locally, so it can read and write 
+                // to the database even when offline. 
+                // Changes are synchronized with the server when the device reconnects.
+                database.setPersistenceEnabled(true);
+                Log.d(TAG, "Firebase persistence enabled for configured URL");
+            } else {
+                Log.e(TAG, "Could not get Firebase Database URL from configuration");
+            }
             
         } catch (Exception e) {
             Log.e(TAG, "Failed to initialize Firebase", e);

@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
 android {
     namespace = "com.example.yoga_admin_app"
     compileSdk = 35
@@ -15,6 +18,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Load Firebase configuration from properties file
+        val firebaseProperties = Properties()
+        val firebasePropertiesFile = rootProject.file("app/firebase.properties")
+        if (firebasePropertiesFile.exists()) {
+            firebaseProperties.load(FileInputStream(firebasePropertiesFile))
+        }
+        
+        // Add Firebase config to BuildConfig
+        buildConfigField("String", "FIREBASE_PROJECT_ID", "\"${firebaseProperties.getProperty("FIREBASE_PROJECT_ID", "")}\"")
+        buildConfigField("String", "FIREBASE_DATABASE_REGION", "\"${firebaseProperties.getProperty("FIREBASE_DATABASE_REGION", "")}\"")
     }
 
     buildTypes {
@@ -25,6 +39,10 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+    
+    buildFeatures {
+        buildConfig = true
     }
     
     lint {

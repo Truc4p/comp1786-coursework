@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 
 /**
  * Firebase configuration helper class
- * Provides methods to get Firebase configuration dynamically instead of hardcoding URLs
+ * Provides methods to get Firebase configuration securely from BuildConfig
  */
 public class FirebaseConfig {
     private static final String TAG = "FirebaseConfig";
@@ -23,13 +23,26 @@ public class FirebaseConfig {
      * @return Firebase Database URL
      */
     public static String getFirebaseDatabaseUrl(Context context) {
-        // For this specific project, we know the correct URL from Firebase error responses
-        // Always use the asia-southeast1 region URL
-        String projectId = "yogaapp-12d2b"; // Known project ID
-        String correctUrl = "https://" + projectId + "-default-rtdb.asia-southeast1.firebasedatabase.app/";
+        // Get project ID and region from BuildConfig (set from firebase.properties)
+        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
+        String region = BuildConfig.FIREBASE_DATABASE_REGION;
         
-        Log.d(TAG, "Using correct Firebase URL for asia-southeast1 region: " + correctUrl);
-        return correctUrl;
+        if (projectId != null && !projectId.isEmpty() && region != null && !region.isEmpty()) {
+            String databaseUrl = "https://" + projectId + "-default-rtdb." + region + ".firebasedatabase.app/";
+            Log.d(TAG, "Using Firebase URL from BuildConfig configuration");
+            return databaseUrl;
+        }
+        
+        // Fallback: try to get from google-services.json
+        projectId = getProjectIdFromGoogleServices(context);
+        if (projectId != null) {
+            String databaseUrl = "https://" + projectId + "-default-rtdb.asia-southeast1.firebasedatabase.app/";
+            Log.d(TAG, "Using Firebase URL from google-services.json fallback");
+            return databaseUrl;
+        }
+        
+        Log.e(TAG, "Could not get Firebase configuration from BuildConfig or google-services.json");
+        return null;
     }
     
     /**

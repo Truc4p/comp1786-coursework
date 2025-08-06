@@ -1,0 +1,10 @@
+# Firebase Configuration Template
+# Copy this file to firebase.properties and fill in your Firebase project details
+# DO NOT commit firebase.properties to version control
+
+FIREBASE_PROJECT_ID=your-firebase-project-id
+FIREBASE_DATABASE_REGION=your-database-region
+
+# Example:
+# FIREBASE_PROJECT_ID=my-yoga-app-12345
+# FIREBASE_DATABASE_REGION=asia-southeast1
