@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.ArrayList;
@@ -394,6 +395,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         return result;
     }
+    
+    // Mark a yoga class as synced (set needsSync to false)
+    public void markYogaClassAsSynced(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_NEEDS_SYNC, 0);
+        
+        db.update(TABLE_YOGA_CLASSES, values, KEY_ID + " = ?",
+                new String[]{String.valueOf(id)});
+        db.close();
+    }
 
     // Delete a yoga class
     public void deleteYogaClass(long id) {
@@ -453,7 +465,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(countQuery, null);
         int count = cursor.getCount();
         cursor.close();
-        db.close();
+        // Don't close db here - let SQLiteOpenHelper manage it
         return count;
     }
     
@@ -462,8 +474,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Add a new class instance
     public long addClassInstance(ClassInstance classInstance) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
         
+        // Check for duplicates first - prevent instances with same class, date, and instructor
+        String checkQuery = "SELECT COUNT(*) FROM " + TABLE_CLASS_INSTANCES + 
+                           " WHERE " + KEY_YOGA_CLASS_ID + " = ? AND " + 
+                           KEY_DATE + " = ? AND " + 
+                           KEY_INSTANCE_INSTRUCTOR + " = ?";
+        
+        Cursor cursor = db.rawQuery(checkQuery, new String[]{
+            String.valueOf(classInstance.getYogaClassId()),
+            classInstance.getDate(),
+            classInstance.getInstructor()
+        });
+        
+        int existingCount = 0;
+        if (cursor.moveToFirst()) {
+            existingCount = cursor.getInt(0);
+        }
+        cursor.close();
+        
+        if (existingCount > 0) {
+            Log.w("DatabaseHelper", "🚫 Duplicate instance prevented: Class=" + classInstance.getYogaClassId() + 
+                  ", Date=" + classInstance.getDate() + ", Instructor=" + classInstance.getInstructor());
+            db.close();
+            return -1; // Return -1 to indicate duplicate prevention
+        }
+        
+        ContentValues values = new ContentValues();
         values.put(KEY_YOGA_CLASS_ID, classInstance.getYogaClassId());
         values.put(KEY_DATE, classInstance.getDate());
         values.put(KEY_INSTANCE_INSTRUCTOR, classInstance.getInstructor());
@@ -473,12 +510,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_INSTANCE_CLOUD_ID, classInstance.getCloudId());
         
         long id = db.insert(TABLE_CLASS_INSTANCES, null, values);
+        Log.d("DatabaseHelper", "✅ New instance created: ID=" + id + ", Class=" + classInstance.getYogaClassId() + 
+              ", Date=" + classInstance.getDate() + ", Instructor=" + classInstance.getInstructor());
         db.close();
         
         // Auto-sync to Firebase if insert was successful
         if (id != -1 && cloudSyncService != null) {
             classInstance.setId(id);
+            Log.d("DatabaseHelper", "🚀 Triggering auto-sync for new class instance: ID=" + id + ", needsSync=" + classInstance.needsSync());
             cloudSyncService.autoSyncClassInstance(classInstance);
+        } else if (id != -1 && cloudSyncService == null) {
+            Log.w("DatabaseHelper", "⚠️ CloudSyncService is null, cannot auto-sync instance " + id);
         }
         
         return id;
@@ -589,6 +631,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         
         return result;
+    }
+    
+    // Mark a class instance as synced (set needsSync to false)
+    public void markClassInstanceAsSynced(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_INSTANCE_NEEDS_SYNC, 0);
+        
+        db.update(TABLE_CLASS_INSTANCES, values, KEY_INSTANCE_ID + " = ?",
+                new String[]{String.valueOf(id)});
+        db.close();
     }
     
     // Delete a class instance
@@ -1800,5 +1853,56 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             android.util.Log.e("DatabaseHelper", "Error hashing password", e);
             return null;
         }
+    }
+    
+    /**
+     * Clean up duplicate class instances
+     * Keeps the instance with the highest ID (most recent) for each duplicate group
+     */
+    public int cleanupDuplicateInstances() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int deletedCount = 0;
+        
+        try {
+            // Find duplicates (same yoga_class_id, date, and instructor)
+            String findDuplicatesQuery = 
+                "SELECT " + KEY_YOGA_CLASS_ID + ", " + KEY_DATE + ", " + KEY_INSTANCE_INSTRUCTOR + ", " +
+                "COUNT(*) as count, GROUP_CONCAT(" + KEY_INSTANCE_ID + " ORDER BY " + KEY_INSTANCE_ID + " DESC) as ids " +
+                "FROM " + TABLE_CLASS_INSTANCES + 
+                " GROUP BY " + KEY_YOGA_CLASS_ID + ", " + KEY_DATE + ", " + KEY_INSTANCE_INSTRUCTOR + 
+                " HAVING COUNT(*) > 1";
+            
+            Cursor cursor = db.rawQuery(findDuplicatesQuery, null);
+            
+            if (cursor.moveToFirst()) {
+                do {
+                    String idsString = cursor.getString(cursor.getColumnIndexOrThrow("ids"));
+                    String[] ids = idsString.split(",");
+                    
+                    // Keep the first ID (highest/most recent), delete the rest
+                    for (int i = 1; i < ids.length; i++) {
+                        int deleteCount = db.delete(TABLE_CLASS_INSTANCES, 
+                                                  KEY_INSTANCE_ID + " = ?", 
+                                                  new String[]{ids[i].trim()});
+                        deletedCount += deleteCount;
+                        Log.d("DatabaseHelper", "🗑️ Deleted duplicate instance ID: " + ids[i].trim());
+                    }
+                    
+                    Log.d("DatabaseHelper", "🧹 Cleaned duplicate group - kept ID: " + ids[0].trim() + 
+                          ", deleted " + (ids.length - 1) + " duplicates");
+                    
+                } while (cursor.moveToNext());
+            }
+            
+            cursor.close();
+            Log.d("DatabaseHelper", "✅ Cleanup completed: " + deletedCount + " duplicate instances removed");
+            
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error cleaning up duplicate instances", e);
+        } finally {
+            db.close();
+        }
+        
+        return deletedCount;
     }
 }

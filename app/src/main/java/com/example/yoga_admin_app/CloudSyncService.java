@@ -73,22 +73,48 @@ public class CloudSyncService {
      * Automatically sync a single yoga class to Firebase when it's added/updated locally
      */
     public void autoSyncYogaClass(YogaClass yogaClass) {
-        if (!NetworkUtils.isNetworkAvailable(context)) {
-            Log.d(TAG, "No network available for auto-sync of class " + yogaClass.getId());
+        Log.d(TAG, "=== AUTO-SYNC YOGA CLASS TRIGGERED ===");
+        Log.d(TAG, "Class ID: " + yogaClass.getId() + ", Type: " + yogaClass.getClassType());
+        Log.d(TAG, "NeedsSync: " + yogaClass.needsSync());
+        
+        // Don't auto-sync classes that don't need syncing (likely downloaded from Firebase)
+        if (!yogaClass.needsSync()) {
+            Log.d(TAG, "Class " + yogaClass.getId() + " doesn't need sync, skipping auto-sync");
             return;
         }
+        
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            Log.w(TAG, "No network available for auto-sync of class " + yogaClass.getId());
+            return;
+        }
+        
+        Log.d(TAG, "Network available, starting background auto-sync for class " + yogaClass.getId());
         
         executorService.execute(() -> {
             try {
                 Log.d(TAG, "Auto-syncing yoga class " + yogaClass.getId() + " to Firebase");
-                boolean success = uploadSingleClass(yogaClass);
-                if (success) {
-                    Log.d(TAG, "Auto-sync successful for class " + yogaClass.getId());
+                
+                // Check if this class already exists on Firebase (by content, not ID)
+                String existingFirebaseId = findExistingFirebaseClass(yogaClass);
+                
+                boolean success;
+                if (existingFirebaseId != null) {
+                    Log.d(TAG, "Found existing Firebase class with ID " + existingFirebaseId + ", updating instead of creating duplicate");
+                    success = updateExistingFirebaseClass(existingFirebaseId, yogaClass);
                 } else {
-                    Log.e(TAG, "Auto-sync failed for class " + yogaClass.getId());
+                    Log.d(TAG, "No existing Firebase class found, creating new one");
+                    success = uploadSingleClass(yogaClass);
+                }
+                
+                if (success) {
+                    Log.d(TAG, "✅ Auto-sync successful for class " + yogaClass.getId());
+                    // Mark as synced in database
+                    getDatabaseHelper().markClassAsSynced(yogaClass.getId());
+                } else {
+                    Log.e(TAG, "❌ Auto-sync failed for class " + yogaClass.getId());
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Auto-sync error for class " + yogaClass.getId(), e);
+                Log.e(TAG, "❌ Auto-sync error for class " + yogaClass.getId(), e);
             }
         });
     }
@@ -97,22 +123,48 @@ public class CloudSyncService {
      * Automatically sync a single class instance to Firebase when it's added/updated locally
      */
     public void autoSyncClassInstance(ClassInstance instance) {
-        if (!NetworkUtils.isNetworkAvailable(context)) {
-            Log.d(TAG, "No network available for auto-sync of instance " + instance.getId());
+        Log.d(TAG, "=== AUTO-SYNC CLASS INSTANCE TRIGGERED ===");
+        Log.d(TAG, "Instance ID: " + instance.getId() + ", ClassID: " + instance.getYogaClassId() + ", Date: " + instance.getDate());
+        Log.d(TAG, "NeedsSync: " + instance.needsSync());
+        
+        // Don't auto-sync instances that don't need syncing (likely downloaded from Firebase)
+        if (!instance.needsSync()) {
+            Log.d(TAG, "Instance " + instance.getId() + " doesn't need sync, skipping auto-sync");
             return;
         }
+        
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            Log.w(TAG, "No network available for auto-sync of instance " + instance.getId());
+            return;
+        }
+        
+        Log.d(TAG, "Network available, starting background auto-sync for instance " + instance.getId());
         
         executorService.execute(() -> {
             try {
                 Log.d(TAG, "Auto-syncing class instance " + instance.getId() + " to Firebase");
-                boolean success = uploadSingleClassInstance(instance);
-                if (success) {
-                    Log.d(TAG, "Auto-sync successful for instance " + instance.getId());
+                
+                // Check if this instance already exists on Firebase (by content, not ID)
+                String existingFirebaseId = findExistingFirebaseInstance(instance);
+                
+                boolean success;
+                if (existingFirebaseId != null) {
+                    Log.d(TAG, "Found existing Firebase instance with ID " + existingFirebaseId + ", updating instead of creating duplicate");
+                    success = updateExistingFirebaseInstance(existingFirebaseId, instance);
                 } else {
-                    Log.e(TAG, "Auto-sync failed for instance " + instance.getId());
+                    Log.d(TAG, "No existing Firebase instance found, creating new one");
+                    success = uploadSingleClassInstance(instance);
+                }
+                
+                if (success) {
+                    Log.d(TAG, "✅ Auto-sync successful for instance " + instance.getId());
+                    // Mark as synced in database
+                    getDatabaseHelper().markInstanceAsSynced(instance.getId());
+                } else {
+                    Log.e(TAG, "❌ Auto-sync failed for instance " + instance.getId());
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Auto-sync error for instance " + instance.getId(), e);
+                Log.e(TAG, "❌ Auto-sync error for instance " + instance.getId(), e);
             }
         });
     }
@@ -360,19 +412,30 @@ public class CloudSyncService {
      */
     private boolean uploadSingleClass(YogaClass yogaClass) {
         try {
+            Log.d(TAG, "=== UPLOADING SINGLE CLASS ===");
+            Log.d(TAG, "Class ID: " + yogaClass.getId() + ", Type: " + yogaClass.getClassType());
+            
             // Create individual class endpoint
             String classEndpoint = YOGA_CLASSES_ENDPOINT + "/" + yogaClass.getId() + ".json";
+            Log.d(TAG, "Upload endpoint: " + baseUrl + "/" + classEndpoint);
             
             // Create JSON for this class
             JSONObject classData = createClassJson(yogaClass);
+            Log.d(TAG, "Class JSON: " + classData.toString());
             
             // Send to Firebase
             String response = sendDataToFirebase(classEndpoint, classData, "PUT");
             
-            return response != null;
+            boolean success = response != null;
+            Log.d(TAG, success ? "✅ Class upload successful" : "❌ Class upload failed");
+            if (response != null) {
+                Log.d(TAG, "Firebase response: " + response);
+            }
+            
+            return success;
             
         } catch (Exception e) {
-            Log.e(TAG, "Error uploading single class", e);
+            Log.e(TAG, "❌ Error uploading single class", e);
             return false;
         }
     }
@@ -413,15 +476,27 @@ public class CloudSyncService {
      */
     private boolean uploadSingleClassInstance(ClassInstance instance) {
         try {
+            Log.d(TAG, "=== UPLOADING SINGLE CLASS INSTANCE ===");
+            Log.d(TAG, "Instance ID: " + instance.getId() + ", ClassID: " + instance.getYogaClassId() + ", Date: " + instance.getDate());
+            
             String instanceEndpoint = CLASS_INSTANCES_ENDPOINT + "/" + instance.getId() + ".json";
+            Log.d(TAG, "Upload endpoint: " + baseUrl + "/" + instanceEndpoint);
+            
             JSONObject instanceData = createInstanceJson(instance);
+            Log.d(TAG, "Instance JSON: " + instanceData.toString());
             
             String response = sendDataToFirebase(instanceEndpoint, instanceData, "PUT");
             
-            return response != null;
+            boolean success = response != null;
+            Log.d(TAG, success ? "✅ Instance upload successful" : "❌ Instance upload failed");
+            if (response != null) {
+                Log.d(TAG, "Firebase response: " + response);
+            }
+            
+            return success;
             
         } catch (Exception e) {
-            Log.e(TAG, "Error uploading single class instance", e);
+            Log.e(TAG, "❌ Error uploading single class instance", e);
             return false;
         }
     }
@@ -951,13 +1026,15 @@ public class CloudSyncService {
         }
         
         try {
-            JSONArray cloudArray = new JSONArray(cloudData);
-            Log.d(TAG, "Checking " + cloudArray.length() + " Firebase instances for class ID updates");
+            JSONObject cloudObject = new JSONObject(cloudData);
+            Log.d(TAG, "Checking " + cloudObject.length() + " Firebase instances for class ID updates");
             
             int updatedCount = 0;
             
-            for (int i = 0; i < cloudArray.length(); i++) {
-                Object item = cloudArray.get(i);
+            Iterator<String> keys = cloudObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                Object item = cloudObject.get(key);
                 
                 if (item == null || item == JSONObject.NULL) {
                     continue;
@@ -998,6 +1075,551 @@ public class CloudSyncService {
         }
         
         Log.d(TAG, "=== FINISHED UPDATING FIREBASE INSTANCES ===");
+    }
+    
+    /**
+     * Find if a class with similar content already exists on Firebase
+     * Returns the Firebase ID if found, null otherwise
+     */
+    private String findExistingFirebaseClass(YogaClass localClass) {
+        try {
+            Log.d(TAG, "=== CHECKING FOR EXISTING FIREBASE CLASS ===");
+            Log.d(TAG, "Looking for: " + localClass.getClassType() + " on " + localClass.getDayOfWeek() + " at " + localClass.getTime());
+            
+            String cloudData = downloadDataFromFirebase(YOGA_CLASSES_ENDPOINT + ".json");
+            
+            if (cloudData == null || cloudData.equals("null")) {
+                Log.d(TAG, "No Firebase classes found");
+                return null;
+            }
+            
+            try {
+                JSONArray cloudArray = new JSONArray(cloudData);
+                
+                for (int i = 0; i < cloudArray.length(); i++) {
+                    Object item = cloudArray.get(i);
+                    
+                    if (item == null || item == JSONObject.NULL) {
+                        continue;
+                    }
+                    
+                    if (item instanceof JSONObject) {
+                        JSONObject firebaseClass = (JSONObject) item;
+                        long firebaseId = firebaseClass.optLong("id", -1);
+                        
+                        // Check if this Firebase class matches our local class
+                        if (classesMatch(localClass, firebaseClass)) {
+                            Log.d(TAG, "Found matching Firebase class with ID: " + firebaseId);
+                            return String.valueOf(firebaseId);
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                Log.d(TAG, "Classes data is not an array, trying as object");
+                // Try parsing as JSONObject if it's not an array
+                try {
+                    JSONObject cloudClasses = new JSONObject(cloudData);
+                    Iterator<String> keys = cloudClasses.keys();
+                    while (keys.hasNext()) {
+                        String firebaseId = keys.next();
+                        JSONObject firebaseClass = cloudClasses.getJSONObject(firebaseId);
+                        
+                        if (classesMatch(localClass, firebaseClass)) {
+                            Log.d(TAG, "Found matching Firebase class with ID: " + firebaseId);
+                            return firebaseId;
+                        }
+                    }
+                } catch (JSONException e2) {
+                    Log.e(TAG, "Failed to parse Firebase classes data", e2);
+                }
+            }
+            
+            Log.d(TAG, "No matching Firebase class found");
+            return null;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking for existing Firebase class", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Check if a local class matches a Firebase class (same content, different IDs)
+     */
+    private boolean classesMatch(YogaClass localClass, JSONObject firebaseClass) {
+        try {
+            String fbClassType = firebaseClass.optString("classType", "");
+            String fbDayOfWeek = firebaseClass.optString("dayOfWeek", "");
+            String fbTime = firebaseClass.optString("time", "");
+            int fbCapacity = firebaseClass.optInt("capacity", 0);
+            int fbDuration = firebaseClass.optInt("duration", 0);
+            double fbPrice = firebaseClass.optDouble("price", 0.0);
+            String fbDifficulty = firebaseClass.optString("difficulty", "");
+            
+            boolean matches = localClass.getClassType().equals(fbClassType) &&
+                            localClass.getDayOfWeek().equals(fbDayOfWeek) &&
+                            localClass.getTime().equals(fbTime) &&
+                            localClass.getCapacity() == fbCapacity &&
+                            localClass.getDuration() == fbDuration &&
+                            Math.abs(localClass.getPrice() - fbPrice) < 0.01 &&
+                            localClass.getDifficulty().equals(fbDifficulty);
+            
+            if (matches) {
+                Log.d(TAG, "Classes match: " + fbClassType + " on " + fbDayOfWeek + " at " + fbTime);
+            }
+            
+            return matches;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error comparing classes", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Update an existing Firebase class instead of creating a new one
+     */
+    private boolean updateExistingFirebaseClass(String firebaseId, YogaClass localClass) {
+        try {
+            Log.d(TAG, "=== UPDATING EXISTING FIREBASE CLASS ===");
+            Log.d(TAG, "Firebase ID: " + firebaseId + ", Local ID: " + localClass.getId());
+            
+            String classEndpoint = YOGA_CLASSES_ENDPOINT + "/" + firebaseId + ".json";
+            
+            // Create JSON with updated data but keep the original Firebase ID
+            JSONObject classData = createClassJson(localClass);
+            classData.put("id", Long.parseLong(firebaseId)); // Use Firebase ID, not local ID
+            classData.put("lastModified", System.currentTimeMillis());
+            
+            Log.d(TAG, "Updated class JSON: " + classData.toString());
+            
+            String response = sendDataToFirebase(classEndpoint, classData, "PUT");
+            
+            boolean success = response != null;
+            Log.d(TAG, success ? "✅ Firebase class update successful" : "❌ Firebase class update failed");
+            
+            return success;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error updating existing Firebase class", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Find if an instance with similar content already exists on Firebase
+     * Returns the Firebase ID if found, null otherwise
+     */
+    private String findExistingFirebaseInstance(ClassInstance localInstance) {
+        try {
+            Log.d(TAG, "=== CHECKING FOR EXISTING FIREBASE INSTANCE ===");
+            Log.d(TAG, "Looking for: ClassID=" + localInstance.getYogaClassId() + ", Date=" + localInstance.getDate() + ", Instructor=" + localInstance.getInstructor());
+            
+            String cloudData = downloadDataFromFirebase(CLASS_INSTANCES_ENDPOINT + ".json");
+            
+            if (cloudData == null || cloudData.equals("null")) {
+                Log.d(TAG, "No Firebase instances found");
+                return null;
+            }
+            
+            try {
+                JSONArray cloudArray = new JSONArray(cloudData);
+                
+                for (int i = 0; i < cloudArray.length(); i++) {
+                    Object item = cloudArray.get(i);
+                    
+                    if (item == null || item == JSONObject.NULL) {
+                        continue;
+                    }
+                    
+                    if (item instanceof JSONObject) {
+                        JSONObject firebaseInstance = (JSONObject) item;
+                        long firebaseId = firebaseInstance.optLong("id", -1);
+                        
+                        // Check if this Firebase instance matches our local instance
+                        if (instancesMatch(localInstance, firebaseInstance)) {
+                            Log.d(TAG, "Found matching Firebase instance with ID: " + firebaseId);
+                            return String.valueOf(firebaseId);
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                Log.d(TAG, "Instances data is not an array, trying as object");
+                // Try parsing as JSONObject if it's not an array
+                try {
+                    JSONObject cloudInstances = new JSONObject(cloudData);
+                    Iterator<String> keys = cloudInstances.keys();
+                    while (keys.hasNext()) {
+                        String firebaseId = keys.next();
+                        JSONObject firebaseInstance = cloudInstances.getJSONObject(firebaseId);
+                        
+                        if (instancesMatch(localInstance, firebaseInstance)) {
+                            Log.d(TAG, "Found matching Firebase instance with ID: " + firebaseId);
+                            return firebaseId;
+                        }
+                    }
+                } catch (JSONException e2) {
+                    Log.e(TAG, "Failed to parse Firebase instances data", e2);
+                }
+            }
+            
+            Log.d(TAG, "No matching Firebase instance found");
+            return null;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking for existing Firebase instance", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Check if a local instance matches a Firebase instance (same content, different IDs)
+     */
+    private boolean instancesMatch(ClassInstance localInstance, JSONObject firebaseInstance) {
+        try {
+            long fbYogaClassId = firebaseInstance.optLong("yogaClassId", -1);
+            String fbDate = firebaseInstance.optString("date", "");
+            String fbInstructor = firebaseInstance.optString("instructor", "");
+            String fbComments = firebaseInstance.optString("additionalComments", "");
+            
+            // For yoga class ID comparison, we need to check if they refer to the same class
+            // This might be tricky due to ID mapping, so for now let's match by date and instructor
+            boolean matches = localInstance.getDate().equals(fbDate) &&
+                            localInstance.getInstructor().equals(fbInstructor) &&
+                            localInstance.getAdditionalComments().equals(fbComments);
+            
+            // Additional check: if class IDs match exactly, that's a strong indicator
+            if (localInstance.getYogaClassId() == fbYogaClassId) {
+                matches = matches && true;
+            }
+            
+            if (matches) {
+                Log.d(TAG, "Instances match: Date=" + fbDate + ", Instructor=" + fbInstructor);
+            }
+            
+            return matches;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error comparing instances", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Update an existing Firebase instance instead of creating a new one
+     */
+    private boolean updateExistingFirebaseInstance(String firebaseId, ClassInstance localInstance) {
+        try {
+            Log.d(TAG, "=== UPDATING EXISTING FIREBASE INSTANCE ===");
+            Log.d(TAG, "Firebase ID: " + firebaseId + ", Local ID: " + localInstance.getId());
+            
+            String instanceEndpoint = CLASS_INSTANCES_ENDPOINT + "/" + firebaseId + ".json";
+            
+            // Create JSON with updated data but keep the original Firebase ID
+            JSONObject instanceData = createInstanceJson(localInstance);
+            instanceData.put("id", Long.parseLong(firebaseId)); // Use Firebase ID, not local ID
+            instanceData.put("lastModified", System.currentTimeMillis());
+            
+            Log.d(TAG, "Updated instance JSON: " + instanceData.toString());
+            
+            String response = sendDataToFirebase(instanceEndpoint, instanceData, "PUT");
+            
+            boolean success = response != null;
+            Log.d(TAG, success ? "✅ Firebase instance update successful" : "❌ Firebase instance update failed");
+            
+            return success;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error updating existing Firebase instance", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Upload all local classes and instances that need syncing to Firebase
+     */
+    public void uploadPendingSyncData(SyncCallback callback) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            callback.onError("No internet connection available");
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "=== UPLOADING PENDING SYNC DATA ===");
+                
+                // Get all local classes that need syncing
+                List<YogaClass> allClasses = databaseHelper.getAllYogaClasses();
+                int classesSynced = 0;
+                
+                callback.onProgress("Uploading local classes that need syncing...");
+                
+                for (YogaClass yogaClass : allClasses) {
+                    if (yogaClass.needsSync()) {
+                        Log.d(TAG, "Uploading class " + yogaClass.getId() + " (" + yogaClass.getClassType() + ") to Firebase");
+                        
+                        // Check if this class already exists on Firebase (by content, not ID)
+                        String existingFirebaseId = findExistingFirebaseClass(yogaClass);
+                        
+                        boolean success;
+                        if (existingFirebaseId != null) {
+                            Log.d(TAG, "Found existing Firebase class with ID " + existingFirebaseId + ", updating instead of creating duplicate");
+                            success = updateExistingFirebaseClass(existingFirebaseId, yogaClass);
+                        } else {
+                            Log.d(TAG, "No existing Firebase class found, creating new one");
+                            success = uploadSingleClass(yogaClass);
+                        }
+                        
+                        if (success) {
+                            classesSynced++;
+                            // Mark as synced in local database
+                            databaseHelper.markYogaClassAsSynced(yogaClass.getId());
+                        }
+                    }
+                }
+                
+                // Get all local instances that need syncing
+                List<ClassInstance> allInstances = databaseHelper.getAllClassInstances();
+                int instancesSynced = 0;
+                
+                callback.onProgress("Uploading local instances that need syncing...");
+                
+                for (ClassInstance instance : allInstances) {
+                    if (instance.needsSync()) {
+                        Log.d(TAG, "Uploading instance " + instance.getId() + " (Class " + instance.getYogaClassId() + ", Date " + instance.getDate() + ") to Firebase");
+                        
+                        // Check if this instance already exists on Firebase (by content, not ID)
+                        String existingFirebaseId = findExistingFirebaseInstance(instance);
+                        
+                        boolean success;
+                        if (existingFirebaseId != null) {
+                            Log.d(TAG, "Found existing Firebase instance with ID " + existingFirebaseId + ", updating instead of creating duplicate");
+                            success = updateExistingFirebaseInstance(existingFirebaseId, instance);
+                        } else {
+                            Log.d(TAG, "No existing Firebase instance found, creating new one");
+                            success = uploadSingleClassInstance(instance);
+                        }
+                        
+                        if (success) {
+                            instancesSynced++;
+                            // Mark as synced in local database
+                            databaseHelper.markClassInstanceAsSynced(instance.getId());
+                        }
+                    }
+                }
+                
+                String message = "Upload completed. Classes: " + classesSynced + " synced. Instances: " + instancesSynced + " synced.";
+                Log.d(TAG, message);
+                callback.onSuccess(message);
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error uploading pending sync data", e);
+                callback.onError("Upload failed: " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Clean up duplicate classes on Firebase - keeps the older ID versions, removes newer duplicates
+     */
+    public void cleanupFirebaseDuplicates(SyncCallback callback) {
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            callback.onError("No internet connection available");
+            return;
+        }
+        
+        executorService.execute(() -> {
+            try {
+                Log.d(TAG, "=== CLEANING UP FIREBASE DUPLICATES ===");
+                callback.onProgress("Downloading Firebase classes to check for duplicates...");
+                
+                String cloudData = downloadDataFromFirebase(YOGA_CLASSES_ENDPOINT + ".json");
+                
+                if (cloudData == null || cloudData.equals("null")) {
+                    callback.onSuccess("No Firebase classes found to clean up");
+                    return;
+                }
+                
+                // Try parsing as JSONObject first (current format), fallback to JSONArray
+                Map<String, List<JSONObject>> duplicateGroups = new HashMap<>();
+                
+                try {
+                    // Try as JSONObject (current format)
+                    JSONObject cloudObject = new JSONObject(cloudData);
+                    Log.d(TAG, "Classes data is JSONObject with " + cloudObject.length() + " entries");
+                    
+                    Iterator<String> keys = cloudObject.keys();
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        Object item = cloudObject.get(key);
+                        
+                        if (item != null && item != JSONObject.NULL && item instanceof JSONObject) {
+                            JSONObject firebaseClass = (JSONObject) item;
+                            
+                            // Create a key based on class content
+                            String contentKey = firebaseClass.optString("classType") + "|" +
+                                              firebaseClass.optString("dayOfWeek") + "|" +
+                                              firebaseClass.optString("time") + "|" +
+                                              firebaseClass.optInt("capacity") + "|" +
+                                              firebaseClass.optInt("duration") + "|" +
+                                              firebaseClass.optString("difficulty");
+                            
+                            duplicateGroups.computeIfAbsent(contentKey, k -> new ArrayList<>()).add(firebaseClass);
+                        }
+                    }
+                    
+                } catch (JSONException e) {
+                    // Fallback to JSONArray format
+                    Log.d(TAG, "Classes data is not JSONObject, trying JSONArray");
+                    JSONArray cloudArray = new JSONArray(cloudData);
+                    
+                    // Group classes by their content (type, day, time, etc.)
+                    for (int i = 0; i < cloudArray.length(); i++) {
+                        Object item = cloudArray.get(i);
+                        
+                        if (item == null || item == JSONObject.NULL) {
+                            continue;
+                        }
+                        
+                        if (item instanceof JSONObject) {
+                            JSONObject firebaseClass = (JSONObject) item;
+                            
+                            // Create a key based on class content
+                            String contentKey = firebaseClass.optString("classType") + "|" +
+                                              firebaseClass.optString("dayOfWeek") + "|" +
+                                              firebaseClass.optString("time") + "|" +
+                                              firebaseClass.optInt("capacity") + "|" +
+                                              firebaseClass.optInt("duration") + "|" +
+                                              firebaseClass.optString("difficulty");
+                            
+                            duplicateGroups.computeIfAbsent(contentKey, k -> new ArrayList<>()).add(firebaseClass);
+                        }
+                    }
+                }
+                
+                int duplicatesFound = 0;
+                int duplicatesRemoved = 0;
+                
+                // Find and remove duplicates (keep the one with the lowest ID)
+                for (Map.Entry<String, List<JSONObject>> entry : duplicateGroups.entrySet()) {
+                    List<JSONObject> classes = entry.getValue();
+                    
+                    if (classes.size() > 1) {
+                        duplicatesFound += classes.size() - 1;
+                        Log.d(TAG, "Found " + classes.size() + " duplicates for: " + entry.getKey());
+                        
+                        // Sort by ID (keep the lowest ID)
+                        classes.sort((a, b) -> Long.compare(a.optLong("id"), b.optLong("id")));
+                        
+                        // Remove all except the first (lowest ID)
+                        for (int i = 1; i < classes.size(); i++) {
+                            JSONObject duplicateClass = classes.get(i);
+                            long idToDelete = duplicateClass.optLong("id");
+                            
+                            Log.d(TAG, "Deleting duplicate class with ID: " + idToDelete);
+                            
+                            try {
+                                String deleteEndpoint = YOGA_CLASSES_ENDPOINT + "/" + idToDelete + ".json";
+                                String response = sendDataToFirebase(deleteEndpoint, null, "DELETE");
+                                
+                                if (response != null || "null".equals(response)) {
+                                    duplicatesRemoved++;
+                                    Log.d(TAG, "✅ Deleted duplicate class " + idToDelete);
+                                } else {
+                                    Log.e(TAG, "❌ Failed to delete duplicate class " + idToDelete);
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error deleting duplicate class " + idToDelete, e);
+                            }
+                        }
+                    }
+                }
+                
+                // STEP 2: Clean up duplicate instances
+                callback.onProgress("Checking Firebase instances for duplicates...");
+                
+                int instanceDuplicatesFound = 0;
+                int instanceDuplicatesRemoved = 0;
+                
+                String instancesData = downloadDataFromFirebase(CLASS_INSTANCES_ENDPOINT + ".json");
+                
+                if (instancesData != null && !instancesData.equals("null")) {
+                    try {
+                        JSONObject instancesObject = new JSONObject(instancesData);
+                        Map<String, List<JSONObject>> instanceDuplicateGroups = new HashMap<>();
+                        
+                        // Group instances by their content
+                        Iterator<String> instanceKeys = instancesObject.keys();
+                        while (instanceKeys.hasNext()) {
+                            String key = instanceKeys.next();
+                            Object item = instancesObject.get(key);
+                            
+                            if (item == null || item == JSONObject.NULL) {
+                                continue;
+                            }
+                            
+                            if (item instanceof JSONObject) {
+                                JSONObject firebaseInstance = (JSONObject) item;
+                                
+                                // Create a key based on instance content
+                                String contentKey = firebaseInstance.optLong("yogaClassId") + "|" +
+                                                  firebaseInstance.optString("date") + "|" +
+                                                  firebaseInstance.optString("instructor") + "|" +
+                                                  firebaseInstance.optString("additionalComments");
+                                
+                                instanceDuplicateGroups.computeIfAbsent(contentKey, k -> new ArrayList<>()).add(firebaseInstance);
+                            }
+                        }
+                        
+                        // Find and remove instance duplicates (keep the one with the lowest ID)
+                        for (Map.Entry<String, List<JSONObject>> entry : instanceDuplicateGroups.entrySet()) {
+                            List<JSONObject> instances = entry.getValue();
+                            
+                            if (instances.size() > 1) {
+                                instanceDuplicatesFound += instances.size() - 1;
+                                Log.d(TAG, "Found " + instances.size() + " duplicate instances for: " + entry.getKey());
+                                
+                                // Sort by ID (keep the lowest ID)
+                                instances.sort((a, b) -> Long.compare(a.optLong("id"), b.optLong("id")));
+                                
+                                // Remove all except the first (lowest ID)
+                                for (int i = 1; i < instances.size(); i++) {
+                                    JSONObject duplicateInstance = instances.get(i);
+                                    long idToDelete = duplicateInstance.optLong("id");
+                                    
+                                    Log.d(TAG, "Deleting duplicate instance with ID: " + idToDelete);
+                                    
+                                    try {
+                                        String deleteEndpoint = CLASS_INSTANCES_ENDPOINT + "/" + idToDelete + ".json";
+                                        String response = sendDataToFirebase(deleteEndpoint, null, "DELETE");
+                                        
+                                        if (response != null || "null".equals(response)) {
+                                            instanceDuplicatesRemoved++;
+                                            Log.d(TAG, "✅ Deleted duplicate instance " + idToDelete);
+                                        } else {
+                                            Log.e(TAG, "❌ Failed to delete duplicate instance " + idToDelete);
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error deleting duplicate instance " + idToDelete, e);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing instances for cleanup", e);
+                    }
+                }
+                
+                String message = "Cleanup completed. Classes: Found " + duplicatesFound + " duplicates, removed " + duplicatesRemoved + 
+                               ". Instances: Found " + instanceDuplicatesFound + " duplicates, removed " + instanceDuplicatesRemoved;
+                Log.d(TAG, message);
+                callback.onSuccess(message);
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error cleaning up Firebase duplicates", e);
+                callback.onError("Cleanup failed: " + e.getMessage());
+            }
+        });
     }
     
     /**

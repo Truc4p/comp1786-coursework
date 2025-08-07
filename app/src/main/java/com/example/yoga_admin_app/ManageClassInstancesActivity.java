@@ -170,11 +170,15 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
                 instance.setDate(date);
                 instance.setInstructor(instructor);
                 instance.setAdditionalComments(comments);
+                instance.setNeedsSync(true); // Ensure auto-sync to Firebase
+                instance.setLastModified(System.currentTimeMillis());
 
                 long id = databaseHelper.addClassInstance(instance);
                 if (id > 0) {
                     Toast.makeText(ManageClassInstancesActivity.this, "Class instance added successfully", Toast.LENGTH_SHORT).show();
                     loadClassInstances(); // Refresh the list
+                } else if (id == -1) {
+                    Toast.makeText(ManageClassInstancesActivity.this, "Instance already exists for this date and instructor", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(ManageClassInstancesActivity.this, "Failed to add class instance", Toast.LENGTH_SHORT).show();
                 }

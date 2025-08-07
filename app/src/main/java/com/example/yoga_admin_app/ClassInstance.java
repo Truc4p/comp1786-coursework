@@ -19,7 +19,10 @@ public class ClassInstance {
     private String cloudId; // Firebase ID for this record
 
     // Constructor
-    public ClassInstance() {}
+    public ClassInstance() {
+        this.needsSync = true; // New instances should sync to Firebase by default
+        this.lastModified = System.currentTimeMillis();
+    }
 
     public ClassInstance(long yogaClassId, String date, String instructor, String additionalComments) {
         this.yogaClassId = yogaClassId;

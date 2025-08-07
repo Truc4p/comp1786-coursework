@@ -2,6 +2,7 @@ package com.example.yoga_admin_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
         // Initialize database helper
         databaseHelper = new DatabaseHelper(this);
         
+        // Clean up any duplicate instances locally first
+        int duplicatesRemoved = databaseHelper.cleanupDuplicateInstances();
+        if (duplicatesRemoved > 0) {
+            Log.d("MainActivity", "🧹 Cleaned up " + duplicatesRemoved + " duplicate instances");
+        }
+        
         // Initialize cloud sync service and set up bidirectional relationship
         CloudSyncService cloudSyncService = new CloudSyncService(this);
         cloudSyncService.setDatabaseHelper(databaseHelper);
@@ -59,7 +66,54 @@ public class MainActivity extends AppCompatActivity {
         // Debug: Check sync status after a delay to see what data we have
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             cloudSyncService.debugSyncStatus();
-        }, 3000); // Wait 3 seconds for initial sync to complete
+            
+            // First upload any pending local data to Firebase
+            cloudSyncService.uploadPendingSyncData(new CloudSyncService.SyncCallback() {
+                @Override
+                public void onProgress(String message) {
+                    Log.d("MainActivity", "Upload progress: " + message);
+                }
+
+                @Override
+                public void onSuccess(String message) {
+                    Log.d("MainActivity", "Upload completed: " + message);
+                    
+                    // After upload, clean up any duplicates
+                    cloudSyncService.cleanupFirebaseDuplicates(new CloudSyncService.SyncCallback() {
+                        @Override
+                        public void onProgress(String message) {
+                            Log.d("MainActivity", "Cleanup progress: " + message);
+                        }
+
+                        @Override
+                        public void onSuccess(String message) {
+                            Log.d("MainActivity", "Cleanup completed: " + message);
+                            runOnUiThread(() -> {
+                                android.widget.Toast.makeText(MainActivity.this, "Sync complete: " + message, android.widget.Toast.LENGTH_LONG).show();
+                                // Update class count after sync is complete
+                                updateClassCount();
+                            });
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e("MainActivity", "Cleanup error: " + error);
+                            runOnUiThread(() -> {
+                                android.widget.Toast.makeText(MainActivity.this, "Cleanup failed: " + error, android.widget.Toast.LENGTH_LONG).show();
+                            });
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e("MainActivity", "Upload error: " + error);
+                    runOnUiThread(() -> {
+                        android.widget.Toast.makeText(MainActivity.this, "Upload failed: " + error, android.widget.Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
+        }, 5000); // Wait 5 seconds for initial sync to complete before cleanup
         
         // Initialize views
         initializeViews();
@@ -115,8 +169,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateClassCount() {
-        int count = databaseHelper.getYogaClassCount();
-        tvClassCount.setText("Total Classes: " + count);
+        try {
+            int count = databaseHelper.getYogaClassCount();
+            tvClassCount.setText("Total Classes: " + count);
+        } catch (Exception e) {
+            Log.w("MainActivity", "Could not update class count: " + e.getMessage());
+            // Set a default message if database is temporarily unavailable
+            tvClassCount.setText("Total Classes: Loading...");
+        }
     }
 
     @Override
@@ -129,7 +189,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         
-        updateClassCount();
+        // Delay class count update to avoid database conflicts during sync
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            updateClassCount();
+        }, 1000); // Wait 1 second to let sync operations complete
     }
     
     @Override
