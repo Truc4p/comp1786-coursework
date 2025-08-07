@@ -146,17 +146,52 @@ public class ConfirmationActivity extends AppCompatActivity {
     }
 
     private void saveYogaClass() {
-        long result = databaseHelper.addYogaClass(yogaClass);
+        // Show progress dialog while syncing
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("Saving class and syncing to Firebase...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        long result = databaseHelper.addYogaClass(yogaClass, new CloudSyncService.SyncCallback() {
+            @Override
+            public void onProgress(String message) {
+                // Update progress dialog on main thread
+                runOnUiThread(() -> progressDialog.setMessage(message));
+            }
+
+            @Override
+            public void onSuccess(String message) {
+                // Handle success on main thread
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(ConfirmationActivity.this, "Yoga class added and synced to Firebase!", Toast.LENGTH_SHORT).show();
+                    
+                    // Go back to MainActivity
+                    Intent intent = new Intent(ConfirmationActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                // Handle error on main thread
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(ConfirmationActivity.this, "Class saved locally but sync failed: " + message, Toast.LENGTH_LONG).show();
+                    
+                    // Still go back to MainActivity even if sync failed
+                    Intent intent = new Intent(ConfirmationActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                });
+            }
+        });
         
-        if (result != -1) {
-            Toast.makeText(this, "Yoga class added successfully!", Toast.LENGTH_SHORT).show();
-            
-            // Go back to MainActivity
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-        } else {
+        if (result == -1) {
+            progressDialog.dismiss();
             Toast.makeText(this, "Error saving yoga class. Please try again.", Toast.LENGTH_SHORT).show();
         }
     }

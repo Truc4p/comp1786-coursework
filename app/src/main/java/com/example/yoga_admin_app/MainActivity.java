@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             cloudSyncService.debugSyncStatus();
             
             // First upload any pending local data to Firebase
-            cloudSyncService.uploadPendingSyncData(new CloudSyncService.SyncCallback() {
+            cloudSyncService.uploadChangedData(new CloudSyncService.SyncCallback() {
                 @Override
                 public void onProgress(String message) {
                     Log.d("MainActivity", "Upload progress: " + message);
@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
         Button btnViewClasses = findViewById(R.id.btn_view_classes);
         Button btnSearchClasses = findViewById(R.id.btn_search_classes);
         Button btnViewBookings = findViewById(R.id.btn_view_bookings);
+        Button btnCloudSync = findViewById(R.id.btn_cloud_sync);
         btnLogout = findViewById(R.id.btn_logout);
         tvClassCount = findViewById(R.id.tv_class_count);
         tvWelcomeMessage = findViewById(R.id.tv_welcome_message);
@@ -163,6 +164,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, BookingActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnCloudSync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = CloudSyncActivity.newIntent(MainActivity.this);
                 startActivity(intent);
             }
         });

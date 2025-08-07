@@ -245,6 +245,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Add a new yoga class
     public long addYogaClass(YogaClass yogaClass) {
+        return addYogaClass(yogaClass, null);
+    }
+    
+    // Add a new yoga class with sync callback
+    public long addYogaClass(YogaClass yogaClass, CloudSyncService.SyncCallback syncCallback) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         
@@ -269,7 +274,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Auto-sync to Firebase if insert was successful
         if (id != -1 && cloudSyncService != null) {
             yogaClass.setId(id);
-            cloudSyncService.autoSyncYogaClass(yogaClass);
+            cloudSyncService.autoSyncYogaClass(yogaClass, syncCallback);
+        } else if (id != -1 && cloudSyncService == null && syncCallback != null) {
+            syncCallback.onError("Sync service not available");
         }
         
         return id;
@@ -473,6 +480,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
     // Add a new class instance
     public long addClassInstance(ClassInstance classInstance) {
+        return addClassInstance(classInstance, null);
+    }
+    
+    // Add a new class instance with sync callback
+    public long addClassInstance(ClassInstance classInstance, CloudSyncService.SyncCallback syncCallback) {
         SQLiteDatabase db = this.getWritableDatabase();
         
         // Check for duplicates first - prevent instances with same class, date, and instructor
@@ -497,6 +509,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.w("DatabaseHelper", "🚫 Duplicate instance prevented: Class=" + classInstance.getYogaClassId() + 
                   ", Date=" + classInstance.getDate() + ", Instructor=" + classInstance.getInstructor());
             db.close();
+            if (syncCallback != null) {
+                syncCallback.onError("Instance already exists for this date and instructor");
+            }
             return -1; // Return -1 to indicate duplicate prevention
         }
         
@@ -518,9 +533,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (id != -1 && cloudSyncService != null) {
             classInstance.setId(id);
             Log.d("DatabaseHelper", "🚀 Triggering auto-sync for new class instance: ID=" + id + ", needsSync=" + classInstance.needsSync());
-            cloudSyncService.autoSyncClassInstance(classInstance);
+            cloudSyncService.autoSyncClassInstance(classInstance, syncCallback);
         } else if (id != -1 && cloudSyncService == null) {
             Log.w("DatabaseHelper", "⚠️ CloudSyncService is null, cannot auto-sync instance " + id);
+            if (syncCallback != null) {
+                syncCallback.onError("Sync service not available");
+            }
         }
         
         return id;
@@ -610,6 +628,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
     // Update a class instance
     public int updateClassInstance(ClassInstance instance) {
+        return updateClassInstance(instance, null);
+    }
+    
+    // Update a class instance with sync callback
+    public int updateClassInstance(ClassInstance instance, CloudSyncService.SyncCallback syncCallback) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         
@@ -627,7 +650,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         // Auto-sync to Firebase if update was successful
         if (result > 0 && cloudSyncService != null) {
-            cloudSyncService.autoSyncClassInstance(instance);
+            cloudSyncService.autoSyncClassInstance(instance, syncCallback);
+        } else if (result > 0 && cloudSyncService == null && syncCallback != null) {
+            syncCallback.onError("Sync service not available");
         }
         
         return result;

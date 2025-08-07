@@ -173,13 +173,49 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
                 instance.setNeedsSync(true); // Ensure auto-sync to Firebase
                 instance.setLastModified(System.currentTimeMillis());
 
-                long id = databaseHelper.addClassInstance(instance);
-                if (id > 0) {
-                    Toast.makeText(ManageClassInstancesActivity.this, "Class instance added successfully", Toast.LENGTH_SHORT).show();
-                    loadClassInstances(); // Refresh the list
-                } else if (id == -1) {
-                    Toast.makeText(ManageClassInstancesActivity.this, "Instance already exists for this date and instructor", Toast.LENGTH_LONG).show();
-                } else {
+                // Show progress dialog while syncing
+                android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(ManageClassInstancesActivity.this);
+                progressDialog.setMessage("Adding instance and syncing to Firebase...");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                long id = databaseHelper.addClassInstance(instance, new CloudSyncService.SyncCallback() {
+                    @Override
+                    public void onProgress(String message) {
+                        // Update progress dialog on main thread
+                        runOnUiThread(() -> progressDialog.setMessage(message));
+                    }
+
+                    @Override
+                    public void onSuccess(String message) {
+                        // Handle success on main thread
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(ManageClassInstancesActivity.this, "Class instance added and synced to Firebase!", Toast.LENGTH_SHORT).show();
+                            loadClassInstances(); // Refresh the list
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Handle error on main thread
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(ManageClassInstancesActivity.this, message, Toast.LENGTH_LONG).show();
+                            if (!message.contains("already exists")) {
+                                // Still refresh the list if instance was created locally but sync failed
+                                loadClassInstances();
+                            }
+                        });
+                    }
+                });
+
+                if (id == -1) {
+                    // Duplicate detected, dismiss progress dialog
+                    progressDialog.dismiss();
+                } else if (id <= 0) {
+                    // Other database error
+                    progressDialog.dismiss();
                     Toast.makeText(ManageClassInstancesActivity.this, "Failed to add class instance", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -266,11 +302,42 @@ public class ManageClassInstancesActivity extends AppCompatActivity {
                 instance.setInstructor(instructor);
                 instance.setAdditionalComments(comments);
 
-                int result = databaseHelper.updateClassInstance(instance);
-                if (result > 0) {
-                    Toast.makeText(ManageClassInstancesActivity.this, "Class instance updated successfully", Toast.LENGTH_SHORT).show();
-                    loadClassInstances(); // Refresh the list
-                } else {
+                // Show progress dialog while syncing
+                android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(ManageClassInstancesActivity.this);
+                progressDialog.setMessage("Updating instance and syncing to Firebase...");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                int result = databaseHelper.updateClassInstance(instance, new CloudSyncService.SyncCallback() {
+                    @Override
+                    public void onProgress(String message) {
+                        // Update progress dialog on main thread
+                        runOnUiThread(() -> progressDialog.setMessage(message));
+                    }
+
+                    @Override
+                    public void onSuccess(String message) {
+                        // Handle success on main thread
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(ManageClassInstancesActivity.this, "Instance updated and synced to Firebase!", Toast.LENGTH_SHORT).show();
+                            loadClassInstances(); // Refresh the list
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Handle error on main thread
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(ManageClassInstancesActivity.this, "Updated locally but sync failed: " + message, Toast.LENGTH_LONG).show();
+                            loadClassInstances(); // Still refresh the list
+                        });
+                    }
+                });
+
+                if (result <= 0) {
+                    progressDialog.dismiss();
                     Toast.makeText(ManageClassInstancesActivity.this, "Failed to update class instance", Toast.LENGTH_SHORT).show();
                 }
             }

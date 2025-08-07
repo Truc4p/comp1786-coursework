@@ -25,6 +25,10 @@
     <color name="light_gray">#F5F5F5</color>
     <color name="dark_gray">#424242</color>
     
+    <!-- Status colors for CloudSyncActivity -->
+    <color name="success_green">#4CAF50</color>
+    <color name="error_red">#F44336</color>
+    
     <!-- Authentication UI colors -->
     <color name="primary">#9C27B0</color>
     <color name="primary_dark">#661a72</color>

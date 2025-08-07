@@ -93,6 +93,12 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
         
+        <!-- Cloud Sync Activity -->
+        <activity
+            android:name=".CloudSyncActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        
     </application>
 
 </manifest>
